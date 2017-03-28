@@ -1,0 +1,5 @@
+com/asiainfo/ocsearch/utils/PropertiesLoadUtilTest.class
+com/asiainfo/ocsearch/core/FieldTest.class
+com/asiainfo/ocsearch/transaction/internal/GenerateSolrConfigTest.class
+com/asiainfo/ocsearch/core/TableConfigTest.class
+com/asiainfo/ocsearch/service/OCSearchServiceTest.class
