@@ -1,9 +1,8 @@
-package com.asiainfo.ocsearch.transaction.internal;
+package com.asiainfo.ocsearch.transaction;
 
 import com.asiainfo.ocsearch.common.OCSearchEnv;
 import com.asiainfo.ocsearch.exception.ErrCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
-import com.asiainfo.ocsearch.transaction.Transaction;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -17,18 +16,20 @@ public class TransactionUtil {
 
     public static void serialize(String name, Transaction transaction) throws ServiceException {
 
-        String path = OCSearchEnv.getEnvValue("work_dir", "work") + "/transaction/" + name;
+        String path = OCSearchEnv.getEnvValue("work_dir", "work") + "/transaction/";
 
         File serializeFile = new File(path);
-        serializeFile.mkdirs();
+        if(!serializeFile.exists())
+            serializeFile.mkdirs();
 
         ObjectOutputStream oos = null;
 
         try {
-            oos = new ObjectOutputStream(new FileOutputStream(serializeFile));
+            oos = new ObjectOutputStream(new FileOutputStream(new File(path,name)));
             oos.writeObject(transaction);
 
         } catch (IOException e) {
+            e.printStackTrace();
 
             throw new ServiceException("can not serialize the transaction", ErrCode.RUNTIME_ERROR);
 

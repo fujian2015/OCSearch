@@ -22,10 +22,9 @@ public class Field implements Serializable {
 
     FieldType type = FieldType.NONE;
 
-    boolean indexed = false;
-    boolean contented = false;
-
-    boolean stored = false;
+    boolean indexed = false;   //idnex in solr
+    boolean contented = false; //copy in hbase
+    boolean stored = false;    //store in solr
 
     //hbase column
     String column = "";

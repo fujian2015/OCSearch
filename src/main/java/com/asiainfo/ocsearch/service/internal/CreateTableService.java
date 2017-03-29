@@ -1,12 +1,13 @@
 package com.asiainfo.ocsearch.service.internal;
 
 import com.asiainfo.ocsearch.core.TableConfig;
+import com.asiainfo.ocsearch.exception.ErrCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
 import com.asiainfo.ocsearch.transaction.internal.GenerateSolrConfig;
 import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
-import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
+import com.asiainfo.ocsearch.transaction.TransactionUtil;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 
@@ -42,9 +43,10 @@ public class CreateTableService extends OCSearchService {
             } catch (Exception rollBackException) {
                 log.error("roll back creating table " + tableConfig.name + " failure", rollBackException);
             }
+            throw new ServiceException(e, ErrCode.RUNTIME_ERROR);
         }
 
-        return new byte[0];
+        return success;
     }
 
 

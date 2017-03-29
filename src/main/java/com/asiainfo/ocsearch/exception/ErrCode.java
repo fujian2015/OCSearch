@@ -10,4 +10,6 @@ public enum ErrCode {
     ErrCode(int code) {
         this.code=code;
     }
+
+    public enum SUCCESS {}
 }

@@ -2,6 +2,7 @@ package com.asiainfo.ocsearch.core;
 
 import com.asiainfo.ocsearch.exception.ErrCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.dom4j.Element;
@@ -17,6 +18,7 @@ import java.util.*;
 public class TableConfig implements Serializable {
 
     public final String storeType;
+    public final int storePeriod;
     public final String hbaseTbale;
     public final String solrCollection;
     public final String name;
@@ -44,6 +46,11 @@ public class TableConfig implements Serializable {
             this.name = request.get("name").getTextValue();
 
             this.storeType = request.get("storeType").getTextValue();
+
+            if (!StringUtils.equals(this.storeType, "n"))
+                this.storePeriod = request.get("storePeriod").getIntValue();
+            else
+                this.storePeriod = -1;
 
             ////
             if (request.get("contentField") != null)
@@ -224,7 +231,7 @@ public class TableConfig implements Serializable {
     }
 
 
-    class QueryField implements Serializable{
+    class QueryField implements Serializable {
 
         public QueryField(JsonNode jsonNode) {
 
@@ -238,7 +245,7 @@ public class TableConfig implements Serializable {
     }
 
 
-    class BaseField implements Serializable{
+    class BaseField implements Serializable {
 
         public BaseField(JsonNode jsonNode) {
 
@@ -251,7 +258,7 @@ public class TableConfig implements Serializable {
         boolean isFast;
     }
 
-    class UniqueKey implements Serializable{
+    class UniqueKey implements Serializable {
 
         int type = 0;   //0 自动生成id 1 指定id字段  2 指定生成规则
         boolean isFast;

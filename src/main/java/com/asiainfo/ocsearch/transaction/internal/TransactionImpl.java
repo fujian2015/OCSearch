@@ -41,6 +41,7 @@ public class TransactionImpl implements Transaction ,Serializable{
         while (null != (operation = ops.poll())) {
 
             completedOps.add(operation);
+            operation.execute();
         }
     }
 

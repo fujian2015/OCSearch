@@ -21,6 +21,20 @@ import java.util.UUID;
  */
 public abstract class OCSearchService extends HttpServlet {
 
+    protected ObjectNode successResult;
+    protected byte[] success;
+
+    public  OCSearchService(){
+
+        try {
+            success= "{\"result\":{\"error_code\":0,\"error_desc\":\"success\"}}".getBytes();
+            successResult= (ObjectNode) new ObjectMapper().readTree("{\"result\":{\"error_code\":0,\"error_desc\":\"success\"}}");
+
+        } catch (IOException e) {
+        }
+
+    }
+
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -88,7 +102,6 @@ public abstract class OCSearchService extends HttpServlet {
 
     protected String getRequestId(){
         return UUID.randomUUID().toString();
-
     }
 
 }
