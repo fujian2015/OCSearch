@@ -27,6 +27,8 @@ public class TableConfig implements Serializable {
 
     public final boolean solrExist;
 
+    private final  String partition;  //must has a date format  or a timestamp format
+
     public final String contentField;  //default query field
 
     public final FieldType contentType;  //default query field
@@ -47,10 +49,14 @@ public class TableConfig implements Serializable {
 
             this.storeType = request.get("storeType").getTextValue();
 
-            if (!StringUtils.equals(this.storeType, "n"))
+            if (!StringUtils.equals(this.storeType, "n")) {
                 this.storePeriod = request.get("storePeriod").getIntValue();
-            else
+                this.partition = request.get("partition").getTextValue();
+            }
+            else {
                 this.storePeriod = -1;
+                this.partition="";
+            }
 
             ////
             if (request.get("contentField") != null)
@@ -62,6 +68,8 @@ public class TableConfig implements Serializable {
                 this.contentType = FieldType.valueOf(request.get("contentType").getTextValue().toUpperCase());
             else
                 this.contentType = FieldType.NONE;
+
+
             ///
 
             JsonNode hbaseNode = request.get("hbase");
@@ -228,6 +236,50 @@ public class TableConfig implements Serializable {
             return fieldEle;
         }
         return null;
+    }
+
+    public Object[] getTableFields() {
+
+        return new Object[]{name, hbaseTbale, solrCollection,storeType, storePeriod,partition};
+    }
+
+    public Object[][] getSchemaFields() {
+
+        Object[][] schemas = new Object[fields.size()][7];
+        int i = 0;
+        for (Field f : fields.values()) {
+            schemas[i++] = new Object[]{
+                    f.name,
+                    String.valueOf(f.indexed),
+                    String.valueOf(f.contented),
+                    String.valueOf(f.contented),
+                    String.valueOf(f.stored),
+                    String.valueOf(f.column),
+                    String.valueOf(f.family),
+                    name
+            };
+        }
+        return schemas;
+    }
+
+    public Object[][] getBaseFields() {
+
+        Object[][] bases = new Object[fields.size()][7];
+        int i = 0;
+        for (BaseField bf : baseFields) {
+            bases[i++] = new Object[]{bf.name, bf.isFast, name};
+        }
+        return bases;
+    }
+
+    public Object[][] getQueryFields() {
+
+        Object[][] queries = new Object[fields.size()][7];
+        int i = 0;
+        for (QueryField qf : queryFields) {
+            queries[i++] = new Object[]{qf.name, qf.weight, name};
+        }
+        return queries;
     }
 
 

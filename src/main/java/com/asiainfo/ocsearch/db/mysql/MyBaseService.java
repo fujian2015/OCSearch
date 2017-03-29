@@ -13,13 +13,20 @@ import java.util.Map;
 public class MyBaseService {
 
 	private final QueryRunner queryRunner;
-	
-	
-	public MyBaseService() {
+
+	private static  MyBaseService instance=null;
+
+	public static synchronized  MyBaseService getInstance(){
+		if(instance==null)
+			instance=new MyBaseService("config");
+		return instance;
+	}
+
+	private MyBaseService() {
 		this.queryRunner = new QueryRunner(DataSourceProvider.getDataSource());
 	}
 
-	public MyBaseService(String dataSource) {
+	private MyBaseService(String dataSource) {
 		BasicDataSource bds = DataSourceProvider.getDataSource(dataSource);
 		this.queryRunner = new QueryRunner(bds);
 	}
