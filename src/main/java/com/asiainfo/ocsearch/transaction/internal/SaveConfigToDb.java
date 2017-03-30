@@ -7,21 +7,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.*;
 
 /**
  * Created by mac on 2017/3/29.
  */
 public class SaveConfigToDb implements AtomicOperation, Serializable {
-
-    final static String[] tableFields = {"name", "hbase_table", "solr_collection",
-           "store_type",  "store_period","partition"};
-
-    final static String[] schemaFields = {"name", "indexed", "contented",
-            "stored", "hbase_column", "hbase_family,table_name"};
-
-    final static String[] baseFields = {"name", "isFast", "table_name"};
-    final static String[] queryFields = {"name", "weight", "table_name"};
-
 
     TableConfig tableConfig;
 
@@ -35,48 +26,92 @@ public class SaveConfigToDb implements AtomicOperation, Serializable {
 
     public boolean execute() {
 
-        String insertTable = "insert into tables(" + StringUtils.join(tableFields, ",")
-                + ")values("
-                + tableConfig.name + "," + tableConfig.hbaseTbale + "," + tableConfig.solrCollection
-                + "," + tableConfig.storeType + "," + tableConfig.storePeriod
-                + ");";
-
-        String insertSchema = "insert into schemas(" + StringUtils.join(schemaFields, ",") + ")values(?,?,?,?,?,?,?);";
-
-        String insertBase= "insert into base(" + StringUtils.join(baseFields, ",") + ")values(?,?,?);";
-        String insertQuery= "insert into query(" + StringUtils.join(queryFields, ",") + ")values(?,?,?);";
 
         try {
-            myBaseService.insertOrUpdate(insertTable, tableConfig.getTableFields());
-            myBaseService.batch(insertSchema, tableConfig.getSchemaFields());
-            if(!tableConfig.baseFields.isEmpty())
-                myBaseService.batch(insertBase, tableConfig.getBaseFields());
-            if(!tableConfig.queryFields.isEmpty())
-                myBaseService.batch(insertQuery, tableConfig.getQueryFields());
+
+            Map<String, Object> tableMap = tableConfig.getTableFields();
+
+            String insertTable = prepareSql("table_def", tableMap.keySet());
+
+            myBaseService.insertOrUpdate(insertTable, tableMap.values().toArray());
+
+
+            List<Map<String, Object>> schemaList = tableConfig.getSchemaFields();
+
+            String insertSchema = prepareSql("schema_def", schemaList.get(0).keySet());
+
+            myBaseService.batch(insertSchema, prepareObjects(schemaList));
+
+
+            List<Map<String, Object>> baseFields = tableConfig.getBaseFields();
+            if (!baseFields.isEmpty()) {
+                String insertBase = prepareSql("base_def", baseFields.get(0).keySet());
+                myBaseService.batch(insertBase, prepareObjects(baseFields));
+            }
+
+            List<Map<String, Object>> queryFields = tableConfig.getQueryFields();
+            if (!queryFields.isEmpty()) {
+                String insertQuery = prepareSql("query_def", queryFields.get(0).keySet());
+                myBaseService.batch(insertQuery, prepareObjects(queryFields));
+            }
+
+            List<Map<String, Object>> keyFields = tableConfig.getKeyFields();
+            if (!keyFields.isEmpty()) {
+                String insertkey = prepareSql("rowkey_def", keyFields.get(0).keySet());
+                myBaseService.batch(insertkey, prepareObjects(keyFields));
+            }
 
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException("insert " + tableConfig.name + " to db failure", e);
         }
 
         return true;
     }
 
+    private Object[][] prepareObjects(List<Map<String, Object>> schemaList) {
+
+        Object[][] fields = new Object[schemaList.size()][];
+        int i = 0;
+
+        for (Map<String, Object> fieldMap : schemaList) {
+            fields[i++] = fieldMap.values().toArray();
+        }
+        return fields;
+    }
+
+    private String prepareSql(String table, Set<String> keys) {
+        StringBuilder sb = new StringBuilder("insert into ");
+        sb.append(table);
+        sb.append("(");
+        sb.append(StringUtils.join(keys, ","));
+        sb.append(")values(");
+        String[] quots = new String[keys.size()];
+        Arrays.fill(quots, "?");
+        sb.append(StringUtils.join(quots, ","));
+        sb.append(");");
+        return sb.toString();
+    }
+
+
     public boolean recovery() {
 
-        String deleteTable = "delete * from  tables where name = " + tableConfig.name;
-//        String deleteSchema = "delete * from  schemas where table_name = " + tableConfig.name;
-//        String deleteBase = "delete * from  base where table_name = " + tableConfig.name;
-//        String deleteQuery = "delete * from  query where table_name = " + tableConfig.name;
+        String deleteTable = "delete  from  table_def where `name` = '" + tableConfig.name + "'";
+        String deleteSchema = "delete  from  schema_def where `table_name` = '" + tableConfig.name + "'";
+        String deleteBase = "delete from  base_def where `table_name` = '" + tableConfig.name + "'";
+        String deleteQuery = "delete from  query_def where `table_name` = '" + tableConfig.name + "'";
+        String deleteRowKey = "delete from  rowkey_def where `table_name` = '" + tableConfig.name + "'";
 
         try {
-//            myBaseService.delete(deleteQuery);
-//            myBaseService.delete(deleteBase);
-//            myBaseService.delete(deleteSchema);
+            myBaseService.delete(deleteRowKey);
+            myBaseService.delete(deleteQuery);
+            myBaseService.delete(deleteBase);
+            myBaseService.delete(deleteSchema);
             myBaseService.delete(deleteTable);
 
         } catch (SQLException e) {
             throw new RuntimeException("delete " + tableConfig.name + " from db failure", e);
         }
-        return false;
+        return true;
     }
 }

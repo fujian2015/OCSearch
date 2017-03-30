@@ -1,22 +1,22 @@
-package com.asiainfo.ocsearch.core;
+package com.asiainfo.ocsearch.transaction.internal;
 
+import com.asiainfo.ocsearch.core.TableConfig;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.dom4j.Element;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.testng.Assert;
 
-import java.util.Iterator;
+/**
+ * Created by mac on 2017/3/30.
+ */
+public class SaveConfigToDbTest {
+    SaveConfigToDb saveConfigToDb;
 
-public class TableConfigTest {
-    @Test
-    public void getKeyFields() throws Exception {
-        System.out.println(tableConfig.getKeyFields());
-    }
-
-    TableConfig tableConfig;
     @Before
     public void setUp() throws Exception {
+
         String json = "{\n" +
                 "    \"name\": \"tableName\",\n" +
                 "    \"store\": {\n" +
@@ -83,44 +83,23 @@ public class TableConfigTest {
                 "    ]\n" +
                 "}";
         JsonNode jsonNode = (new ObjectMapper()).readTree(json);
-        this.tableConfig = new TableConfig(jsonNode);
+        saveConfigToDb = new SaveConfigToDb(new TableConfig(jsonNode));
+
     }
 
-
-    @Test
-    public void getTableFields() throws Exception {
-
-        System.out.println(tableConfig.getTableFields());
-    }
-
-    @Test
-    public void getSchemaFields() throws Exception {
-
-        System.out.println(tableConfig.getSchemaFields());
+    @After
+    public void tearDown() throws Exception {
+//        recovery();
     }
 
     @Test
-    public void getBaseFields() throws Exception {
-
-            System.out.println(tableConfig.getBaseFields());
-
+    public void execute() throws Exception {
+        Assert.assertEquals(this.saveConfigToDb.execute(), true);
     }
 
     @Test
-    public void getQueryFields() throws Exception {
-
-
-        System.out.println(tableConfig.getQueryFields());
+    public void recovery() throws Exception {
+        Assert.assertEquals(this.saveConfigToDb.recovery(), true);
     }
 
-    @Test
-    public void getSolrFields() throws Exception {
-
-        Iterator var4 = tableConfig.getSolrFields().iterator();
-
-        while(var4.hasNext()) {
-            Element element = (Element)var4.next();
-            System.out.println(element.asXML());
-        }
-    }
 }

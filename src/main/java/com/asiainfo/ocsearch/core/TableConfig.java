@@ -27,18 +27,22 @@ public class TableConfig implements Serializable {
 
     public final boolean solrExist;
 
-    private final  String partition;  //must has a date format  or a timestamp format
+    public final String partition;  //must has a date format  or a timestamp format
 
     public final String contentField;  //default query field
 
     public final FieldType contentType;  //default query field
 
+    public final int rowKeyVersion;   //0 自动生成id  1 指定生成规则
 
-    public Map<String, Field> fields = new HashMap<String, Field>();
+    private Set<KeyField> keyFields = new TreeSet<KeyField>();
 
-    public List<QueryField> queryFields = new ArrayList<QueryField>();
 
-    public List<BaseField> baseFields = new ArrayList<BaseField>();
+    private Map<String, Field> fields = new HashMap<String, Field>();
+
+    private List<QueryField> queryFields = new ArrayList<QueryField>();
+
+    private List<BaseField> baseFields = new ArrayList<BaseField>();
 
 
     public TableConfig(JsonNode request) throws ServiceException {
@@ -47,30 +51,33 @@ public class TableConfig implements Serializable {
 
             this.name = request.get("name").getTextValue();
 
-            this.storeType = request.get("storeType").getTextValue();
+            //---------------------------------------
+
+            JsonNode storeNode = request.get("store");
+
+            this.storeType = storeNode.get("type").getTextValue();
 
             if (!StringUtils.equals(this.storeType, "n")) {
-                this.storePeriod = request.get("storePeriod").getIntValue();
-                this.partition = request.get("partition").getTextValue();
-            }
-            else {
+                this.storePeriod = storeNode.get("period").getIntValue();
+                this.partition = storeNode.get("partition").getTextValue();
+            } else {
                 this.storePeriod = -1;
-                this.partition="";
+                this.partition = "";
             }
 
-            ////
-            if (request.get("contentField") != null)
-                this.contentField = request.get("contentField").getTextValue();
-            else
-                this.contentField = null;
+            //---------------------------------------
 
-            if (request.get("contentType") != null)
-                this.contentType = FieldType.valueOf(request.get("contentType").getTextValue().toUpperCase());
-            else
+            JsonNode contentNode = request.get("content");
+            if (contentNode != null) {
+                this.contentField = contentNode.get("name").getTextValue();
+                this.contentType = FieldType.valueOf(contentNode.get("type").getTextValue().toUpperCase());
+
+            } else {
+                this.contentField = "";
+                ;
                 this.contentType = FieldType.NONE;
-
-
-            ///
+            }
+            //------------------------------------------
 
             JsonNode hbaseNode = request.get("hbase");
             if (hbaseNode != null) {
@@ -80,7 +87,7 @@ public class TableConfig implements Serializable {
                 this.hbaseTbale = this.name;
                 this.hbaseExist = false;
             }
-
+            //---------------------------------------
             JsonNode solrNode = request.get("solr");
 
             if (solrNode != null) {
@@ -92,6 +99,8 @@ public class TableConfig implements Serializable {
                 this.solrExist = false;
             }
 
+            //---------------------------------------
+
             ArrayNode fieldsNode = (ArrayNode) request.get("fields");
 
             for (JsonNode fieldNode : fieldsNode) {
@@ -100,8 +109,8 @@ public class TableConfig implements Serializable {
                 fields.put(field.name, field);
             }
 
-
-            ArrayNode queryFieldsNode = (ArrayNode) request.get("queryFields");
+            //---------------------------------------
+            ArrayNode queryFieldsNode = (ArrayNode) request.get("queryfields");
 
             if (queryFieldsNode != null) {
                 for (JsonNode queryFieldNode : queryFieldsNode) {
@@ -109,9 +118,9 @@ public class TableConfig implements Serializable {
                     this.queryFields.add(new QueryField(queryFieldNode));
                 }
             }
+            //---------------------------------------
 
-
-            ArrayNode baseFieldsNode = (ArrayNode) request.get("baseFields");
+            ArrayNode baseFieldsNode = (ArrayNode) request.get("basefields");
 
             if (baseFieldsNode != null) {
                 for (JsonNode baseFieldNode : baseFieldsNode) {
@@ -119,6 +128,21 @@ public class TableConfig implements Serializable {
                     this.baseFields.add(new BaseField(baseFieldNode));
                 }
             }
+            //---------------------------------------
+
+            JsonNode rowKeyNode = request.get("rowkey");
+
+            if (rowKeyNode != null) {
+                this.rowKeyVersion = rowKeyNode.get("version").getIntValue();
+                if (rowKeyVersion == 1) {
+                    ArrayNode nodes = (ArrayNode) rowKeyNode.get("keys");
+                    for (JsonNode node : nodes)
+                        keyFields.add(new KeyField(node));
+                }
+            } else {
+                this.rowKeyVersion = 0;
+            }
+            //---------------------------------------
 
             String checkResult = checkFields();
             if (null != checkResult)
@@ -238,48 +262,108 @@ public class TableConfig implements Serializable {
         return null;
     }
 
-    public Object[] getTableFields() {
+    /**
+     * {"name", "hbase_table", "solr_collection",
+     "store_type",  "store_period","partition_field","content_field","content_type","rowkey_version"}
+     * @return
+     */
+    public Map<String,Object> getTableFields() {
 
-        return new Object[]{name, hbaseTbale, solrCollection,storeType, storePeriod,partition};
+        Map<String,Object> tableMap=new HashMap<String, Object>();
+        tableMap.put("name",name);
+        tableMap.put("hbase_table",hbaseTbale);
+        tableMap.put("solr_collection",solrCollection);
+        tableMap.put("store_type",storeType);
+        tableMap.put("store_period",storePeriod);
+        tableMap.put("partition_field",partition);
+        tableMap.put("content_field",contentField);
+        tableMap.put("content_type",contentType.getValue());
+        tableMap.put("rowkey_version",rowKeyVersion);
+
+        return tableMap;
     }
 
-    public Object[][] getSchemaFields() {
+    /**
+     * {"name", "indexed", "contented","stored", "hbase_column", "hbase_family","field_type","table_name"};
+     * @return
+     */
+    public List<Map<String,Object>> getSchemaFields() {
 
-        Object[][] schemas = new Object[fields.size()][7];
-        int i = 0;
+        List<Map<String,Object>> schemas = new ArrayList<Map<String, Object>>(fields.size());
+
         for (Field f : fields.values()) {
-            schemas[i++] = new Object[]{
-                    f.name,
-                    String.valueOf(f.indexed),
-                    String.valueOf(f.contented),
-                    String.valueOf(f.contented),
-                    String.valueOf(f.stored),
-                    String.valueOf(f.column),
-                    String.valueOf(f.family),
-                    name
-            };
+            Map fieldMap=new HashMap();
+            fieldMap.put("name",f.name);
+            fieldMap.put("indexed",String.valueOf(f.indexed));
+            fieldMap.put("contented", String.valueOf(f.stored));
+            fieldMap.put("stored",String.valueOf(f.stored));
+            fieldMap.put("hbase_column",f.column);
+            fieldMap.put("hbase_family",f.family);
+            fieldMap.put("field_type",f.type.getValue());
+            fieldMap.put("table_name",name);
+            schemas.add(fieldMap);
         }
         return schemas;
     }
 
-    public Object[][] getBaseFields() {
+    /**
+     * {"name", "is_fast", "table_name"};
+     * @return
+     */
+    public List<Map<String,Object>> getBaseFields() {
 
-        Object[][] bases = new Object[fields.size()][7];
-        int i = 0;
-        for (BaseField bf : baseFields) {
-            bases[i++] = new Object[]{bf.name, bf.isFast, name};
+        List<Map<String,Object>> bases=new ArrayList<Map<String, Object>>(baseFields.size());
+
+        for (BaseField f : baseFields) {
+            Map fieldMap=new HashMap();
+            fieldMap.put("name",f.name);
+            fieldMap.put("is_fast",String.valueOf(f.isFast));
+
+            fieldMap.put("table_name",name);
+            bases.add(fieldMap);
         }
+
         return bases;
     }
 
-    public Object[][] getQueryFields() {
+    /**
+     *   {"name", "weight", "table_name"};
+     * @return
+     */
+    public  List<Map<String,Object>> getQueryFields() {
+        List<Map<String,Object>> queries=new ArrayList<Map<String, Object>>(queryFields.size());
 
-        Object[][] queries = new Object[fields.size()][7];
-        int i = 0;
-        for (QueryField qf : queryFields) {
-            queries[i++] = new Object[]{qf.name, qf.weight, name};
+        for (QueryField f : queryFields) {
+            Map fieldMap=new HashMap();
+            fieldMap.put("name",f.name);
+            fieldMap.put("weight",f.weight);
+
+            fieldMap.put("table_name",name);
+            queries.add(fieldMap);
         }
+
         return queries;
+    }
+
+    /**
+     * {"name", "order", "table_name"};
+     * @return
+     */
+    public  List<Map<String,Object>> getKeyFields() {
+
+        List<Map<String,Object>> keys=new ArrayList<Map<String, Object>>(keyFields.size());
+
+        for (KeyField f : keyFields) {
+            Map fieldMap=new HashMap();
+            fieldMap.put("name",f.name);
+            fieldMap.put("field_order",f.order);
+
+            fieldMap.put("table_name",name);
+            keys.add(fieldMap);
+        }
+
+        return keys;
+
     }
 
 
@@ -310,46 +394,22 @@ public class TableConfig implements Serializable {
         boolean isFast;
     }
 
-    class UniqueKey implements Serializable {
 
-        int type = 0;   //0 自动生成id 1 指定id字段  2 指定生成规则
-        boolean isFast;
-        String uniqueField;
+    class KeyField implements Comparable<KeyField> {
 
-        Set<KeyField> keyFields = new TreeSet<KeyField>();
+        String name;
+        int order;
 
-        public UniqueKey(JsonNode jsonNode) {
+        KeyField(JsonNode jsonNode) {
 
-            this.type = jsonNode.get("type").getIntValue();
-
-            if (type == 1) {
-                uniqueField = jsonNode.get("uniqueKey").getTextValue();
-            } else if (type == 2) {
-                ArrayNode nodes = (ArrayNode) jsonNode.get("keyFields");
-
-                for (JsonNode node : nodes)
-                    keyFields.add(new KeyField(node));
-            }
-
-            this.isFast = jsonNode.get("isFast").getBooleanValue();
-
+            name = jsonNode.get("name").getTextValue();
+            order = jsonNode.get("order").getIntValue();
         }
 
-        class KeyField implements Comparator<KeyField> {
-
-            String name;
-            int order;
-
-            KeyField(JsonNode jsonNode) {
-
-                name = jsonNode.get("name").getTextValue();
-                order = jsonNode.get("order").getIntValue();
-            }
-
-            public int compare(KeyField o1, KeyField o2) {
-                return o1.order - o2.order;
-            }
+        public int compareTo(KeyField o) {
+            return this.order - o.order;
         }
     }
+
 
 }
