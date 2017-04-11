@@ -1,8 +1,8 @@
 package com.asiainfo.ocsearch.transaction.internal;
 
-import com.asiainfo.ocsearch.common.OCSearchEnv;
-import com.asiainfo.ocsearch.core.TableConfig;
+import com.asiainfo.ocsearch.core.TableSchema;
 import com.asiainfo.ocsearch.transaction.AtomicOperation;
+import com.asiainfo.ocsearch.utils.ConfigUtil;
 import com.asiainfo.ocsearch.utils.PropertiesLoadUtil;
 import org.apache.commons.io.IOUtils;
 import org.dom4j.Document;
@@ -18,16 +18,16 @@ import java.util.List;
  */
 public class GenerateSolrConfig implements AtomicOperation ,Serializable{
 
-    TableConfig tableConfig;
+    TableSchema tableSchema;
 
-    public GenerateSolrConfig(TableConfig tableConfig) {
+    public GenerateSolrConfig(TableSchema tableSchema) {
 
-        this.tableConfig = tableConfig;
+        this.tableSchema = tableSchema;
     }
 
     public boolean execute() {
 
-        String path = OCSearchEnv.getEnvValue("work_dir", "work") + "/solr/" + tableConfig.name + "/";
+        String path = ConfigUtil.getSolrConfigPath(tableSchema.name);
 
         File config = new File(path);
 
@@ -81,7 +81,7 @@ public class GenerateSolrConfig implements AtomicOperation ,Serializable{
 
             Element root = schemaDoc.getRootElement();
 
-            List<Element> fields = tableConfig.getSolrFields();
+            List<Element> fields = tableSchema.getSolrFields();
 
             for (Element field : fields) {
                 root.addText("\n\t");
@@ -102,7 +102,7 @@ public class GenerateSolrConfig implements AtomicOperation ,Serializable{
 
     public boolean recovery() {
 
-        String path = OCSearchEnv.getEnvValue("work_dir") + "/solr/" + tableConfig.name + "/";
+        String path =  ConfigUtil.getSolrConfigPath(tableSchema.name);
 
         File dir = new File(path);
 
@@ -110,6 +110,16 @@ public class GenerateSolrConfig implements AtomicOperation ,Serializable{
             return deleteDir(dir);
         }
         return true;
+    }
+
+    @Override
+    public boolean canExecute() {
+
+        String path = ConfigUtil.getSolrConfigPath(tableSchema.name);
+
+        File config = new File(path);
+
+        return !config.exists();
     }
 
     private boolean deleteDir(File dir) {

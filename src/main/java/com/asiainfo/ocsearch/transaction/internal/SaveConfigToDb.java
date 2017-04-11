@@ -1,6 +1,6 @@
 package com.asiainfo.ocsearch.transaction.internal;
 
-import com.asiainfo.ocsearch.core.TableConfig;
+import com.asiainfo.ocsearch.core.TableSchema;
 import com.asiainfo.ocsearch.db.mysql.MyBaseService;
 import com.asiainfo.ocsearch.transaction.AtomicOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -14,48 +14,47 @@ import java.util.*;
  */
 public class SaveConfigToDb implements AtomicOperation, Serializable {
 
-    TableConfig tableConfig;
+    TableSchema tableSchema;
 
-    transient MyBaseService myBaseService;
 
-    public SaveConfigToDb(TableConfig tableConfig) {
+    public SaveConfigToDb(TableSchema tableSchema) {
 
-        this.tableConfig = tableConfig;
-        this.myBaseService = MyBaseService.getInstance();
+        this.tableSchema = tableSchema;
     }
 
     public boolean execute() {
 
 
         try {
+            MyBaseService myBaseService = MyBaseService.getInstance();
 
-            Map<String, Object> tableMap = tableConfig.getTableFields();
+            Map<String, Object> tableMap = tableSchema.getTableFields();
 
             String insertTable = prepareSql("table_def", tableMap.keySet());
 
             myBaseService.insertOrUpdate(insertTable, tableMap.values().toArray());
 
 
-            List<Map<String, Object>> schemaList = tableConfig.getSchemaFields();
+            List<Map<String, Object>> schemaList = tableSchema.getSchemaFields();
 
             String insertSchema = prepareSql("schema_def", schemaList.get(0).keySet());
 
             myBaseService.batch(insertSchema, prepareObjects(schemaList));
 
 
-            List<Map<String, Object>> baseFields = tableConfig.getBaseFields();
+            List<Map<String, Object>> baseFields = tableSchema.getBaseFields();
             if (!baseFields.isEmpty()) {
                 String insertBase = prepareSql("base_def", baseFields.get(0).keySet());
                 myBaseService.batch(insertBase, prepareObjects(baseFields));
             }
 
-            List<Map<String, Object>> queryFields = tableConfig.getQueryFields();
+            List<Map<String, Object>> queryFields = tableSchema.getQueryFields();
             if (!queryFields.isEmpty()) {
                 String insertQuery = prepareSql("query_def", queryFields.get(0).keySet());
                 myBaseService.batch(insertQuery, prepareObjects(queryFields));
             }
 
-            List<Map<String, Object>> keyFields = tableConfig.getKeyFields();
+            List<Map<String, Object>> keyFields = tableSchema.getKeyFields();
             if (!keyFields.isEmpty()) {
                 String insertkey = prepareSql("rowkey_def", keyFields.get(0).keySet());
                 myBaseService.batch(insertkey, prepareObjects(keyFields));
@@ -63,7 +62,7 @@ public class SaveConfigToDb implements AtomicOperation, Serializable {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("insert " + tableConfig.name + " to db failure", e);
+            throw new RuntimeException("insert " + tableSchema.name + " to db failure", e);
         }
 
         return true;
@@ -96,13 +95,14 @@ public class SaveConfigToDb implements AtomicOperation, Serializable {
 
     public boolean recovery() {
 
-        String deleteTable = "delete  from  table_def where `name` = '" + tableConfig.name + "'";
-        String deleteSchema = "delete  from  schema_def where `table_name` = '" + tableConfig.name + "'";
-        String deleteBase = "delete from  base_def where `table_name` = '" + tableConfig.name + "'";
-        String deleteQuery = "delete from  query_def where `table_name` = '" + tableConfig.name + "'";
-        String deleteRowKey = "delete from  rowkey_def where `table_name` = '" + tableConfig.name + "'";
-
         try {
+            MyBaseService myBaseService = MyBaseService.getInstance();
+
+            String deleteTable = "delete  from  table_def where `name` = '" + tableSchema.name + "'";
+            String deleteSchema = "delete  from  schema_def where `table_name` = '" + tableSchema.name + "'";
+            String deleteBase = "delete from  base_def where `table_name` = '" + tableSchema.name + "'";
+            String deleteQuery = "delete from  query_def where `table_name` = '" + tableSchema.name + "'";
+            String deleteRowKey = "delete from  rowkey_def where `table_name` = '" + tableSchema.name + "'";
             myBaseService.delete(deleteRowKey);
             myBaseService.delete(deleteQuery);
             myBaseService.delete(deleteBase);
@@ -110,8 +110,25 @@ public class SaveConfigToDb implements AtomicOperation, Serializable {
             myBaseService.delete(deleteTable);
 
         } catch (SQLException e) {
-            throw new RuntimeException("delete " + tableConfig.name + " from db failure", e);
+            throw new RuntimeException("delete " + tableSchema.name + " from db failure", e);
         }
         return true;
+    }
+
+    @Override
+    public boolean canExecute() {
+        try {
+            MyBaseService myBaseService = MyBaseService.getInstance();
+
+            String queryTable = "select * from  table_def where `name` = '" + tableSchema.name + "'";
+
+            Map<String,Object> result=myBaseService.queryOne(queryTable);
+
+            if(result==null||result.isEmpty())
+                return true;
+        } catch (SQLException e) {
+            throw new RuntimeException("delete " + tableSchema.name + " from db failure", e);
+        }
+        return false;
     }
 }

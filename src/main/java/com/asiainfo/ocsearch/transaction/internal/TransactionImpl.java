@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created by mac on 2017/3/26.
  */
-public class TransactionImpl implements Transaction ,Serializable{
+public class TransactionImpl implements Transaction, Serializable {
 
     private Queue<AtomicOperation> ops = new ConcurrentLinkedQueue();
 
@@ -47,6 +47,17 @@ public class TransactionImpl implements Transaction ,Serializable{
 
     public void add(AtomicOperation atomicOperation) {
         ops.offer(atomicOperation);
+    }
+
+    @Override
+    public boolean canExecute() {
+
+        boolean canExecute =true;
+        for (AtomicOperation atomicOperation : ops) {
+            canExecute = atomicOperation.canExecute();
+            if (!canExecute) break;
+        }
+        return canExecute;
     }
 
 }

@@ -7,10 +7,16 @@ public interface AtomicOperation {
     /**
      * excute the operation
      */
-    public boolean execute();
+     boolean execute();
 
     /**
      * 恢复到execute函数执行前的状态
      */
-    public boolean recovery();
+     boolean recovery();
+    /**
+     * 检查操作是否可行;
+     */
+    boolean canExecute();
+
+
 }

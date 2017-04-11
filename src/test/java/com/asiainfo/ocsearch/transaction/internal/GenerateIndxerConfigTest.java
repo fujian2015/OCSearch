@@ -5,32 +5,35 @@ import com.asiainfo.ocsearch.core.TableSchema;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.testng.Assert;
 
 /**
- * Created by mac on 2017/3/30.
+ * Created by mac on 2017/4/6.
  */
-public class SaveConfigToDbTest {
-    SaveConfigToDb saveConfigToDb;
-
+public class GenerateIndxerConfigTest {
+    GenerateIndxerConfig generateIndxerConfig;
     @Before
     public void setUp() throws Exception {
-        saveConfigToDb = new SaveConfigToDb(new TableSchema(CommonUtils.getRquestDemo()));
+        generateIndxerConfig=new GenerateIndxerConfig(new TableSchema(CommonUtils.getRquestDemo()));
     }
 
     @After
     public void tearDown() throws Exception {
-        recovery();
+
     }
 
     @Test
     public void execute() throws Exception {
-        Assert.assertEquals(this.saveConfigToDb.execute(), true);
+        generateIndxerConfig.execute();
     }
 
     @Test
     public void recovery() throws Exception {
-        Assert.assertEquals(this.saveConfigToDb.recovery(), true);
+        generateIndxerConfig.recovery();
+    }
+
+    @Test
+    public void canExecute() throws Exception {
+
     }
 
 }

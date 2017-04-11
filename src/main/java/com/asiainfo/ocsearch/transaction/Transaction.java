@@ -8,5 +8,6 @@ public interface Transaction {
      void rollBack();
      void execute();
      void add(AtomicOperation atomicOperation);
+     boolean canExecute();
 
 }

@@ -14,7 +14,8 @@ public class SolrConfig {
     private final int soTimeout;
     private final int zkClientTimeout;
     private final int zkConnectTimeout;
-
+    private final int replicas;
+    private final boolean autoAddReplicas;
 
 
     public SolrConfig(String configFile) {
@@ -25,6 +26,8 @@ public class SolrConfig {
         soTimeout=Integer.parseInt(prop.getProperty("soTimeout","60000"));
         zkClientTimeout=Integer.parseInt(prop.getProperty("zkClientTimeout","60000"));
         zkConnectTimeout=Integer.parseInt(prop.getProperty("zkConnectTimeout","60000"));
+        replicas = Integer.parseInt(prop.getProperty("replicas","1"));
+        autoAddReplicas =Boolean.parseBoolean(prop.getProperty("autoAddReplicas","true"));
 
     }
 
@@ -42,4 +45,7 @@ public class SolrConfig {
         return soTimeout;
     }
 
+    public int getReplicas() {
+        return replicas;
+    }
 }

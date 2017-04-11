@@ -1,6 +1,7 @@
 package com.asiainfo.ocsearch.service;
 
 
+import com.asiainfo.ocsearch.common.OCSearchEnv;
 import com.asiainfo.ocsearch.exception.ErrCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import org.codehaus.jackson.JsonNode;
@@ -32,7 +33,6 @@ public abstract class OCSearchService extends HttpServlet {
 
         } catch (IOException e) {
         }
-
     }
 
     @Override
@@ -42,8 +42,8 @@ public abstract class OCSearchService extends HttpServlet {
         try {
             byte[] re;
 
-            if (request.getContentLength() > 1024)
-                re = new ServiceException("request is too long",ErrCode.PARSE_ERROR).getErrorResonce();
+            if (request.getContentLength() > Integer.parseInt(OCSearchEnv.getEnvValue("MAX_REQUEST_LENGTH","10240")))
+                re = new ServiceException("request is too long",ErrCode.PARSE_ERROR).getErrorResponse();
             else {
 
                 try {
@@ -51,9 +51,9 @@ public abstract class OCSearchService extends HttpServlet {
                     re = doService(jsonNode);
 
                 } catch (IOException e) {
-                    re = new ServiceException(e, ErrCode.PARSE_ERROR).getErrorResonce();
-                } catch (ServiceException serviceExeption) {
-                    re = serviceExeption.getErrorResonce();
+                    re = new ServiceException(e, ErrCode.PARSE_ERROR).getErrorResponse();
+                } catch (ServiceException serviceException) {
+                    re = serviceException.getErrorResponse();
                 }
             }
 
@@ -83,10 +83,9 @@ public abstract class OCSearchService extends HttpServlet {
 
             try {
                 re = doService(jsonNode);
-            } catch (ServiceException serviceExeption) {
-                re = serviceExeption.getErrorResonce();
+            } catch (ServiceException serviceException) {
+                re = serviceException.getErrorResponse();
             }
-
             response.setCharacterEncoding("utf-8");
             ServletOutputStream so = response.getOutputStream();
             so.write(re);

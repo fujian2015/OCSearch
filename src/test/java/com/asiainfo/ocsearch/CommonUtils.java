@@ -1,23 +1,16 @@
-package com.asiainfo.ocsearch.core;
+package com.asiainfo.ocsearch;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.dom4j.Element;
-import org.junit.Before;
-import org.junit.Test;
 
-import java.util.Iterator;
+import java.io.IOException;
 
-public class TableConfigTest {
-    @Test
-    public void getKeyFields() throws Exception {
-        System.out.println(tableConfig.getKeyFields());
-    }
-
-    TableConfig tableConfig;
-    @Before
-    public void setUp() throws Exception {
-        String json = "{\n" +
+/**
+ * Created by mac on 2017/4/6.
+ */
+public class CommonUtils {
+    public static JsonNode getRquestDemo() throws IOException {
+        String json ="{\n" +
                 "    \"name\": \"tableName\",\n" +
                 "    \"store\": {\n" +
                 "        \"type\": \"d\",\n" +
@@ -39,11 +32,13 @@ public class TableConfigTest {
                 "    },\n" +
                 "    \"hbase\": {\n" +
                 "        \"name\": \"hbaseTable\",\n" +
-                "        \"isExist\": \"true\"\n" +
+                "        \"exist\": \"true\",\n" +
+                "        \"regions\": 100\n" +
                 "    },\n" +
                 "    \"solr\": {\n" +
                 "        \"name\": \"solrCollection\",\n" +
-                "        \"isExist\": \"true\"\n" +
+                "        \"exist\": \"true\",\n" +
+                "        \"shards\": 20\n" +
                 "    },\n" +
                 "    \"fields\": [\n" +
                 "        {\n" +
@@ -82,45 +77,7 @@ public class TableConfigTest {
                 "        }\n" +
                 "    ]\n" +
                 "}";
-        JsonNode jsonNode = (new ObjectMapper()).readTree(json);
-        this.tableConfig = new TableConfig(jsonNode);
-    }
-
-
-    @Test
-    public void getTableFields() throws Exception {
-
-        System.out.println(tableConfig.getTableFields());
-    }
-
-    @Test
-    public void getSchemaFields() throws Exception {
-
-        System.out.println(tableConfig.getSchemaFields());
-    }
-
-    @Test
-    public void getBaseFields() throws Exception {
-
-            System.out.println(tableConfig.getBaseFields());
-
-    }
-
-    @Test
-    public void getQueryFields() throws Exception {
-
-
-        System.out.println(tableConfig.getQueryFields());
-    }
-
-    @Test
-    public void getSolrFields() throws Exception {
-
-        Iterator var4 = tableConfig.getSolrFields().iterator();
-
-        while(var4.hasNext()) {
-            Element element = (Element)var4.next();
-            System.out.println(element.asXML());
-        }
+        System.out.println(json);
+       return (new ObjectMapper()).readTree(json);
     }
 }

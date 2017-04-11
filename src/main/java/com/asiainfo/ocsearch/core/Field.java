@@ -67,13 +67,13 @@ public class Field implements Serializable {
                 this.family = field.get("family").asText();
                 ;
             } else {
-                this.family = name;
+                this.column = name;
                 if (type == FieldType.ATTACHMENT) {
-                    this.column = ATTACHMENT_FAMILY;
+                    this.family = ATTACHMENT_FAMILY;
                 } else if (type == FieldType.FILE) {
-                    this.column = FILE_FAMILY;
+                    this.family = FILE_FAMILY;
                 } else {
-                    this.column = BASIC_FAMILY;
+                    this.family = BASIC_FAMILY;
                 }
             }
 

@@ -24,7 +24,7 @@ public  class ServiceException extends Exception{
         this.errCode=code;
     }
 
-    public  byte[] getErrorResonce(){
+    public  byte[] getErrorResponse(){
 
         ObjectNode re= JsonNodeFactory.instance.objectNode();
         ObjectNode result= JsonNodeFactory.instance.objectNode();

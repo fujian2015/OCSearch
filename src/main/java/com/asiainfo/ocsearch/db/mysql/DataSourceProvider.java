@@ -2,7 +2,6 @@ package com.asiainfo.ocsearch.db.mysql;
 
 import com.asiainfo.ocsearch.utils.PropertiesLoadUtil;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -20,125 +19,7 @@ public class DataSourceProvider {
 			logger.error("database.properties配置不正确!!!", e);
 		}
 	}
-	
-	public static void batchSave(String tableName,List<Map<String, Object>> fieldMaps){
-		Connection conn=null;
-		Statement stmt=null;
-		try {
-			conn=getConnection();
-			conn.setAutoCommit(false);
-			stmt=conn.createStatement();
-			
-			for(Map<String, Object> fieldMap:fieldMaps){
-				stmt.addBatch(prepareSQL(tableName, fieldMap));
-			}
 
-			 stmt.executeBatch();    //执行批处理 
-             conn.commit();
-             stmt.close();
-             conn.close();
-             
-             
-			
-		} catch (SQLException e) {
-
-			logger.error(e);
-			try {
-				conn.rollback();
-			} catch (SQLException e1) {
-
-				logger.error(e1);
-			}
-		}
-		
-		finally{
-			if(conn!=null){
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					logger.error(e);
-				}
-			}
-			
-			if(stmt!=null){
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					logger.error(e);
-				}
-			}
-		}
-		
-	}
-	
-	public static void save(String tableName,Map<String, Object> fieldMap){
-		Connection conn=null;
-		Statement stmt=null;
-		try {
-			
-			String sql=prepareSQL(tableName, fieldMap);
-			conn=getConnection();
-			conn.setAutoCommit(false);
-			stmt=conn.createStatement();
-			stmt.execute(sql);
-			conn.commit();
-			stmt.close();
-			conn.close();
-			
-		} catch (SQLException e) {
-			
-			try {
-				conn.rollback();
-			} catch (SQLException e1) {
-
-				logger.error(e1);
-			}
-			
-		}
-		
-		finally{
-			if(conn!=null){
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					logger.error(e);
-				}
-			}
-			
-			if(stmt!=null){
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					logger.error(e);
-				}
-			}
-		}
-		
-	}
-	
-    public static String prepareSQL(String tableName,Map<String, Object> fieldMap){
-		
-		StringBuffer sb=new StringBuffer("insert into "+tableName+"(");
-		Iterator<String> it=fieldMap.keySet().iterator();
-		StringBuffer keys=new StringBuffer();
-		StringBuffer values=new StringBuffer();
-		while(it.hasNext()){
-			String key=it.next();
-			keys.append(StringUtils.lowerCase(key)+",");
-			Object value=fieldMap.get(key);
-			
-			if(value instanceof String){
-				value="'"+value.toString()+"'";
-			}
-			values.append(value+",");
-		}
-		keys=new StringBuffer(keys.substring(0,keys.length()-1));
-		values=new StringBuffer(values.substring(0, values.length()-1));
-		sb.append(keys).append(") values (").append(values).append(")");
-        		
-		return sb.toString();
-		
-	}
 
 	private static void loadProps(String dbPropName) {
 		Properties properties = PropertiesLoadUtil.loadProFile(dbPropName);
@@ -164,35 +45,7 @@ public class DataSourceProvider {
 			}
 		}
 	}
-	public static void main(String[] args){
-		try{
-		   Connection conn = DataSourceProvider.getConnection("config");
-		   conn.setAutoCommit(false);
-		   
-		   
-		   
-		   String sql = "insert into tablename(name,age)values(?,?);";
-		   PreparedStatement pstmt = conn.prepareStatement(sql);
-		   pstmt.setString(1, "AOBAMA");
-		   pstmt.setInt(2, 45);
-		   pstmt.executeUpdate();
-		   pstmt.close();
-		   conn.commit();
-		   
-		   Statement st = conn.createStatement();
-		   st.setQueryTimeout(1000);
-		   st.setFetchSize(10);
-		   ResultSet rs = st.executeQuery("select * from tablename");
-		   while(rs.next()){
-			   System.out.print("name="+rs.getString(1));
-			   System.out.print("name="+rs.getInt(2));
-		   }
-		   st.close();
-		   conn.close();
-		  }catch(Exception e){
-			  logger.error(e);
-		  }
-	}
+
 	public static synchronized Connection getConnection(String name) {
 		BasicDataSource ds = (BasicDataSource) dsMap.get(name);
 		Connection connection = null;
