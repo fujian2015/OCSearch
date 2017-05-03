@@ -22,44 +22,14 @@ USE `ocsearch`;
 
 /*Table structure for table `table_def` */
 
-DROP TABLE IF EXISTS `table_def`;
-CREATE TABLE `table_def` (
-  `name` varchar(255) NOT NULL,
-  `hbase_table` varchar(255) NOT NULL,
-  `solr_collection` varchar(255) NOT NULL,
-  `store_type` varchar(1) NOT NULL,
-  `store_period` decimal(22,0) NOT NULL,
-  `partition_field` varchar(255) NOT NULL,
-  `content_field` varchar(255) NOT NULL,
-  `content_type` varchar(255) NOT NULL,
-  `rowkey_version` decimal(22,0) NOT NULL,
-  PRIMARY KEY  (`name`)
-
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
-
-/*Data for the table `table_def` */
-
-LOCK TABLES `table_def` WRITE;
-
-UNLOCK TABLES;
-
-
-/*Table structure for table `schema_def` */
-
 DROP TABLE IF EXISTS `schema_def`;
-
 CREATE TABLE `schema_def` (
   `name` varchar(255) NOT NULL,
-  `indexed` varchar(5) NOT NULL,
-  `contented` varchar(5) NOT NULL,
-  `stored` varchar(5) NOT NULL,
-  `hbase_column` varchar(255) NOT NULL,
-  `hbase_family` varchar(255) NOT NULL,
-  `field_type` varchar(255) NOT NULL,
-  `table_name` varchar(255) NOT NULL,
-  UNIQUE KEY `ak_key_2_schemas` (`name`,`table_name`),
-  KEY `schemas_fk_reference_table` (`table_name`),
-  CONSTRAINT `fk_reference_table` FOREIGN KEY (`table_name`) REFERENCES `table_def` (`name`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  `rowkey_expression` varchar(255) NOT NULL,
+  `table_expression` varchar(255) NOT NULL,
+  `content_field` varchar(255) NOT NULL, /*json 字符串*/
+  `query_fields` varchar(255) NOT NULL, /*json 字符串*/
+  PRIMARY KEY  (`name`)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
@@ -70,61 +40,54 @@ LOCK TABLES `schema_def` WRITE;
 UNLOCK TABLES;
 
 
+/*Table structure for table `field_def` */
 
-/*Table structure for table `base_def` */
+DROP TABLE IF EXISTS `field_def`;
 
-DROP TABLE IF EXISTS `base_def`;
-
-CREATE TABLE `base_def` (
+CREATE TABLE `field_def` (
   `name` varchar(255) NOT NULL,
-  `is_fast` varchar(5) NOT NULL,
-  `table_name` varchar(255) NOT NULL,
-   UNIQUE KEY `ak_key_2_base` (`name`,`table_name`),
-   KEY `base_fk_reference_table` (`table_name`),
-   CONSTRAINT `base_fk_reference_table` FOREIGN KEY (`table_name`) REFERENCES `table_def` (`name`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  `indexed` varchar(5) NOT NULL,
+  `index_contented` varchar(5) NOT NULL,
+  `index_stored` varchar(5) NOT NULL,
+  `index_type` varchar(255) NOT NULL,
+  `hbase_column` varchar(255) NOT NULL,
+  `hbase_family` varchar(255) NOT NULL,
+  `store_type` varchar(255) NOT NULL,
+  `schema_name` varchar(255) NOT NULL,
+  UNIQUE KEY `ak_key_2_schemas` (`name`,`schema_name`),
+  KEY `field_fk_schema` (`schema_name`),
+  CONSTRAINT `field_fk_schema` FOREIGN KEY (`schema_name`) REFERENCES `schema_def` (`name`) ON DELETE NO ACTION ON UPDATE NO ACTION
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
-/*Data for the table `base_def` */
+/*Data for the table `field_def` */
 
-LOCK TABLES `base_def` WRITE;
+LOCK TABLES `field_def` WRITE;
 
 UNLOCK TABLES;
 
 
-/*Table structure for table `query_def` */
+/*Table structure for table `table_def` */
 
-DROP TABLE IF EXISTS `query_def`;
-CREATE TABLE `query_def` (
+DROP TABLE IF EXISTS `table_def`;
+
+CREATE TABLE `table_def` (
   `name` varchar(255) NOT NULL,
-  `weight` decimal(22,0) NOT NULL,
-  `table_name` varchar(255) NOT NULL,
-  UNIQUE KEY `ak_key_2_query` (`name`,`table_name`),
-  KEY `query_fk_reference_table` (`table_name`),
-  CONSTRAINT `query_fk_reference_table` FOREIGN KEY (`table_name`) REFERENCES `table_def` (`name`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  `index_type` INT(1) NOT NULL,
+  `hbase_regions` INT(4) NOT NULL,
+  `solr_shards` INT(4) NOT NULL,
+  `solr_replicas` INT(4) NOT NULL,
+  `region_splits` varchar(255) NOT NULL,
+  `schema_name` varchar(255) NOT NULL,
+  KEY `table_fk_schema` (`schema_name`),
+  PRIMARY KEY  (`name`),
+  CONSTRAINT `table_fk_schema` FOREIGN KEY (`schema_name`) REFERENCES `schema_def` (`name`) ON DELETE NO ACTION ON UPDATE NO ACTION
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
-/*Data for the table `query_def` */
+/*Data for the table `table_def` */
 
-LOCK TABLES `query_def` WRITE;
-
-UNLOCK TABLES;
-
-
-/*Table structure for table `rowkey_def` */
-
-DROP TABLE IF EXISTS `rowkey_def`;
-CREATE TABLE `rowkey_def` (
-  `name` varchar(255) NOT NULL,
-  `field_order` decimal(22,0) NOT NULL,
-  `table_name` varchar(255) NOT NULL,
-  UNIQUE KEY `ak_key_2_rowkey` (`name`,`table_name`),
-  KEY `rowkey_fk_reference_table` (`table_name`),
-  CONSTRAINT `rowkey_fk_reference_table` FOREIGN KEY (`table_name`) REFERENCES `table_def` (`name`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
-
-/*Data for the table `rowkey_def` */
-
-LOCK TABLES `rowkey_def` WRITE;
+LOCK TABLES `table_def` WRITE;
 
 UNLOCK TABLES;
 

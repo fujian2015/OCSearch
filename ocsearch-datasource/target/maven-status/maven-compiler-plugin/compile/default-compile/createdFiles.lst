@@ -1,0 +1,15 @@
+com/asiainfo/ocsearch/datasource/hbase/GetService.class
+com/asiainfo/ocsearch/datasource/solr/SolrServer.class
+com/asiainfo/ocsearch/datasource/hbase/HbaseServiceManager.class
+com/asiainfo/ocsearch/datasource/indexer/IndexerService.class
+com/asiainfo/ocsearch/datasource/indexer/ExecuteProcessUtil$StreamGobbler.class
+com/asiainfo/ocsearch/datasource/indexer/IndexerServiceManager.class
+com/asiainfo/ocsearch/datasource/indexer/ExecuteProcessUtil.class
+com/asiainfo/ocsearch/datasource/hbase/ScanService.class
+com/asiainfo/ocsearch/datasource/mysql/DataSourceProvider.class
+com/asiainfo/ocsearch/datasource/mysql/MyBaseService.class
+com/asiainfo/ocsearch/datasource/hbase/PutService.class
+com/asiainfo/ocsearch/datasource/hbase/AdminService.class
+com/asiainfo/ocsearch/datasource/solr/SolrConfig.class
+com/asiainfo/ocsearch/datasource/hbase/AbstractService.class
+com/asiainfo/ocsearch/datasource/hbase/util/RegionSplitsUtil.class
