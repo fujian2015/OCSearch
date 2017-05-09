@@ -29,6 +29,7 @@ CREATE TABLE `schema_def` (
   `table_expression` varchar(255) NOT NULL,
   `content_field` varchar(255) NOT NULL, /*json 字符串*/
   `query_fields` varchar(255) NOT NULL, /*json 字符串*/
+  `index_type` INT(1) NOT NULL, /*-1  hbase-only ;0 hbase-solr-indexer ;1 hbase-solr-batch-index*/
   PRIMARY KEY  (`name`)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
@@ -73,7 +74,6 @@ DROP TABLE IF EXISTS `table_def`;
 
 CREATE TABLE `table_def` (
   `name` varchar(255) NOT NULL,
-  `index_type` INT(1) NOT NULL,
   `hbase_regions` INT(4) NOT NULL,
   `solr_shards` INT(4) NOT NULL,
   `solr_replicas` INT(4) NOT NULL,

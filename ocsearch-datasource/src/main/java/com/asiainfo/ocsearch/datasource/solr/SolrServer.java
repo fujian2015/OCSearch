@@ -25,22 +25,16 @@ public class SolrServer {
 
     private SolrConfig solrConfig;
 
-    private static SolrServer instance;
 
-    private SolrServer(Properties prop) {
+
+    public SolrServer(Properties prop) {
 
         this.solrConfig = new SolrConfig(prop);
 
         solrServer = careateSolrClient();
     }
 
-    public synchronized  static void setUp(Properties prop){
-        instance = new SolrServer(prop);
-    }
 
-    public static SolrServer getInstance() {
-        return instance;
-    }
 
     private CloudSolrClient careateSolrClient() {
 
@@ -53,7 +47,7 @@ public class SolrServer {
         return solrClient;
     }
 
-    private void createCollection(String collection, String config, int numShards, int numReplicas) throws Exception {
+    public void createCollection(String collection, String config, int numShards, int numReplicas) throws Exception {
 
         CollectionAdminRequest.Create create = CollectionAdminRequest.createCollection(collection, config, numShards, numReplicas);
 
@@ -105,7 +99,7 @@ public class SolrServer {
                 e.printStackTrace();
             }
         }
-        SolrServer.instance = null;
+        this.solrServer=null;
     }
 
     public void deleteCollection(String collection) throws Exception {

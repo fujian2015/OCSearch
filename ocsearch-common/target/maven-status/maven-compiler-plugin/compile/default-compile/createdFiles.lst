@@ -1,6 +1,6 @@
 com/asiainfo/ocsearch/meta/SchemaManager.class
-com/asiainfo/ocsearch/meta/Table$IndexType.class
 com/asiainfo/ocsearch/exception/ServiceException.class
+com/asiainfo/ocsearch/meta/IndexType.class
 com/asiainfo/ocsearch/meta/QueryField.class
 com/asiainfo/ocsearch/utils/SqlUtil.class
 com/asiainfo/ocsearch/meta/Schema.class
@@ -12,4 +12,5 @@ com/asiainfo/ocsearch/utils/ConfigUtil.class
 com/asiainfo/ocsearch/meta/Field.class
 com/asiainfo/ocsearch/utils/PropertiesLoadUtil.class
 com/asiainfo/ocsearch/exception/ErrorCode.class
+com/asiainfo/ocsearch/lock/OCSearchLock.class
 com/asiainfo/ocsearch/meta/Table.class

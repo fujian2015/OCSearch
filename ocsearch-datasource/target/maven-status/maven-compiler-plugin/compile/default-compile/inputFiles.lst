@@ -3,6 +3,8 @@
 /Users/mac/Documents/OCSearch/ocsearch-datasource/src/main/java/com/asiainfo/ocsearch/datasource/indexer/ExecuteProcessUtil.java
 /Users/mac/Documents/OCSearch/ocsearch-datasource/src/main/java/com/asiainfo/ocsearch/datasource/solr/SolrConfig.java
 /Users/mac/Documents/OCSearch/ocsearch-datasource/src/main/java/com/asiainfo/ocsearch/datasource/hbase/ScanService.java
+/Users/mac/Documents/OCSearch/ocsearch-datasource/src/main/java/com/asiainfo/ocsearch/datasource/indexer/IndexerService1.java
+/Users/mac/Documents/OCSearch/ocsearch-datasource/src/main/java/com/asiainfo/ocsearch/datasource/solr/SolrServerManager.java
 /Users/mac/Documents/OCSearch/ocsearch-datasource/src/main/java/com/asiainfo/ocsearch/datasource/solr/SolrServer.java
 /Users/mac/Documents/OCSearch/ocsearch-datasource/src/main/java/com/asiainfo/ocsearch/datasource/hbase/HbaseServiceManager.java
 /Users/mac/Documents/OCSearch/ocsearch-datasource/src/main/java/com/asiainfo/ocsearch/datasource/indexer/IndexerServiceManager.java

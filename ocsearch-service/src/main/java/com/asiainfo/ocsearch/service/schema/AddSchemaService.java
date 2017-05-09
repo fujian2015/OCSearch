@@ -2,13 +2,17 @@ package com.asiainfo.ocsearch.service.schema;
 
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
+import com.asiainfo.ocsearch.meta.IndexType;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.asiainfo.ocsearch.meta.SchemaManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
-import com.asiainfo.ocsearch.transaction.TransactionUtil;
-import com.asiainfo.ocsearch.transaction.atomic.SaveSchemaToDb;
-import com.asiainfo.ocsearch.transaction.atomic.TransactionImpl;
+import com.asiainfo.ocsearch.transaction.atomic.schema.AddSchemaToMemory;
+import com.asiainfo.ocsearch.transaction.atomic.schema.CreateIndxerConfig;
+import com.asiainfo.ocsearch.transaction.atomic.schema.CreateSolrConfig;
+import com.asiainfo.ocsearch.transaction.atomic.schema.SaveSchemaToDb;
+import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
+import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 
@@ -23,8 +27,10 @@ public class AddSchemaService extends OCSearchService {
 
     @Override
     public byte[] doService(JsonNode request) throws ServiceException {
+
         String uuid = getRequestId();
         try {
+
             stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());
             Schema tableSchema = new Schema(request);
 
@@ -34,29 +40,30 @@ public class AddSchemaService extends OCSearchService {
 
             Transaction transaction = new TransactionImpl();
 
-            transaction.add(new SaveSchemaToDb(tableSchema));
-
-            String transactionName = uuid + "_add_" + tableSchema.name;
-
-
-            if (transaction.canExecute()) {
-                try {
-                    TransactionUtil.serialize(transactionName, transaction);
-                    transaction.execute();
-                    TransactionUtil.deleteTransaction(transactionName);
-                    SchemaManager.addSchema(tableSchema.name, tableSchema);
-                } catch (Exception e) {
-                    try {
-                        transaction.rollBack();
-                    } catch (Exception rollBackException) {
-                        log.error("roll back adding schema " + tableSchema.name + " failure", rollBackException);
-                    }
-                    throw e;
-                }
-            } else {
-                throw new ServiceException(String.format("add schema :%s  failure.", tableSchema.name), ErrorCode.RUNTIME_ERROR);
+            if (tableSchema.getIndexType() != IndexType.HBASE_ONLY) {
+                transaction.add(new CreateSolrConfig(tableSchema));
+                transaction.add(new CreateIndxerConfig(tableSchema));
             }
 
+            transaction.add(new SaveSchemaToDb(tableSchema));
+            transaction.add(new AddSchemaToMemory(tableSchema));
+
+            String transactionName = uuid + "_schema_add_" + tableSchema.name;
+
+            if (!transaction.canExecute()) {
+                throw new ServiceException(String.format("add schema :%s  failure.", tableSchema.name), ErrorCode.RUNTIME_ERROR);
+            }
+            try {
+                transaction.execute();
+            } catch (Exception e) {
+                try {
+                    transaction.rollBack();
+                } catch (Exception rollBackException) {
+                    log.error("roll back adding schema " + tableSchema.name + " failure", rollBackException);
+                    TransactionUtil.serialize(transactionName, transaction, true);
+                }
+                throw e;
+            }
         } catch (ServiceException e) {
             log.warn(e);
             throw e;
@@ -66,7 +73,6 @@ public class AddSchemaService extends OCSearchService {
         } finally {
             stateLog.info("end request " + uuid + " at " + System.currentTimeMillis());
         }
-
         return success;
     }
 

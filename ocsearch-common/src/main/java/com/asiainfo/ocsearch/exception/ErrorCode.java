@@ -4,7 +4,7 @@ package com.asiainfo.ocsearch.exception;
  * Created by mac on 2017/3/23.
  */
 public enum ErrorCode {
-    PARSE_ERROR(101),RUNTIME_ERROR(102),SCHEMA_EXIST(103);
+    PARSE_ERROR(101),RUNTIME_ERROR(102),SCHEMA_EXIST(103), TABLE_NOT_EXIST(104), SCHEMA_NOT_EXIST(105), SCHEMA_IN_USE(106);
 
     int code;
     ErrorCode(int code) {

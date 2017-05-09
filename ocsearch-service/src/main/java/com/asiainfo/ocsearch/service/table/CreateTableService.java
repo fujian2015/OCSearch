@@ -2,15 +2,12 @@ package com.asiainfo.ocsearch.service.table;
 
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
-import com.asiainfo.ocsearch.meta.Field;
-import com.asiainfo.ocsearch.meta.Schema;
-import com.asiainfo.ocsearch.meta.SchemaManager;
-import com.asiainfo.ocsearch.meta.Table;
+import com.asiainfo.ocsearch.meta.*;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
-import com.asiainfo.ocsearch.transaction.TransactionUtil;
-import com.asiainfo.ocsearch.transaction.atomic.*;
-import com.asiainfo.ocsearch.utils.ConfigUtil;
+import com.asiainfo.ocsearch.transaction.atomic.table.*;
+import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
+import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
@@ -44,7 +41,7 @@ public class CreateTableService extends OCSearchService {
 
             Table table = parseRequest(request);
 
-            Schema schema = SchemaManager.getSchema(table.getSchema());
+            Schema schema = SchemaManager.getSchemaBySchema(table.getSchema());
             if (schema == null) {
                 throw new ServiceException("schema : " + table.getSchema() + " does not exist!", ErrorCode.PARSE_ERROR);
             }
@@ -58,40 +55,36 @@ public class CreateTableService extends OCSearchService {
 
             transaction.add(new CreateHbaseTable(name, table.getHbaseRegions(), table.getRegionSplits(), families));
 
-            Table.IndexType indexType = table.getIndexType();
+            IndexType indexType = schema.getIndexType();
 
-            if (indexType != Table.IndexType.HBASE_ONLY) {
-                if (!ConfigUtil.configExists(schema.getName())) {
-                    transaction.add(new GenerateSolrConfig(schema));
-                    transaction.add(new UploadConfig(schema.getName()));
-                    transaction.add(new GenerateIndxerConfig(schema));
-                }
+            if (indexType == IndexType.HBASE_SOLR_INDEXER) {
+
                 transaction.add(new CreateSolrCollection(name, schema.getName(), table.getSolrShards(), table.getSolrReplicas()));
 
-                if (indexType == Table.IndexType.HBASE_SOLR_INDEXER) {
-                    transaction.add(new CreateIndexerTable(name, schema.getName()));
-                }
+                transaction.add(new CreateIndexerTable(name, schema.getName()));
+
+            } else if (indexType == IndexType.HBASE_SOLR_BATCH) {
+                transaction.add(new CreateSolrCollection(name, schema.getName(), table.getSolrShards(), table.getSolrReplicas()));
             }
 
             transaction.add(new SaveTableToDb(table));
 
-            if (transaction.canExecute()) {
-                try {
-                    String transactionName = uuid + "_add_" + name;
+            transaction.add(new SaveTableToMemory(name, schema.getName()));
 
-                    TransactionUtil.serialize(transactionName, transaction);
-                    transaction.execute();
-                    TransactionUtil.deleteTransaction(transactionName);
-                } catch (RuntimeException e) {
-                    try {
-                        transaction.rollBack();
-                    } catch (Exception rollBackException) {
-                        log.error("roll back create table " + name + " failure", rollBackException);
-                    }
-                    throw e;
-                }
-            } else {
+            if (!transaction.canExecute()) {
                 throw new ServiceException(String.format("create table :%s  failure because of transaction can't be executed.", name), ErrorCode.RUNTIME_ERROR);
+            }
+            try {
+                transaction.execute();
+            } catch (Exception e) {
+                log.error(e);
+                try {
+                    transaction.rollBack();
+                } catch (Exception rollBackException) {
+                    TransactionUtil.serialize( uuid + "_table_create_" + name, transaction, true);
+                    log.error("roll back create table " + name + " failure", rollBackException);
+                }
+                throw e;
             }
         } catch (ServiceException e) {
             log.warn(e);
@@ -161,9 +154,7 @@ public class CreateTableService extends OCSearchService {
                 solrReplicas = solrNode.get("replicas").asInt();
             }
 
-            int indexType = request.get("index_type").asInt();
-
-            return new Table(name, schema, indexType, solrShards, solrReplicas, regions, regionsSplits);
+            return new Table(name, schema, solrShards, solrReplicas, regions, regionsSplits);
 
         } catch (Exception e) {
             throw new ServiceException("parse error!", ErrorCode.PARSE_ERROR);

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 /**
  * Created by mac on 2017/4/1.
  */
@@ -111,4 +110,12 @@ public class HbaseServiceManager {
         return pool;
     }
 
+    public void close() {
+        try{
+            if(connection!=null)
+                connection.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

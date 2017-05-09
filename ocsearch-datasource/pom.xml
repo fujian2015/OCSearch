@@ -14,8 +14,10 @@
         <version.mysql>5.1.34</version.mysql>
 
         <version.indexer>1.6-SNAPSHOT</version.indexer>
+        <version.phoenix>4.7.0-HBase-1.1</version.phoenix>
     </properties>
     <artifactId>ocsearch-datasource</artifactId>
+    <packaging>jar</packaging>
     <dependencies>
 
         <dependency>
@@ -44,10 +46,24 @@
 
         <dependency>
             <groupId>com.ngdata</groupId>
-            <artifactId>hbase-indexer-cli</artifactId>
+            <artifactId>hbase-indexer-model</artifactId>
             <version>${version.indexer}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.ngdata</groupId>
+            <artifactId>hbase-indexer-engine</artifactId>
+            <version>${version.indexer}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ngdata</groupId>
+            <artifactId>hbase-indexer-morphlines</artifactId>
+            <version>${version.indexer}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.phoenix</groupId>
+            <artifactId>phoenix-core</artifactId>
+            <version>${version.phoenix}</version>
+        </dependency>
     </dependencies>
 
 </project>

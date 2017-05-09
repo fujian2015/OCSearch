@@ -1,5 +1,7 @@
 /Users/mac/Documents/OCSearch/ocsearch-common/src/main/java/com/asiainfo/ocsearch/utils/PropertiesLoadUtil.java
+/Users/mac/Documents/OCSearch/ocsearch-common/src/main/java/com/asiainfo/ocsearch/meta/IndexType.java
 /Users/mac/Documents/OCSearch/ocsearch-common/src/main/java/com/asiainfo/ocsearch/constants/OCSearchEnv.java
+/Users/mac/Documents/OCSearch/ocsearch-common/src/main/java/com/asiainfo/ocsearch/lock/OCSearchLock.java
 /Users/mac/Documents/OCSearch/ocsearch-common/src/main/java/com/asiainfo/ocsearch/utils/JsonWirterUtil.java
 /Users/mac/Documents/OCSearch/ocsearch-common/src/main/java/com/asiainfo/ocsearch/meta/Schema.java
 /Users/mac/Documents/OCSearch/ocsearch-common/src/main/java/com/asiainfo/ocsearch/meta/FieldType.java

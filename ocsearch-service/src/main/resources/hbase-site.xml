@@ -187,7 +187,7 @@
     
     <property>
       <name>hbase.zookeeper.quorum</name>
-      <value>ochadoop19.jcloud.local,ochadoop20.jcloud.local,ocdp001.jcloud.local</value>
+      <value>ochadoop19.jcloud.local,ochadoop20.jcloud.local</value>
     </property>
     
     <property>

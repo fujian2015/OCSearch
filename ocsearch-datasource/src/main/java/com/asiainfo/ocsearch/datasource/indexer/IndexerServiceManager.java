@@ -9,12 +9,16 @@ public class IndexerServiceManager {
 
     private static IndexerService instance = null;
 
-    public static  IndexerService getIndexerService() {
+    public static IndexerService getIndexerService() {
 
         return instance;
     }
 
-    public synchronized  static void setUp(Properties p){
-        instance = new IndexerService(p.getProperty("indexer_home"), p.getProperty("zookeeper"), p.getProperty("solr_zk"));
+    public synchronized  static void setUp(Properties p) throws Exception {
+        try {
+            instance = new IndexerService(p.getProperty("solr.zookeeper"));
+        } catch (Exception e) {
+            throw e;
+        }
     }
 }

@@ -85,7 +85,7 @@
 
     </dependencies>
     <build>
-        <finalName>ocsearch</finalName>
+
         <plugins>
             <!--Maven Tomcat Plugin -->
             <plugin>
@@ -98,7 +98,7 @@
                     <server>tomcat-7.0.73</server>
                     <username>admin</username>
                     <password>admin</password>
-                    <path>/OCSearch</path>
+                    <path>/ocsearch</path>
                     <port>8080</port>
                 </configuration>
             </plugin>

@@ -294,6 +294,7 @@
       <filter class="solr.IndonesianStemFilterFactory" stemDerivational="true"/>
     </analyzer>
   </fieldType>
+  <!--
   <fieldType name="text_ik" class="solr.TextField">
     <analyzer type="index">
       <tokenizer class="org.wltea.analyzer.lucene.IKTokenizerFactory" conf="ik.conf" useSmart="false"/>
@@ -304,6 +305,7 @@
       <filter class="solr.StopFilterFactory" words="stopwords.txt" ignoreCase="true"/>
     </analyzer>
   </fieldType>
+  -->
   <fieldType name="text_it" class="solr.TextField" positionIncrementGap="100">
     <analyzer>
       <tokenizer class="solr.StandardTokenizerFactory"/>
@@ -407,71 +409,7 @@
   <fieldType name="tints" class="solr.TrieIntField" positionIncrementGap="0" docValues="true" multiValued="true" precisionStep="8"/>
   <fieldType name="tlong" class="solr.TrieLongField" positionIncrementGap="0" docValues="true" precisionStep="8"/>
   <fieldType name="tlongs" class="solr.TrieLongField" positionIncrementGap="0" docValues="true" multiValued="true" precisionStep="8"/>
-  <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
-  <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
-  <field name="_version_" type="long" indexed="false" stored="false"/>
-  <field name="address.code" type="string" multiValued="true" indexed="true" stored="true"/>
-  <field name="address.name1" type="string" multiValued="true" indexed="true" stored="true"/>
-  <field name="author" type="strings"/>
-  <field name="cat" type="strings"/>
-  <field name="code" type="strings"/>
-  <field name="comments" type="strings"/>
-  <field name="content_encoding" type="strings"/>
-  <field name="content_type" type="strings"/>
-  <field name="descwus" type="string" indexed="true" stored="true"/>
-  <field name="firstname" type="string" docValues="false" indexed="true" stored="false"/>
-  <field name="full-AbstractParagraphs" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-Applicant.AddressBuilding" type="strings"/>
-  <field name="full-Applicant.AddressCity" type="strings"/>
-  <field name="full-Applicant.AddressFloor" type="strings"/>
-  <field name="full-Applicant.AddressLine" type="strings"/>
-  <field name="full-Applicant.AddressMailCode" type="strings"/>
-  <field name="full-Applicant.AddressRoom" type="strings"/>
-  <field name="full-Applicant.City" type="strings"/>
-  <field name="full-Applicant.County" type="strings"/>
-  <field name="full-Applicant.Name" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-Applicant.OrganizationCode" type="strings"/>
-  <field name="full-Applicant.PostBox" type="strings"/>
-  <field name="full-Applicant.PostCode" type="strings"/>
-  <field name="full-Applicant.Province" type="strings"/>
-  <field name="full-Applicant.Street" type="strings"/>
-  <field name="full-Applicant.Text" type="strings"/>
-  <field name="full-Applicant.WIPOST3Code" type="strings"/>
-  <field name="full-ApplicationReference.Date" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-ApplicationReference.DocNumber" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-ApplicationReference.Kind" type="strings"/>
-  <field name="full-ApplicationReference.WIPOST3Code" type="strings"/>
-  <field name="full-Claim" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-ClassificationIPCEdition" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-ClassificationIPCFurther" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-ClassificationIPCMain" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-ClassificationIPCText" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-DescriptionBackgroundArt" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-DescriptionDisclosure" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-DescriptionInventionMode" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-DescriptionParagraphs" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-DescriptionTechnicalField" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-DocNumber" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-InventionTitle" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-Inventor.Name" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-Priority.Date" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-Priority.DocNumber" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-Priority.WIPOST3Code" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-PublicationReference.Date" type="strings"/>
-  <field name="full-PublicationReference.DocNumber" type="text_ik" multiValued="true" indexed="true" stored="true"/>
-  <field name="full-PublicationReference.Kind" type="strings"/>
-  <field name="full-PublicationReference.WIPOST3Code" type="strings"/>
-  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-  <field name="ik_analyzer_wus" type="text_ik" multiValued="false" indexed="true" stored="true"/>
-  <field name="inStock" type="booleans"/>
-  <field name="lastname" type="string" docValues="false" indexed="false" stored="true"/>
-  <field name="name" type="strings"/>
-  <field name="price" type="tdoubles"/>
-  <field name="resourcename" type="strings"/>
-  <field name="stream_content_type" type="strings"/>
-  <field name="stream_size" type="tlongs"/>
-  <field name="title" type="strings"/>
-  <field name="x_parsed_by" type="strings"/>
+
   <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>
   <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
   <dynamicField name="*_ancestor_path" type="ancestor_path" indexed="true" stored="true"/>
@@ -545,5 +483,8 @@
   <dynamicField name="*_d" type="double" indexed="true" stored="true"/>
   <dynamicField name="*_p" type="location" indexed="true" stored="true"/>
   <dynamicField name="*_c" type="currency" indexed="true" stored="true"/>
-  <copyField source="*" dest="_text_"/>
+
+  <field name="_version_" type="long" indexed="false" stored="false"/>
+  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+
 </schema>

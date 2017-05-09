@@ -32,7 +32,7 @@ public class AdminService extends AbstractService {
         if (regions == -1) {
             createTable(tableName, columnFamilies, (byte[][]) null);
         } else {
-            createTable(tableName, columnFamilies, RegionSplitsUtil.splits(regions));
+            createTable(tableName, columnFamilies, RegionSplitsUtil.splits(regions-1));
         }
 
     }
@@ -92,7 +92,7 @@ public class AdminService extends AbstractService {
                 admin.deleteTable(t);
             }
         } catch (Exception e) {
-
+            log.error(e);
             throw new RuntimeException(String.format("delete hbase table:%s failed.", tableName), e);
         }
 

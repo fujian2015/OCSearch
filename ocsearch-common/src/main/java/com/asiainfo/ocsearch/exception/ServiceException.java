@@ -16,6 +16,7 @@ public  class ServiceException extends Exception{
 
     public ServiceException(Exception e, ErrorCode code){
         super(e);
+        errCode=code;
 
     }
 
@@ -28,7 +29,7 @@ public  class ServiceException extends Exception{
 
         ObjectNode re= JsonNodeFactory.instance.objectNode();
         ObjectNode result= JsonNodeFactory.instance.objectNode();
-        result.put("error_code",errCode.code);
+        result.put("error_code",errCode.getCode());
         result.put("error_desc",this.getMessage());
 
         re.put("result",result);

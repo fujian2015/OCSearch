@@ -19,6 +19,8 @@ public class Schema implements Serializable {
 
     public final String name;
 
+    IndexType indexType;  //-1: hbase ,0 solr+hbase hbase-indexer
+
     public ContentField contentField = null;  //default query field
 
     private final String tableExpression;
@@ -45,6 +47,9 @@ public class Schema implements Serializable {
         try {
 
             this.name = request.get("name").getTextValue();
+
+            this.indexType=IndexType.valueOf(request.get("index_type").asInt());
+
             this.rowkeyExpression = request.get("rowkey_expression").asText();
             this.tableExpression = request.get("table_expression").asText();
 
@@ -81,12 +86,13 @@ public class Schema implements Serializable {
         }
     }
 
-    public Schema(String name, String tableExpression, String rowkeyExpression) {
+    public Schema(String name, String tableExpression, String rowkeyExpression, IndexType indexType) {
 
 
         this.name = name;
         this.rowkeyExpression = rowkeyExpression;
         this.tableExpression = tableExpression;
+        this.indexType = indexType;
 
     }
 
@@ -122,8 +128,9 @@ public class Schema implements Serializable {
         schemaNode.put("name", name);
         schemaNode.put("rowkey_expression", rowkeyExpression);
         schemaNode.put("table_expression", tableExpression);
+        schemaNode.put("index_type", indexType.getValue());
 
-        if(contentField!=null)
+        if (contentField != null)
             schemaNode.put("content_field", contentField.toJsonNode());
 
         ArrayNode queryNodes = factory.arrayNode();
@@ -177,7 +184,8 @@ public class Schema implements Serializable {
 
     @Override
     public Object clone() {
-        Schema schema = new Schema(this.name, this.tableExpression, this.rowkeyExpression);
+
+        Schema schema = new Schema(this.name, this.tableExpression, this.rowkeyExpression, this.indexType);
 
         Map<String, Field> fieldsMap = new HashMap<>();
         for (Map.Entry<String, Field> entry : this.fields.entrySet()) {
@@ -187,9 +195,13 @@ public class Schema implements Serializable {
 
         schema.setQueryFields(queryFields.stream().map(qf -> (QueryField) qf.clone()).collect(Collectors.toList()));
 
-        schema.setContentField(contentField==null?contentField: (ContentField) contentField.clone());
+        schema.setContentField(contentField == null ? contentField : (ContentField) contentField.clone());
 
         return schema;
     }
 
+
+    public IndexType getIndexType() {
+        return indexType;
+    }
 }
