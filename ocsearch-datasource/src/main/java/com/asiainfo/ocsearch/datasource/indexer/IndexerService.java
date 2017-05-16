@@ -14,11 +14,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.KeeperException;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -117,11 +116,6 @@ public class IndexerService {
 
         IndexerComponentFactoryUtil.getComponentFactory(defaultFactory, new ByteArrayInputStream(indexerConf), connectionParams);
 
-        try {
-            System.out.println(new SAXReader().read(new ByteArrayInputStream(indexerConf)).asXML());
-        } catch (DocumentException e) {
-            e.printStackTrace();
-        }
         return builder;
     }
 

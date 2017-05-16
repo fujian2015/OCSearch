@@ -54,7 +54,7 @@ public class SaveSchemaToDb implements AtomicOperation {
         return true;
     }
 
-
+@Deprecated
     public Map<String, Object> generateSchema() {
 
         Map<String, Object> schemaMap = new TreeMap();
@@ -62,8 +62,8 @@ public class SaveSchemaToDb implements AtomicOperation {
         schemaMap.put("rowkey_expression", tableSchema.getRowkeyExpression());
         schemaMap.put("index_type", tableSchema.getIndexType().getValue());
         schemaMap.put("table_expression", tableSchema.getTableExpression());
-        if(tableSchema.getContentField()!=null)
-            schemaMap.put("content_field", tableSchema.getContentField().toString());
+//        if(tableSchema.getContentField()!=null)
+//            schemaMap.put("content_field", tableSchema.getContentField().toString());
 
         ArrayNode queryNodes= JsonNodeFactory.instance.arrayNode();
         for(QueryField qf:tableSchema.getQueryFields()){

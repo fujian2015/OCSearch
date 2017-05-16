@@ -15,22 +15,20 @@ import java.util.List;
  */
 public class Field implements Serializable {
 
-    static final String BASIC_FAMILY = "B";
-    static final String FILE_FAMILY = "C";
-    static final String ATTACHMENT_FAMILY = "D";
-    static final String NETSTED_FAMILY = "E";
-
     String name = "";
 
-    boolean indexContented = false;   //index in solr
-    boolean indexed = false;  //copy in hbase
+    String contentField;   //copy in solr field
+    String innerField;
+    int innerIndex = -1;
+
+    boolean indexed = false;  //index in solr
     boolean indexStored = false;    //store in solr
 
-    String indexType = "";
+    String indexType="";
 
-    String hbaseColumn = ""; //hbase column
+    String hbaseColumn; //hbase column
 
-    String hbaseFamily = "";    //hbase column family
+    String hbaseFamily;    //hbase column family
 
     FieldType storeType;
 
@@ -55,24 +53,35 @@ public class Field implements Serializable {
         try {
             this.name = field.get("name").asText();
 
+
+            if (field.has("content_field"))
+                this.contentField = field.get("content_field").asText();
+            //inner field and index
+            if (field.has("inner_field"))
+                this.innerField = field.get("inner_field").asText();
+            if (field.has("innner_index"))
+                this.innerIndex = field.get("inner_index").asInt();
+
             this.indexed = field.get("indexed").asBoolean();
 
-            this.indexContented = field.get("index_contented").asBoolean();
+            if (field.has("index_stored")) this.indexStored = field.get("index_stored").asBoolean();
 
-            this.indexStored = field.get("index_stored").asBoolean();
+            if (field.has("index_type")) this.indexType = field.get("index_type").asText();
 
-            this.indexType = field.get("index_type").asText();
             this.storeType = FieldType.valueOf(field.get("store_type").asText().toUpperCase());
 
-            this.hbaseColumn = name;
-
-            if (storeType == FieldType.ATTACHMENT) {
-                this.hbaseFamily = ATTACHMENT_FAMILY;
-            } else if (storeType == FieldType.FILE) {
-                this.hbaseFamily = FILE_FAMILY;
-            } else {
-                this.hbaseFamily = BASIC_FAMILY;
+            if (field.has("hbase_column")) {
+                this.hbaseColumn = field.get("hbase_column").asText();
+                this.hbaseFamily = field.get("hbase_family").asText();
             }
+
+//            if (storeType == FieldType.ATTACHMENT) {
+//                this.hbaseFamily = ATTACHMENT_FAMILY;
+//            } else if (storeType == FieldType.FILE) {
+//                this.hbaseFamily = FILE_FAMILY;
+//            } else {
+//                this.hbaseFamily = BASIC_FAMILY;
+//            }
 
 //            if(this.type ==FieldType.NETSTED){
 //                ArrayNode children= (ArrayNode) field.get("children");
@@ -87,13 +96,14 @@ public class Field implements Serializable {
     }
 
 
-    public Field(String name, boolean indexed, boolean indexContented, boolean indexStored, String indexType, String storeType, String hbaseColumn, String hbaseFamily) {
+    public Field(String name, boolean indexed, String contented, boolean indexStored, String indexType,
+                 String storeType, String hbaseColumn, String hbaseFamily, String innerField, int innerIndex) {
 
         this.name = name;
 
         this.indexed = indexed;
 
-        this.indexContented = indexContented;
+        this.contentField = contented;
 
         this.indexStored = indexStored;
 
@@ -105,15 +115,12 @@ public class Field implements Serializable {
 
         this.hbaseFamily = hbaseFamily;
 
+        this.innerField = innerField;
+
+        this.innerIndex = innerIndex;
+
     }
 
-    public boolean isIndexContented() {
-        return indexContented;
-    }
-
-    public void setIndexContented(boolean indexContented) {
-        this.indexContented = indexContented;
-    }
 
     public String getName() {
         return name;
@@ -174,26 +181,68 @@ public class Field implements Serializable {
     }
 
     public boolean withSolr() {
-        return indexed || indexStored || indexContented;
+        return (indexed || indexStored || contentField != null);
     }
 
     public JsonNode toJsonNode() {
+
         ObjectNode fieldNode = new ObjectMapper().createObjectNode();
 
         fieldNode.put("name", name);
         fieldNode.put("indexed", indexed);
-        fieldNode.put("index_contented", indexed);
+
+
         fieldNode.put("index_stored", indexStored);
+
         fieldNode.put("index_type", indexType);
-        fieldNode.put("hbase_column", hbaseColumn);
-        fieldNode.put("hbase_family", hbaseFamily);
+
         fieldNode.put("store_type", storeType.toString());
+
+        if (contentField != null) fieldNode.put("content_field", contentField);
+
+        if (hbaseColumn != null) {
+            fieldNode.put("hbase_column", hbaseColumn);
+            fieldNode.put("hbase_family", hbaseFamily);
+        }
+
+        if (innerField != null) {
+            fieldNode.put("inner_field", innerField);
+            fieldNode.put("inner_index", innerIndex);
+        }
 
         return fieldNode;
     }
 
     @Override
     public Object clone() {
-        return new Field(name, indexed, indexContented, indexStored, indexType, storeType.toString(), hbaseColumn, hbaseFamily);
+        return new Field(name, indexed, contentField, indexStored, indexType, storeType.toString(), hbaseColumn, hbaseFamily, innerField, innerIndex);
+    }
+
+    public String getContentField() {
+        return contentField;
+    }
+
+    public void setContentField(String contentField) {
+        this.contentField = contentField;
+    }
+
+    public String getInnerField() {
+        return innerField;
+    }
+
+    public void setInnerField(String innerField) {
+        this.innerField = innerField;
+    }
+
+    public int getInnerIndex() {
+        return innerIndex;
+    }
+
+    public void setInerIndex(int innnerIndex) {
+        this.innerIndex = innnerIndex;
+    }
+
+    public boolean isIndexContented() {
+        return contentField!=null;
     }
 }

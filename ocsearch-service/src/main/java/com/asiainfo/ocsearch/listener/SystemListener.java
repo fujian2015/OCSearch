@@ -3,10 +3,10 @@ package com.asiainfo.ocsearch.listener;
 import com.asiainfo.ocsearch.constants.OCSearchEnv;
 import com.asiainfo.ocsearch.datasource.hbase.HbaseServiceManager;
 import com.asiainfo.ocsearch.datasource.indexer.IndexerServiceManager;
-import com.asiainfo.ocsearch.datasource.mysql.DataSourceProvider;
 import com.asiainfo.ocsearch.datasource.mysql.MyBaseService;
 import com.asiainfo.ocsearch.datasource.solr.SolrServerManager;
 import com.asiainfo.ocsearch.meta.*;
+import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.scheduler.ProcessTransaction;
 import com.asiainfo.ocsearch.scheduler.RollBackTranscation;
 import com.asiainfo.ocsearch.utils.PropertiesLoadUtil;
@@ -55,9 +55,9 @@ public class SystemListener implements ServletContextListener {
                 ObjectMapper objectMapper = new ObjectMapper();
 
                 String contentField = String.valueOf(result.get("content_field"));
-                if (StringUtils.isNotEmpty(contentField)) {
-                    schema.setContentField(new ContentField(objectMapper.readTree(contentField)));
-                }
+//                if (StringUtils.isNotEmpty(contentField)) {
+//                    schema.setContentField(new ContentField(objectMapper.readTree(contentField)));
+//                }
 
                 String queryFieldsString = String.valueOf(result.get("query_fields"));
 
@@ -117,7 +117,7 @@ public class SystemListener implements ServletContextListener {
             String hbaseColumn = String.valueOf(map.get("hbase_column"));
             String hbaseFamily = String.valueOf(map.get("hbase_family"));
             String storeType = String.valueOf(map.get("store_type"));
-            fields.put(name, new Field(name, indexed, indexContented, indexStored, indexType, storeType, hbaseColumn, hbaseFamily));
+//            fields.put(name, new Field(name, indexed, indexContented, indexStored, indexType, storeType, hbaseColumn, hbaseFamily));
         }
         return fields;
     }
@@ -166,13 +166,15 @@ public class SystemListener implements ServletContextListener {
 
         Properties properties = PropertiesLoadUtil.loadProFile("ocsearch.properties");
 
-        DataSourceProvider.setUp(properties);
+//        DataSourceProvider.setUp(properties);
 
-        initSchemaManager();
+//        initSchemaManager();
 
 
         HbaseServiceManager.setup("hbase-site.xml");
         OCSearchEnv.setUp(properties);
+
+        MetaDataHelperManager.setUp(properties);
 
         boolean hbaseOnly = Boolean.valueOf(OCSearchEnv.getEnvValue("HBASE_ONLY"));
 

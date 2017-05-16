@@ -11,6 +11,6 @@ com/asiainfo/ocsearch/meta/ContentField.class
 com/asiainfo/ocsearch/utils/ConfigUtil.class
 com/asiainfo/ocsearch/meta/Field.class
 com/asiainfo/ocsearch/utils/PropertiesLoadUtil.class
+com/asiainfo/ocsearch/meta/InnerField.class
 com/asiainfo/ocsearch/exception/ErrorCode.class
-com/asiainfo/ocsearch/lock/OCSearchLock.class
 com/asiainfo/ocsearch/meta/Table.class

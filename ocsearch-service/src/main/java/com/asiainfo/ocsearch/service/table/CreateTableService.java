@@ -2,22 +2,27 @@ package com.asiainfo.ocsearch.service.table;
 
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
-import com.asiainfo.ocsearch.meta.*;
+import com.asiainfo.ocsearch.meta.IndexType;
+import com.asiainfo.ocsearch.meta.Schema;
+import com.asiainfo.ocsearch.meta.Table;
+import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
-import com.asiainfo.ocsearch.transaction.atomic.table.*;
+import com.asiainfo.ocsearch.transaction.atomic.table.CreateHbaseTable;
+import com.asiainfo.ocsearch.transaction.atomic.table.CreateIndexerTable;
+import com.asiainfo.ocsearch.transaction.atomic.table.CreateSolrCollection;
+import com.asiainfo.ocsearch.transaction.atomic.table.SaveTableToZk;
 import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
 import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 
 /**
  * Created by mac on 2017/5/2.
@@ -41,7 +46,9 @@ public class CreateTableService extends OCSearchService {
 
             Table table = parseRequest(request);
 
-            Schema schema = SchemaManager.getSchemaBySchema(table.getSchema());
+//            Schema schema = SchemaManager.getSchemaBySchema(table.getSchema());
+            Schema schema= MetaDataHelperManager.getInstance().getSchemaBySchema(table.getSchema());
+
             if (schema == null) {
                 throw new ServiceException("schema : " + table.getSchema() + " does not exist!", ErrorCode.PARSE_ERROR);
             }
@@ -49,9 +56,11 @@ public class CreateTableService extends OCSearchService {
 
             Transaction transaction = new TransactionImpl();
 
-            Collection<Field> fields = schema.getFields().values();
+            Set<String> families = new HashSet<>();
 
-            Set<String> families = fields.stream().map(field -> field.getHbaseFamily()).collect(Collectors.toSet());
+            schema.getFields().values().stream().map(field -> families.add(field.getHbaseFamily()));
+
+            schema.getInnerFields().stream().map(innerField ->families.add(innerField.getHbaseFamily()));
 
             transaction.add(new CreateHbaseTable(name, table.getHbaseRegions(), table.getRegionSplits(), families));
 
@@ -61,15 +70,16 @@ public class CreateTableService extends OCSearchService {
 
                 transaction.add(new CreateSolrCollection(name, schema.getName(), table.getSolrShards(), table.getSolrReplicas()));
 
-                transaction.add(new CreateIndexerTable(name, schema.getName()));
+                transaction.add(new CreateIndexerTable(name, schema));
 
             } else if (indexType == IndexType.HBASE_SOLR_BATCH) {
                 transaction.add(new CreateSolrCollection(name, schema.getName(), table.getSolrShards(), table.getSolrReplicas()));
             }
 
-            transaction.add(new SaveTableToDb(table));
+//            transaction.add(new SaveTableToDb(table));
 
-            transaction.add(new SaveTableToMemory(name, schema.getName()));
+//            transaction.add(new SaveTableToMemory(name, schema.getName()));
+            transaction.add(new SaveTableToZk(table)); //instead db with zookeeper
 
             if (!transaction.canExecute()) {
                 throw new ServiceException(String.format("create table :%s  failure because of transaction can't be executed.", name), ErrorCode.RUNTIME_ERROR);

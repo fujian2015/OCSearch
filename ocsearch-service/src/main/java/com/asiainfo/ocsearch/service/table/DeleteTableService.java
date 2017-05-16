@@ -4,13 +4,13 @@ import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.meta.IndexType;
 import com.asiainfo.ocsearch.meta.Schema;
-import com.asiainfo.ocsearch.meta.SchemaManager;
+import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
 import com.asiainfo.ocsearch.transaction.atomic.table.DeleteHbaseTable;
 import com.asiainfo.ocsearch.transaction.atomic.table.DeleteIndexerTable;
 import com.asiainfo.ocsearch.transaction.atomic.table.DeleteSolrCollection;
-import com.asiainfo.ocsearch.transaction.atomic.table.RemoveTableFromDb;
+import com.asiainfo.ocsearch.transaction.atomic.table.RemoveTableFromZk;
 import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
 import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
 import org.apache.log4j.Logger;
@@ -32,16 +32,15 @@ public class DeleteTableService extends OCSearchService {
             stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());
             String name = request.get("name").asText();
 
-            if (!SchemaManager.containsTable(name)) {
+            if (!MetaDataHelperManager.getInstance().hasTable(name)) {
                 throw new ServiceException("table " + name + " does not exist!", ErrorCode.TABLE_NOT_EXIST);
             }
-            Schema schema = SchemaManager.getSchemaByTable(name);
-
-            SchemaManager.removeTable(name);
+            Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(name);
 
             Transaction transaction = new TransactionImpl();
 
-            transaction.add(new RemoveTableFromDb(name));
+//            transaction.add(new RemoveTableFromDb(name));
+            transaction.add(new RemoveTableFromZk(name));  //instead db with zookeeper
 
             IndexType indexType = schema.getIndexType();
 

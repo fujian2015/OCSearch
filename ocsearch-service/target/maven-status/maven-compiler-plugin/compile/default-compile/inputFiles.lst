@@ -4,6 +4,8 @@
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/internal/TransactionImpl.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/table/CreateSolrCollection.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/table/SaveTableToDb.java
+/Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/schema/SaveSchemaToZk.java
+/Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/table/SaveTableToZk.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/scheduler/RollBackTranscation.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/table/CreateHbaseTable.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/table/DeleteHbaseTable.java
@@ -12,6 +14,8 @@
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/service/OCSearchService.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/listener/TestClass.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/service/schema/AddSchemaService.java
+/Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/table/RemoveTableFromZk.java
+/Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/schema/CreateIndexerConfig.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/table/SaveTableToMemory.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/table/DeleteSolrCollection.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/schema/AddSchemaToMemory.java
@@ -22,9 +26,11 @@
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/scheduler/ProcessTransaction.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/service/schema/UpdateSchemaService.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/service/schema/DeleteSchemaService.java
-/Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/schema/CreateIndxerConfig.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/table/DeleteIndexerTable.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/service/table/DeleteTableService.java
+/Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/schema/RemoveSchemaFromZk.java
+/Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/metahelper/MetaDataHelperManager.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/schema/CreateSolrConfig.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/atomic/schema/DeleteSolrConfig.java
 /Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/transaction/internal/TransactionUtil.java
+/Users/mac/Documents/OCSearch/ocsearch-service/src/main/java/com/asiainfo/ocsearch/metahelper/MetaDataHelper.java

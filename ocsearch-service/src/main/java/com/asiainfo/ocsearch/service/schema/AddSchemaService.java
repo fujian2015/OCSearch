@@ -4,13 +4,11 @@ import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.meta.IndexType;
 import com.asiainfo.ocsearch.meta.Schema;
-import com.asiainfo.ocsearch.meta.SchemaManager;
+import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
-import com.asiainfo.ocsearch.transaction.atomic.schema.AddSchemaToMemory;
-import com.asiainfo.ocsearch.transaction.atomic.schema.CreateIndxerConfig;
 import com.asiainfo.ocsearch.transaction.atomic.schema.CreateSolrConfig;
-import com.asiainfo.ocsearch.transaction.atomic.schema.SaveSchemaToDb;
+import com.asiainfo.ocsearch.transaction.atomic.schema.SaveSchemaToZk;
 import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
 import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
 import org.apache.log4j.Logger;
@@ -34,7 +32,7 @@ public class AddSchemaService extends OCSearchService {
             stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());
             Schema tableSchema = new Schema(request);
 
-            if (SchemaManager.existsConfig(tableSchema.name)) {
+            if (MetaDataHelperManager.getInstance().hasSchema(tableSchema.getName())) {
                 throw new ServiceException(String.format("schema :%s  exists.", tableSchema.name), ErrorCode.SCHEMA_EXIST);
             }
 
@@ -42,11 +40,12 @@ public class AddSchemaService extends OCSearchService {
 
             if (tableSchema.getIndexType() != IndexType.HBASE_ONLY) {
                 transaction.add(new CreateSolrConfig(tableSchema));
-                transaction.add(new CreateIndxerConfig(tableSchema));
+//                transaction.add(new CreateIndexerConfig(tableSchema));
             }
 
-            transaction.add(new SaveSchemaToDb(tableSchema));
-            transaction.add(new AddSchemaToMemory(tableSchema));
+//            transaction.add(new SaveSchemaToDb(tableSchema));
+//            transaction.add(new AddSchemaToMemory(tableSchema));
+            transaction.add(new SaveSchemaToZk(tableSchema)); //instead db with zookeeper
 
             String transactionName = uuid + "_schema_add_" + tableSchema.name;
 

@@ -4,12 +4,12 @@ import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.meta.IndexType;
 import com.asiainfo.ocsearch.meta.Schema;
-import com.asiainfo.ocsearch.meta.SchemaManager;
+import com.asiainfo.ocsearch.metahelper.MetaDataHelper;
+import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
-import com.asiainfo.ocsearch.transaction.atomic.schema.DeleteIndexerConfig;
 import com.asiainfo.ocsearch.transaction.atomic.schema.DeleteSolrConfig;
-import com.asiainfo.ocsearch.transaction.atomic.schema.RemoveSchemaFromDb;
+import com.asiainfo.ocsearch.transaction.atomic.schema.RemoveSchemaFromZk;
 import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
 import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
 import org.apache.log4j.Logger;
@@ -36,22 +36,24 @@ public class DeleteSchemaService extends OCSearchService {
 
             String name = request.get("name").asText();
 
-            Schema schema = SchemaManager.getSchemaBySchema(name);
+            MetaDataHelper metaDataHelper = MetaDataHelperManager.getInstance();
+            Schema schema = metaDataHelper.getSchemaBySchema(name);
 
             if (schema == null) {
                 throw new ServiceException(String.format("schema :%s  does not exist.", name), ErrorCode.SCHEMA_NOT_EXIST);
             }
 
-            if(SchemaManager.removeSchema(name)==false){
+            if (metaDataHelper.schemaInUse(name) == false) {
                 throw new ServiceException(String.format("schema :%s  is in use.", name), ErrorCode.SCHEMA_IN_USE);
             }
 
             Transaction transaction = new TransactionImpl();
 
-            transaction.add(new RemoveSchemaFromDb(name));
+//            transaction.add(new RemoveSchemaFromDb(name));
+            transaction.add(new RemoveSchemaFromZk(name)); //instead db with zookeeper
 
             if (schema.getIndexType() != IndexType.HBASE_ONLY) {
-                transaction.add(new DeleteIndexerConfig(name));
+//                transaction.add(new DeleteIndexerConfig(name));
                 transaction.add(new DeleteSolrConfig(name));
             }
             try {

@@ -1,6 +1,7 @@
 package com.asiainfo.ocsearch.meta;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -120,4 +121,13 @@ public class SchemaManager {
 
         lock.writeLock().unlock();
     }
+
+    public static Set<String> schemaNames(){
+        return schemaMap.keySet();
+    }
+
+    public static Set<String> tableNames(){
+        return tableMap.keySet();
+    }
+
 }

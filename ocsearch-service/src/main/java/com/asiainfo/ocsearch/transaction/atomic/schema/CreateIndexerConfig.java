@@ -17,17 +17,19 @@ import org.codehaus.jackson.node.ObjectNode;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by mac on 2017/4/5.
  */
-public class CreateIndxerConfig implements AtomicOperation {
+public class CreateIndexerConfig implements AtomicOperation {
 
     static Logger log = Logger.getLogger("state");
 
     Schema tableSchema;
 
-    public CreateIndxerConfig(Schema tableSchema) {
+    public CreateIndexerConfig(Schema tableSchema) {
 
         this.tableSchema = tableSchema;
     }
@@ -121,36 +123,50 @@ public class CreateIndxerConfig implements AtomicOperation {
      *
      * @return
      */
-    @Deprecated
     public ArrayNode getIndexerFields() {
 
         JsonNodeFactory factory = JsonNodeFactory.instance;
         ArrayNode indexerFields = factory.arrayNode();
+        Set<String> innerNames=new HashSet<>();
 
         tableSchema.getFields().values().stream().filter(Field::withSolr).forEach(field -> {
+            if (StringUtils.isNotEmpty(field.getInnerField())) {
+                innerNames.add(field.getInnerField());
+            } else {
+                ObjectNode fieldNode = factory.objectNode();
 
+                fieldNode.put("inputColumn", StringUtils.join(field.getHbaseFamily(), ":", field.getHbaseColumn()));
+
+                fieldNode.put("outputField", field.getName());
+
+                FieldType fieldType = field.getStoreType();
+
+                if (fieldType == FieldType.NETSTED) {
+                    fieldNode.put("type", "com.ngdata.hbaseindexer.parse.JsonByteArrayValueMapper");
+
+                } else {
+                    fieldNode.put("type", fieldType.getValue());
+                }
+
+                fieldNode.put("source", "value");
+
+                indexerFields.add(fieldNode);
+            }
+        });
+        tableSchema.getInnerFields().stream().filter(innerField -> innerNames.contains(innerField.getName())).forEach(field -> {
             ObjectNode fieldNode = factory.objectNode();
 
             fieldNode.put("inputColumn", StringUtils.join(field.getHbaseFamily(), ":", field.getHbaseColumn()));
 
             fieldNode.put("outputField", field.getName());
 
-            FieldType fieldType = field.getStoreType();
-
-            if (fieldType == FieldType.NETSTED) {
-                fieldNode.put("type", "com.ngdata.hbaseindexer.parse.JsonByteArrayValueMapper");
-
-            } else if (fieldType == FieldType.ATTACHMENT) {
-                fieldNode.put("type", "string");
-            } else {
-                fieldNode.put("type", fieldType.getValue());
-            }
+            fieldNode.put("type", "com.ngdata.hbaseindexer.parse.InnerValueMapper");
 
             fieldNode.put("source", "value");
 
             indexerFields.add(fieldNode);
-
         });
+
         return indexerFields;
     }
 

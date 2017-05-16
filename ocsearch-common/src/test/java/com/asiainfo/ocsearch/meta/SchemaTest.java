@@ -11,14 +11,23 @@ public class SchemaTest {
     @Test
     public void testToString() throws Exception {
         JsonNode jsonNode=new ObjectMapper().readTree("{\n" +
-                "    \"name\": \"testSchema\",\n" +
+                "\"request\":true,\n" +
+                "    \"name\": \"testSchema10\",\n" +
                 "    \"rowkey_expression\": \"md5(phone,imsi)+‘|‘+phone+‘|‘+imsi\",\n" +
                 "    \"table_expression\": \"table+’_'+time\",\n" +
                 "    \"index_type\": 0,\n" +
-                "    \"content_field\": {\n" +
-                "        \"name\": \"_root_\",\n" +
-                "        \"type\": \"text\"\n" +
-                "    },\n" +
+                "    \"content_fields\": [\n" +
+                "        {\n" +
+                "            \"name\": \"_root_\",\n" +
+                "            \"type\": \"text_gl\"\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"inner_fields\": [\n" +
+                "        {\n" +
+                "            \"name\": \"basic\",\n" +
+                "            \"separator\": \";\"\n" +
+                "        }\n" +
+                "    ],\n" +
                 "    \"query_fields\": [\n" +
                 "        {\n" +
                 "            \"name\": \"title\",\n" +
@@ -33,41 +42,34 @@ public class SchemaTest {
                 "        {\n" +
                 "            \"name\": \"length\",\n" +
                 "            \"indexed\": true,\n" +
-                "            \"index_contented\": true,\n" +
                 "            \"index_stored\": false,\n" +
                 "            \"index_type\": \"int\",\n" +
-                "            \"hbase_column\": \"length\",\n" +
-                "            \"hbase_family\": \"B\",\n" +
-                "            \"store_type\": \"INT\"\n" +
+                "            \"store_type\": \"INT\",\n" +
+                "            \"content_field\": \"_root_\",\n" +
+                "            \"inner_field\": \"basic\"\n" +
                 "        },\n" +
                 "        {\n" +
                 "            \"name\": \"title\",\n" +
                 "            \"indexed\": true,\n" +
-                "            \"index_contented\": true,\n" +
                 "            \"index_stored\": true,\n" +
                 "            \"index_type\": \"text_gl\",\n" +
-                "            \"hbase_column\": \"title\",\n" +
-                "            \"hbase_family\": \"B\",\n" +
-                "            \"store_type\": \"STRING\"\n" +
+                "            \"store_type\": \"STRING\",\n" +
+                "            \"content_field\": \"_root_\",\n" +
+                "            \"inner_field\": \"basic\"\n" +
                 "        },\n" +
                 "        {\n" +
                 "            \"name\": \"content\",\n" +
                 "            \"indexed\": false,\n" +
-                "            \"index_contented\": false,\n" +
-                "            \"index_stored\": false,\n" +
-                "            \"index_type\": \"text_gl\",\n" +
-                "            \"hbase_column\": \"content\",\n" +
-                "            \"hbase_family\": \"B\",\n" +
                 "            \"store_type\": \"STRING\"\n" +
                 "        }\n" +
                 "    ]\n" +
                 "}");
         Schema schema=new Schema(jsonNode);
 
-
         Schema a= (Schema) schema.clone();
-        schema.setContentField(null);
-        System.out.println(a);
+        System.out.println("GPRS_123".hashCode());
+        System.out.println("GPRS_124".hashCode());
+        System.out.println("GPRS_124aaa".hashCode());
     }
 
 }

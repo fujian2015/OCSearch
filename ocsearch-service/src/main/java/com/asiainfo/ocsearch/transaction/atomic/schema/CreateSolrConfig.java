@@ -9,6 +9,7 @@ import com.asiainfo.ocsearch.transaction.atomic.AtomicOperation;
 import com.asiainfo.ocsearch.utils.ConfigUtil;
 import com.asiainfo.ocsearch.utils.PropertiesLoadUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -160,12 +161,9 @@ public class CreateSolrConfig implements AtomicOperation {
             solrFields.add(asSolrField(field));
         });
 
-        ContentField contentField = tableSchema.getContentField();
-        if (contentField != null) {
-
+        for(ContentField contentField:tableSchema.getContentFields()){
             solrFields.add(generateContentField(contentField));
-
-            fields.values().stream().filter(Field::isIndexContented).forEach(field -> {
+            fields.values().stream().filter(f-> StringUtils.equals(contentField.getName(),f.getContentField())).forEach(field -> {
 
                 Element fieldEle = new DefaultElement("copyField");
                 fieldEle.add(new DefaultAttribute("source", field.getName()));

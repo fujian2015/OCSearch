@@ -2,13 +2,18 @@ package com.asiainfo.ocsearch.meta;
 
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -16,12 +21,15 @@ import java.util.stream.Collectors;
  */
 public class Schema implements Serializable {
 
+    static final String BASIC_FAMILY = "B";
+    static final String FILE_FAMILY = "C";
+    static final String ATTACHMENT_FAMILY = "D";
+    static final String NETSTED_FAMILY = "E";
 
     public final String name;
 
     IndexType indexType;  //-1: hbase ,0 solr+hbase hbase-indexer
 
-    public ContentField contentField = null;  //default query field
 
     private final String tableExpression;
 
@@ -29,8 +37,9 @@ public class Schema implements Serializable {
 
     private Map<String, Field> fields = new HashMap<String, Field>();
 
+    private List<ContentField> contentFields = new ArrayList<>();  //default query field
     private List<QueryField> queryFields = new ArrayList<QueryField>();
-
+    private List<InnerField> innerFields = new ArrayList<InnerField>();
 
     /**
      * name	varchar(255)	NO	PRI	NULL	schema名
@@ -45,16 +54,18 @@ public class Schema implements Serializable {
     public Schema(JsonNode request) throws ServiceException {
 
         try {
+            boolean isRequest = request.has("request") ? true : false;
 
             this.name = request.get("name").getTextValue();
 
-            this.indexType=IndexType.valueOf(request.get("index_type").asInt());
+            this.indexType = IndexType.valueOf(request.get("index_type").asInt());
 
             this.rowkeyExpression = request.get("rowkey_expression").asText();
             this.tableExpression = request.get("table_expression").asText();
 
-            if (request.get("content_field") != null)
-                this.contentField = new ContentField(request.get("content_field"));
+
+            ArrayNode contentNodes = (ArrayNode) request.get("content_fields");
+            contentNodes.forEach(contentNode -> contentFields.add(new ContentField(contentNode)));
 
             ArrayNode fieldsNode = (ArrayNode) request.get("fields");
 
@@ -66,16 +77,21 @@ public class Schema implements Serializable {
 
             ArrayNode queryFieldsNode = (ArrayNode) request.get("query_fields");
 
-            if (queryFieldsNode != null) {
-                for (JsonNode queryFieldNode : queryFieldsNode) {
+            queryFieldsNode.forEach(queryFieldNode -> this.queryFields.add(new QueryField(queryFieldNode)));
 
-                    this.queryFields.add(new QueryField(queryFieldNode));
-                }
+
+            ArrayNode innerNodes = (ArrayNode) request.get("inner_fields");
+
+            innerNodes.forEach(innerNode -> innerFields.add(new InnerField(innerNode)));
+
+
+            if (isRequest) {
+                String checkResult = checkFields();
+                if (null != checkResult)
+                    throw new ServiceException(checkResult, ErrorCode.PARSE_ERROR);
+                fillBlanks();
             }
 
-            String checkResult = checkFields();
-            if (null != checkResult)
-                throw new ServiceException(checkResult, ErrorCode.PARSE_ERROR);
 
         } catch (ServiceException se) {
             throw se;
@@ -84,6 +100,73 @@ public class Schema implements Serializable {
             e.printStackTrace();
             throw new ServiceException("request is not valid", ErrorCode.PARSE_ERROR);
         }
+    }
+
+    private void fillBlanks() throws ServiceException {
+        List<Field> basicFields = new ArrayList<>();
+        List<Field> fileFields = new ArrayList<>();
+        List<Field> attachmentFields = new ArrayList<>();
+        Multimap<String, Field> innerMap = ArrayListMultimap.create();
+        for (Field field : this.fields.values()) {
+
+            String innerField = field.getInnerField();
+
+            if (innerField == null) {
+                if (field.getStoreType() == FieldType.ATTACHMENT)
+                    attachmentFields.add(field);
+
+                else if (field.getStoreType() == FieldType.FILE)
+                    fileFields.add(field);
+
+                else
+                    basicFields.add(field);
+            } else {
+                innerMap.put(innerField, field);
+            }
+        }
+        if (innerMap.keySet().size() == this.innerFields.size()) {
+            for (InnerField innerField : this.innerFields) {
+                int order = 0;
+                if (!innerMap.containsKey(innerField.name))
+                    throw new ServiceException("inner field " + innerField.getName() + " never be used in field list ", ErrorCode.PARSE_ERROR);
+                for (Field f : innerMap.get(innerField.name)) {
+                    f.setInerIndex(order++);
+                }
+            }
+        } else throw new ServiceException("inner field  must be in use properly! ", ErrorCode.PARSE_ERROR);
+
+
+        //basic hbase family
+        int basicOrder = 0;
+        for (Field field : basicFields) {
+            field.setHbaseFamily(BASIC_FAMILY);
+            field.setHbaseColumn(String.valueOf(basicOrder++));
+        }
+        for (InnerField field : this.innerFields) {
+            field.setHbaseFamily(BASIC_FAMILY);
+            field.setHbaseColumn(String.valueOf(basicOrder++));
+        }
+
+        //file type family
+        int fileOrder = 0;
+        for (Field field : fileFields) {
+            field.setHbaseFamily(FILE_FAMILY);
+            field.setHbaseColumn(String.valueOf(fileOrder++));
+        }
+
+        //attachment type family
+        int attachmentOrder = 0;
+        if (attachmentFields.size() == 1) {
+            Field field = attachmentFields.get(0);
+            field.setHbaseFamily(ATTACHMENT_FAMILY);
+            field.setHbaseColumn("");
+        } else {
+            for (Field field : attachmentFields) {
+                field.setHbaseFamily(ATTACHMENT_FAMILY + (attachmentOrder++));
+                field.setHbaseColumn("");
+            }
+        }
+
     }
 
     public Schema(String name, String tableExpression, String rowkeyExpression, IndexType indexType) {
@@ -101,9 +184,13 @@ public class Schema implements Serializable {
         for (QueryField qf : queryFields) {
             if (fields.containsKey(qf.name))
                 continue;
-
-            if (contentField != null && qf.name.equals(contentField.name))
-                continue;
+            boolean hasQf = false;
+            for (ContentField contentField : contentFields) {
+                if (contentField.getName().equals(qf.name)) {
+                    hasQf = true;
+                }
+            }
+            if (hasQf) continue;
             return "the query field  " + qf.name + "is not in the fields";
         }
         return null;
@@ -130,8 +217,14 @@ public class Schema implements Serializable {
         schemaNode.put("table_expression", tableExpression);
         schemaNode.put("index_type", indexType.getValue());
 
-        if (contentField != null)
-            schemaNode.put("content_field", contentField.toJsonNode());
+
+        ArrayNode contentNodes= factory.arrayNode();
+        contentFields.forEach(contentField -> contentNodes.add(contentField.toJsonNode()));
+        schemaNode.put("content_fields", contentNodes);
+
+        ArrayNode innerNodes= factory.arrayNode();
+        innerFields.forEach(innerField -> innerNodes.add(innerField.toJsonNode()));
+        schemaNode.put("inner_fields", innerNodes);
 
         ArrayNode queryNodes = factory.arrayNode();
 
@@ -154,10 +247,6 @@ public class Schema implements Serializable {
         return name;
     }
 
-    public void setContentField(ContentField contentField) {
-        this.contentField = contentField;
-    }
-
     public String getTableExpression() {
         return tableExpression;
     }
@@ -178,9 +267,6 @@ public class Schema implements Serializable {
         return fields;
     }
 
-    public ContentField getContentField() {
-        return contentField;
-    }
 
     @Override
     public Object clone() {
@@ -195,7 +281,9 @@ public class Schema implements Serializable {
 
         schema.setQueryFields(queryFields.stream().map(qf -> (QueryField) qf.clone()).collect(Collectors.toList()));
 
-        schema.setContentField(contentField == null ? contentField : (ContentField) contentField.clone());
+        schema.setContentFields(contentFields.stream().map(cf -> (ContentField) cf.clone()).collect(Collectors.toList()));
+
+        schema.setInnerFields(innerFields.stream().map(inf->(InnerField)inf.clone()).collect(Collectors.toList()));
 
         return schema;
     }
@@ -203,5 +291,21 @@ public class Schema implements Serializable {
 
     public IndexType getIndexType() {
         return indexType;
+    }
+
+    public List<ContentField> getContentFields() {
+        return contentFields;
+    }
+
+    public void setContentFields(List<ContentField> contentFields) {
+        this.contentFields = contentFields;
+    }
+
+    public List<InnerField> getInnerFields() {
+        return innerFields;
+    }
+
+    public void setInnerFields(List<InnerField> innerFields) {
+        this.innerFields = innerFields;
     }
 }
