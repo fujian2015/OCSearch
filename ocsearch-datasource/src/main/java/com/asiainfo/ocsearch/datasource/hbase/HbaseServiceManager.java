@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
 /**
  * Created by mac on 2017/4/1.
  */
@@ -43,60 +44,44 @@ public class HbaseServiceManager {
 
     private HbaseServiceManager(Configuration config) throws IOException {
         this.config = config;
-        connection = createConnnection(config);
+        connection = createConnection(config);
     }
 
     public synchronized AdminService getAdminService() {
         if (adminService == null) {
 
-            adminService = new AdminService(connection);
+            adminService = new AdminService(this);
         }
         return adminService;
     }
 
     public synchronized GetService getGetService() {
         if (getService == null) {
-            getService = new GetService(connection);
+            getService = new GetService(this);
         }
         return getService;
     }
 
-    public synchronized ScanService getScanService(){
+    public synchronized ScanService getScanService() {
         if (scanService == null) {
-            scanService = new ScanService(connection);
+            scanService = new ScanService(this);
         }
         return scanService;
     }
 
     public synchronized PutService createPutService(String table) throws IOException {
 
-        return new PutService(connection, table);
+        return new PutService(this, table);
     }
 
 
-    private Connection createConnnection(Configuration conf) throws IOException {
+    private Connection createConnection(Configuration conf) throws IOException {
 
-        Connection conn = null;
-        ThreadPoolExecutor pool = null;
 
-        try {
-            pool = getDefaultExecutor(conf);
-            conn = ConnectionFactory.createConnection(conf, pool);
-        } catch (Exception e) {
-            if (pool != null) {
-                try {
-                    pool.shutdown();
-                    pool.awaitTermination(60, TimeUnit.SECONDS);
-                } catch (InterruptedException e1) {
-
-                }
-            }
-            throw e;
-        }
-        return conn;
+        return ConnectionFactory.createConnection(conf);
     }
 
-
+    @Deprecated
     private ThreadPoolExecutor getDefaultExecutor(Configuration conf) {
         int maxThreads = conf.getInt("hbase.htable.threads.max", 10240);
         if (maxThreads == 0) {
@@ -111,11 +96,34 @@ public class HbaseServiceManager {
     }
 
     public void close() {
-        try{
-            if(connection!=null)
+        try {
+            if (connection != null)
                 connection.close();
+            connection = null;
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public synchronized  void reconnect() {
+        try {
+            synchronized (connection) {
+                if (connection != null) {
+                    connection.close();
+                }
+                connection = createConnection(config);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Connection getHBaseConnection() throws IOException {
+        synchronized (connection) {
+            if (connection == null || connection.isClosed()) {
+                connection = createConnection(config);
+            }
+        }
+        return connection;
     }
 }

@@ -4,6 +4,7 @@ import com.asiainfo.ocsearch.datasource.indexer.IndexerService;
 import com.asiainfo.ocsearch.datasource.indexer.IndexerServiceManager;
 import com.asiainfo.ocsearch.meta.Field;
 import com.asiainfo.ocsearch.meta.FieldType;
+import com.asiainfo.ocsearch.meta.InnerField;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.asiainfo.ocsearch.transaction.atomic.AtomicOperation;
 import com.asiainfo.ocsearch.utils.ConfigUtil;
@@ -20,6 +21,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -189,7 +191,11 @@ public class CreateIndexerTable implements AtomicOperation {
                 indexerFields.add(fieldNode);
             }
         });
-        tableSchema.getInnerFields().stream().filter(innerField -> innerNames.contains(innerField.getName())).forEach(field -> {
+
+        Map<String,InnerField> innerFieldMap=tableSchema.getInnerFields();
+
+        innerNames.forEach(innerName->{
+            InnerField field=innerFieldMap.get(innerName);
             ObjectNode fieldNode = factory.objectNode();
 
             fieldNode.put("inputColumn", StringUtils.join(field.getHbaseFamily(), ":", field.getHbaseColumn()));

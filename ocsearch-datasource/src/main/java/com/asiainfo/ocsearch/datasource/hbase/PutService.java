@@ -1,6 +1,5 @@
 package com.asiainfo.ocsearch.datasource.hbase;
 
-import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.log4j.Logger;
 
@@ -15,8 +14,8 @@ public class PutService extends  AbstractService{
 
     HTable hTable=null;
 
-    public PutService(Connection conn,String table) throws IOException {
-        super(conn);
+    public PutService(HbaseServiceManager hbaseServiceManager, String table) throws IOException {
+        super(hbaseServiceManager);
         try {
             hTable = getTable(table);
         } catch (IOException e) {

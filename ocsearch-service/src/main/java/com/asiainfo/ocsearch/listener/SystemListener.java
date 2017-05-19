@@ -35,6 +35,7 @@ public class SystemListener implements ServletContextListener {
     ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(5);
 
 
+    @Deprecated
     public void initSchemaManager() throws IOException, SQLException {
 
         MyBaseService myBaseService = MyBaseService.getInstance();
@@ -90,7 +91,7 @@ public class SystemListener implements ServletContextListener {
                 String name = String.valueOf(result.get("name"));
                 String schema = String.valueOf(result.get("schema_name"));
 
-                SchemaManager.addTable(name,schema);
+                SchemaManager.addTable(name, schema);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,6 +101,7 @@ public class SystemListener implements ServletContextListener {
 
     }
 
+    @Deprecated
     private Map<String, Field> getFields(String schema, MyBaseService myBaseService) throws SQLException {
 
         String queryField = "select * from  field_def where `schema_name` = '" + schema + "'";
@@ -140,15 +142,15 @@ public class SystemListener implements ServletContextListener {
         logger.info("begin destroy ocsearch...");
         scheduledThreadPool.shutdownNow();
         try {
-            scheduledThreadPool.awaitTermination(5,TimeUnit.MINUTES);
+            scheduledThreadPool.awaitTermination(5, TimeUnit.MINUTES);
 
-            if(IndexerServiceManager.getIndexerService()!=null){
+            if (IndexerServiceManager.getIndexerService() != null) {
                 IndexerServiceManager.getIndexerService().close();
             }
-            if(HbaseServiceManager.getInstance()!=null){
+            if (HbaseServiceManager.getInstance() != null) {
                 HbaseServiceManager.getInstance().close();
             }
-            if(SolrServerManager.getInstance()!=null){
+            if (SolrServerManager.getInstance() != null) {
                 SolrServerManager.getInstance().close();
             }
         } catch (InterruptedException e) {
@@ -166,14 +168,11 @@ public class SystemListener implements ServletContextListener {
 
         Properties properties = PropertiesLoadUtil.loadProFile("ocsearch.properties");
 
-//        DataSourceProvider.setUp(properties);
-
-//        initSchemaManager();
-
-
-        HbaseServiceManager.setup("hbase-site.xml");
         OCSearchEnv.setUp(properties);
 
+        ThreadPoolManager.setUp();
+
+        HbaseServiceManager.setup("hbase-site.xml");
         MetaDataHelperManager.setUp(properties);
 
         boolean hbaseOnly = Boolean.valueOf(OCSearchEnv.getEnvValue("HBASE_ONLY"));

@@ -20,9 +20,6 @@ import org.codehaus.jackson.JsonNode;
  */
 public class DeleteSchemaService extends OCSearchService {
 
-
-    Logger log = Logger.getLogger(getClass());
-
     Logger stateLog = Logger.getLogger("state");
 
     @Override

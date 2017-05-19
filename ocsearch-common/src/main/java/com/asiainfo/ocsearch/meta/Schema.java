@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by mac on 2017/3/24.
@@ -25,7 +24,7 @@ public class Schema implements Serializable {
     static final String FILE_FAMILY = "C";
     static final String ATTACHMENT_FAMILY = "D";
     static final String NETSTED_FAMILY = "E";
-
+    static final String FILE_NAMES_COLUMN = "FILES";
     public final String name;
 
     IndexType indexType;  //-1: hbase ,0 solr+hbase hbase-indexer
@@ -39,7 +38,18 @@ public class Schema implements Serializable {
 
     private List<ContentField> contentFields = new ArrayList<>();  //default query field
     private List<QueryField> queryFields = new ArrayList<QueryField>();
-    private List<InnerField> innerFields = new ArrayList<InnerField>();
+
+    private Map<String, InnerField> innerFields = new HashMap<>();
+
+    private  Multimap<String, Field> innerMap = ArrayListMultimap.create();
+
+    public Schema(String name, String tableExpression, String rowkeyExpression) {
+        this.name = name;
+        this.tableExpression = tableExpression;
+        this.rowkeyExpression = rowkeyExpression;
+    }
+
+
 
     /**
      * name	varchar(255)	NO	PRI	NULL	schema名
@@ -82,7 +92,10 @@ public class Schema implements Serializable {
 
             ArrayNode innerNodes = (ArrayNode) request.get("inner_fields");
 
-            innerNodes.forEach(innerNode -> innerFields.add(new InnerField(innerNode)));
+            innerNodes.forEach(innerNode -> {
+                InnerField innerField = new InnerField(innerNode);
+                innerFields.put(innerField.getName(), innerField);
+            });
 
 
             if (isRequest) {
@@ -106,7 +119,7 @@ public class Schema implements Serializable {
         List<Field> basicFields = new ArrayList<>();
         List<Field> fileFields = new ArrayList<>();
         List<Field> attachmentFields = new ArrayList<>();
-        Multimap<String, Field> innerMap = ArrayListMultimap.create();
+
         for (Field field : this.fields.values()) {
 
             String innerField = field.getInnerField();
@@ -121,11 +134,12 @@ public class Schema implements Serializable {
                 else
                     basicFields.add(field);
             } else {
-                innerMap.put(innerField, field);
+                this.innerMap.put(innerField, field);
             }
         }
+
         if (innerMap.keySet().size() == this.innerFields.size()) {
-            for (InnerField innerField : this.innerFields) {
+            for (InnerField innerField : this.innerFields.values()) {
                 int order = 0;
                 if (!innerMap.containsKey(innerField.name))
                     throw new ServiceException("inner field " + innerField.getName() + " never be used in field list ", ErrorCode.PARSE_ERROR);
@@ -133,7 +147,9 @@ public class Schema implements Serializable {
                     f.setInerIndex(order++);
                 }
             }
-        } else throw new ServiceException("inner field  must be in use properly! ", ErrorCode.PARSE_ERROR);
+        } else {
+            throw new ServiceException("inner field  must be in use properly! ", ErrorCode.PARSE_ERROR);
+        }
 
 
         //basic hbase family
@@ -142,7 +158,7 @@ public class Schema implements Serializable {
             field.setHbaseFamily(BASIC_FAMILY);
             field.setHbaseColumn(String.valueOf(basicOrder++));
         }
-        for (InnerField field : this.innerFields) {
+        for (InnerField field : this.innerFields.values()) {
             field.setHbaseFamily(BASIC_FAMILY);
             field.setHbaseColumn(String.valueOf(basicOrder++));
         }
@@ -151,7 +167,7 @@ public class Schema implements Serializable {
         int fileOrder = 0;
         for (Field field : fileFields) {
             field.setHbaseFamily(FILE_FAMILY);
-            field.setHbaseColumn(String.valueOf(fileOrder++));
+            field.setHbaseColumn(FILE_NAMES_COLUMN);
         }
 
         //attachment type family
@@ -159,11 +175,11 @@ public class Schema implements Serializable {
         if (attachmentFields.size() == 1) {
             Field field = attachmentFields.get(0);
             field.setHbaseFamily(ATTACHMENT_FAMILY);
-            field.setHbaseColumn("");
+            field.setHbaseColumn(FILE_NAMES_COLUMN);
         } else {
             for (Field field : attachmentFields) {
                 field.setHbaseFamily(ATTACHMENT_FAMILY + (attachmentOrder++));
-                field.setHbaseColumn("");
+                field.setHbaseColumn(FILE_NAMES_COLUMN);  //存放文件名列表
             }
         }
 
@@ -218,12 +234,12 @@ public class Schema implements Serializable {
         schemaNode.put("index_type", indexType.getValue());
 
 
-        ArrayNode contentNodes= factory.arrayNode();
+        ArrayNode contentNodes = factory.arrayNode();
         contentFields.forEach(contentField -> contentNodes.add(contentField.toJsonNode()));
         schemaNode.put("content_fields", contentNodes);
 
-        ArrayNode innerNodes= factory.arrayNode();
-        innerFields.forEach(innerField -> innerNodes.add(innerField.toJsonNode()));
+        ArrayNode innerNodes = factory.arrayNode();
+        innerFields.values().forEach(innerField -> innerNodes.add(innerField.toJsonNode()));
         schemaNode.put("inner_fields", innerNodes);
 
         ArrayNode queryNodes = factory.arrayNode();
@@ -271,21 +287,12 @@ public class Schema implements Serializable {
     @Override
     public Object clone() {
 
-        Schema schema = new Schema(this.name, this.tableExpression, this.rowkeyExpression, this.indexType);
-
-        Map<String, Field> fieldsMap = new HashMap<>();
-        for (Map.Entry<String, Field> entry : this.fields.entrySet()) {
-            fieldsMap.put(entry.getKey(), (Field) entry.getValue().clone());
+        try {
+            return new Schema(this.toJsonNode());
+        } catch (ServiceException e) {
+            e.printStackTrace();
         }
-        schema.setFields(fieldsMap);
-
-        schema.setQueryFields(queryFields.stream().map(qf -> (QueryField) qf.clone()).collect(Collectors.toList()));
-
-        schema.setContentFields(contentFields.stream().map(cf -> (ContentField) cf.clone()).collect(Collectors.toList()));
-
-        schema.setInnerFields(innerFields.stream().map(inf->(InnerField)inf.clone()).collect(Collectors.toList()));
-
-        return schema;
+        return null;
     }
 
 
@@ -301,11 +308,15 @@ public class Schema implements Serializable {
         this.contentFields = contentFields;
     }
 
-    public List<InnerField> getInnerFields() {
+    public Map<String, InnerField> getInnerFields() {
         return innerFields;
     }
 
-    public void setInnerFields(List<InnerField> innerFields) {
+    public void setInnerFields(Map<String, InnerField> innerFields) {
         this.innerFields = innerFields;
+    }
+
+    public Multimap<String, Field> getInnerMap() {
+        return innerMap;
     }
 }

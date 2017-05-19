@@ -1,12 +1,11 @@
 package com.asiainfo.ocsearch.datasource.hbase;
 
-import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,22 +18,11 @@ public class GetService extends AbstractService {
 
     //多个HTable用同一个connection,同一个pool
 
-    public GetService(Connection connection) {
-        super(connection);
+    public GetService(HbaseServiceManager hbaseServiceManager ) {
+        super(hbaseServiceManager);
     }
 
-    public Result getResult(String tableName, final Get get) {
 
-        Result result;
-        try {
-            result = getTable(tableName).get(get);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Exception occured in getResult method, tableName=" + tableName, e);
-        }
-        return result;
-
-    }
 
     public byte[] get(String tableName, byte[] row, final byte[] family, final byte[] qualifier) {
         final Get get = new Get(row);
@@ -75,14 +63,6 @@ public class GetService extends AbstractService {
 
     }
 
-    public boolean exists(String tableName, final Get get) {
-        try {
-            return getTable(tableName).exists(get);
-        } catch (IOException e) {
-            throw new RuntimeException("Exception occured in exists method, tableName=" + tableName, e);
-        }
-    }
-
     public boolean exists(String tableName, byte[] row, byte[] family) {
         Get get = new Get(row);
         get.addFamily(family);
@@ -97,4 +77,16 @@ public class GetService extends AbstractService {
     }
 
 
+    public boolean exists(String tableName, final Get get) {
+        return execute(tableName, table -> table.exists(get));
+    }
+    public Result[] getList(String tableName, List<Get> gets)  {
+
+        return execute(tableName, table -> table.get(gets));
+    }
+
+    public Result getResult(String tableName, final Get get) {
+
+        return execute(tableName, table -> table.get(get));
+    }
 }

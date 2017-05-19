@@ -1,6 +1,5 @@
 package com.asiainfo.ocsearch.datasource.hbase;
 
-import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -17,8 +16,8 @@ public class ScanService extends AbstractService{
 
     Logger log = Logger.getLogger(getClass());
 
-    public ScanService(Connection conn) {
-        super(conn);
+    public ScanService(HbaseServiceManager hbaseServiceManager) {
+        super(hbaseServiceManager);
     }
 
 

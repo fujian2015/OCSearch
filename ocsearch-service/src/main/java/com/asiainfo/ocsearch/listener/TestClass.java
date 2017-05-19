@@ -1,13 +1,15 @@
 package com.asiainfo.ocsearch.listener;
 
 import com.asiainfo.ocsearch.datasource.indexer.IndexerServiceManager;
-import com.asiainfo.ocsearch.datasource.solr.SolrServerManager;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.asiainfo.ocsearch.transaction.atomic.AtomicOperation;
 import com.asiainfo.ocsearch.transaction.atomic.table.CreateIndexerTable;
 import com.asiainfo.ocsearch.utils.PropertiesLoadUtil;
+import com.google.common.collect.HashBasedTable;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
 
 import java.util.Properties;
 
@@ -18,7 +20,7 @@ public class TestClass {
     public static void main(String[] args) throws Exception {
         Properties properties = PropertiesLoadUtil.loadProFile("ocsearch.properties");
 
-        SolrServerManager.setUp(properties);
+//        SolrServerManager.setUp(properties);
 //        DataSourceProvider.setUp(properties);
 
 //        new SystemListener().initSchemaManager();
@@ -99,7 +101,20 @@ public class TestClass {
 //        Thread.sleep(100);
 //        System.out.println(saveSchemaToZk.canExecute());
 
-        testIndexer(jsonNode);
+//        testIndexer(jsonNode);
+
+        com.google.common.collect.Table<String,String, String> kvMap = HashBasedTable.create();
+
+        kvMap.put("a","b","c");
+
+        System.out.println(kvMap.get("a","b"));
+
+        ObjectNode objectNode= JsonNodeFactory.instance.objectNode();
+
+        objectNode.put("a","c");
+        objectNode.remove("a");
+        System.out.println(objectNode);
+
 
     }
 

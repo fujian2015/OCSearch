@@ -67,9 +67,11 @@ public class SchemaTest {
         Schema schema=new Schema(jsonNode);
 
         Schema a= (Schema) schema.clone();
-        System.out.println("GPRS_123".hashCode());
-        System.out.println("GPRS_124".hashCode());
-        System.out.println("GPRS_124aaa".hashCode());
+        System.out.println(a.toString());
+//        System.out.println("GPRS_124".hashCode());
+//        System.out.println("GPRS_124aaa".hashCode());
+
+
     }
 
 }
