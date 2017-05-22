@@ -9,7 +9,7 @@
     <modules>
         <module>ocsearch-common</module>
         <module>ocsearch-datasource</module>
-        <module>ocsearch-mr</module>
+        <module>ocsearch-datainput</module>
         <module>ocsearch-service</module>
         <module>ocsearch-expression</module>
     </modules>
