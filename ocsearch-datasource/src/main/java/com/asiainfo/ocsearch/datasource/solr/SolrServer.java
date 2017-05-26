@@ -7,7 +7,7 @@ import org.apache.solr.client.solrj.request.schema.SchemaRequest;
 import org.apache.solr.client.solrj.response.CollectionAdminResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse;
-import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.SolrParams;
 
 import java.io.IOException;
@@ -26,14 +26,12 @@ public class SolrServer {
     private SolrConfig solrConfig;
 
 
-
     public SolrServer(Properties prop) {
 
         this.solrConfig = new SolrConfig(prop);
 
         solrServer = careateSolrClient();
     }
-
 
 
     private CloudSolrClient careateSolrClient() {
@@ -63,20 +61,20 @@ public class SolrServer {
 
     public void createCollection(String collection, String config, int shards) throws Exception {
 
-        this.createCollection(collection,config,shards,solrConfig.getReplicas());
+        this.createCollection(collection, config, shards, solrConfig.getReplicas());
     }
 
 
-    private synchronized void query(String collection, SolrParams solrParams) {
+    public synchronized SolrDocumentList query(String collection, SolrParams solrParams) throws Exception {
         try {
             QueryResponse queryResponse = solrServer.query(collection, solrParams);
-            for (SolrDocument solrDocument : queryResponse.getResults()) {
-                solrDocument.getChildDocuments();
-            }
+            return queryResponse.getResults();
         } catch (SolrServerException e) {
             e.printStackTrace();
+            throw e;
         } catch (IOException e) {
             e.printStackTrace();
+            throw e;
         }
     }
 
@@ -99,7 +97,7 @@ public class SolrServer {
                 e.printStackTrace();
             }
         }
-        this.solrServer=null;
+        this.solrServer = null;
     }
 
     public void deleteCollection(String collection) throws Exception {
@@ -123,16 +121,16 @@ public class SolrServer {
         return this.solrServer.getZkStateReader().getConfigManager().configExists(config);
     }
 
-    public boolean existsFields(String collection,Set<String> solrFieldNames) throws IOException, SolrServerException {
+    public boolean existsFields(String collection, Set<String> solrFieldNames) throws IOException, SolrServerException {
 
-        SchemaRequest.Fields fields=new SchemaRequest.Fields();
+        SchemaRequest.Fields fields = new SchemaRequest.Fields();
 
-        SchemaResponse.FieldsResponse response =fields.process(solrServer,collection);
+        SchemaResponse.FieldsResponse response = fields.process(solrServer, collection);
 
-        Set<String> allFields=response.getFields().stream().map(map->map.get("name").toString()).collect(Collectors.toSet());
+        Set<String> allFields = response.getFields().stream().map(map -> map.get("name").toString()).collect(Collectors.toSet());
 
-        for(String name:solrFieldNames){
-            if(!allFields.contains(name)){
+        for (String name : solrFieldNames) {
+            if (!allFields.contains(name)) {
                 return false;
             }
         }

@@ -7,16 +7,20 @@ import com.asiainfo.ocsearch.meta.FieldType;
 import com.asiainfo.ocsearch.meta.InnerField;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.asiainfo.ocsearch.transaction.atomic.AtomicOperation;
-import com.asiainfo.ocsearch.utils.ConfigUtil;
 import com.asiainfo.ocsearch.utils.JsonWirterUtil;
-import org.apache.commons.io.FileUtils;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.XMLWriter;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -44,32 +48,14 @@ public class CreateIndexerTable implements AtomicOperation {
     @Override
     public boolean execute() {
 
-        String schema = tableSchema.getName();
-
         log.info("create indexer table " + table + " start!");
-
-        String path = ConfigUtil.getIndexerConfigPath(schema);
-
-        File config = new File(path);
         try {
-
-            if (config.exists()) FileUtils.deleteDirectory(config);
-
-            config.mkdirs();
-            File conf = new File(path, "morphlines.conf");
-            generateSchema(conf);
-            IndexerServiceManager.getIndexerService().createTable(table, new File(path, "morphlines.conf").getAbsolutePath());
-
+            IndexerServiceManager.getIndexerService().createTable(table,getIndexerConf(table));
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("create habse-indexer table " + table + " failure!", e);
         } finally {
-            try {
-                if (config.exists()) FileUtils.deleteDirectory(config);
-            } catch (IOException e) {
-                log.error("delete indexer dir error!", e);
-                throw new RuntimeException("delete indexer dir error!", e);
-            }
+
         }
 
         log.info("create indexer table " + table + " success!");
@@ -77,21 +63,20 @@ public class CreateIndexerTable implements AtomicOperation {
         return true;
     }
 
-
     @Override
     public boolean recovery() {
         log.info("delete indexer table " + table + " start!");
         try {
 
-            IndexerService indexerService2 = IndexerServiceManager.getIndexerService();
+            IndexerService indexerService = IndexerServiceManager.getIndexerService();
 
-            String path = ConfigUtil.getIndexerConfigPath(tableSchema.getName());
+//            String path = ConfigUtil.getIndexerConfigPath(tableSchema.getName());
+//
+//            File config = new File(path);
+//
+//            if (config.exists()) FileUtils.deleteDirectory(config);
 
-            File config = new File(path);
-
-            if (config.exists()) FileUtils.deleteDirectory(config);
-
-            if (indexerService2.exists(table)) indexerService2.deleteTable(table);
+            if (indexerService.exists(table)) indexerService.deleteTable(table);
 
         } catch (Exception e) {
             log.error("delete indexer table " + table + " failure!", e);
@@ -110,6 +95,7 @@ public class CreateIndexerTable implements AtomicOperation {
     /**
      * @param conf
      */
+    @Deprecated
     private void generateSchema(File conf) {
         ObjectMapper objectMapper = new ObjectMapper();
         FileWriter fileWriter = null;
@@ -161,6 +147,7 @@ public class CreateIndexerTable implements AtomicOperation {
      *
      * @return
      */
+    @Deprecated
     public ArrayNode getIndexerFields() {
 
         JsonNodeFactory factory = JsonNodeFactory.instance;
@@ -192,10 +179,10 @@ public class CreateIndexerTable implements AtomicOperation {
             }
         });
 
-        Map<String,InnerField> innerFieldMap=tableSchema.getInnerFields();
+        Map<String, InnerField> innerFieldMap = tableSchema.getInnerFields();
 
-        innerNames.forEach(innerName->{
-            InnerField field=innerFieldMap.get(innerName);
+        innerNames.forEach(innerName -> {
+            InnerField field = innerFieldMap.get(innerName);
             ObjectNode fieldNode = factory.objectNode();
 
             fieldNode.put("inputColumn", StringUtils.join(field.getHbaseFamily(), ":", field.getHbaseColumn()));
@@ -211,7 +198,7 @@ public class CreateIndexerTable implements AtomicOperation {
 
         return indexerFields;
     }
-
+@Deprecated
     private ObjectNode getExtractCommands() {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode extract = objectMapper.createObjectNode();
@@ -225,7 +212,7 @@ public class CreateIndexerTable implements AtomicOperation {
         return extract;
     }
 
-
+@Deprecated
     private ObjectNode getLogCommads() {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode logCommands = objectMapper.createObjectNode();
@@ -239,7 +226,7 @@ public class CreateIndexerTable implements AtomicOperation {
 
         return logCommands;
     }
-
+@Deprecated
     private ArrayNode getImportCommands() {
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode importCommands = objectMapper.createArrayNode();
@@ -249,5 +236,67 @@ public class CreateIndexerTable implements AtomicOperation {
         importCommands.add("com.ngdata.**");
 
         return importCommands;
+    }
+
+    private byte[] getIndexerConf(String name) throws IOException {
+
+        Document indexerDoc = DocumentHelper.createDocument();
+
+        Element indexer = indexerDoc.addElement("indexer");
+        indexer.addAttribute("table", name);
+        indexer.addAttribute("mapper", "com.ngdata.hbaseindexer.parse.DefaultResultToSolrMapper");
+        indexer.addAttribute("table-name-field", "_table_");
+        indexer.addAttribute("read-row", "never");
+
+        Element isProduct = indexer.addElement("param");
+        isProduct.addAttribute("name", "isProductionMode");
+        isProduct.addAttribute("value", "true");
+
+        Map<String, Element> innerElements = Maps.newHashMap();
+
+        tableSchema.getFields().values().stream().filter(Field::withSolr).forEach(field -> {
+            if (StringUtils.isNotEmpty(field.getInnerField())) {
+                String innerName = field.getInnerField();
+                if (false==innerElements.containsKey(innerName)) {
+
+                    InnerField inf = tableSchema.getInnerFields().get(innerName);
+                    Element innerElement = indexer.addElement("field");
+                    innerElement.addAttribute("name", inf.getName());
+                    innerElement.addAttribute("source", "value");
+                    innerElement.addAttribute("value", inf.getHbaseFamily() + ":" + inf.getHbaseColumn());
+                    innerElement.addAttribute("type", "com.ngdata.hbaseindexer.parse.InnerFieldArrayValueMapper");
+
+                    Element split = innerElement.addElement("param");
+                    split.addAttribute("name", "_split_");
+                    split.addAttribute("value", inf.getSeparator());
+                    innerElements.put(innerName, innerElement);
+                }
+                Element f = innerElements.get(innerName).addElement("param");
+                f.addAttribute("name", field.getName());
+                f.addAttribute("value", field.getInnerIndex() + ":" + field.getStoreType().toString().toLowerCase());
+            } else {
+                Element fieldElement = indexer.addElement("field");
+                fieldElement.addAttribute("name", field.getName());
+                fieldElement.addAttribute("source", "value");
+                fieldElement.addAttribute("value", field.getHbaseFamily() + ":" + field.getHbaseColumn());
+                fieldElement.addAttribute("type", field.getStoreType().toString().toLowerCase());
+            }
+        });
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        XMLWriter xmlWriter = null;
+
+        try {
+            xmlWriter = new XMLWriter(out);
+            xmlWriter.write(indexerDoc);
+            System.out.println(indexerDoc.asXML());
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            if (xmlWriter != null)
+                xmlWriter.close();
+        }
+
+        return out.toByteArray();
     }
 }

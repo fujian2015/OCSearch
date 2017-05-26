@@ -1,0 +1,61 @@
+{
+  "name": "testSchema10",
+  "rowkey_expression": "md5(phone,imsi)+‘|‘+phone+‘|‘+imsi",
+  "table_expression": "table+’_'+time",
+  "index_type": 0,
+  "content_fields": [
+    {
+      "name": "_root_",
+      "type": "text_gl"
+    }
+  ],
+  "inner_fields": [
+    {
+      "name": "basic",
+      "separator": ";",
+      "hbase_column": "1",
+      "hbase_family": "B"
+    }
+  ],
+  "query_fields": [
+    {
+      "name": "title",
+      "weight": 10
+    },
+    {
+      "name": "content",
+      "weight": 20
+    }
+  ],
+  "fields": [
+    {
+      "name": "length",
+      "indexed": true,
+      "index_stored": false,
+      "index_type": "int",
+      "store_type": "INT",
+      "content_field": "_root_",
+      "inner_field": "basic",
+      "inner_index": 0
+    },
+    {
+      "name": "title",
+      "indexed": true,
+      "index_stored": true,
+      "index_type": "text_gl",
+      "store_type": "STRING",
+      "content_field": "_root_",
+      "inner_field": "basic",
+      "inner_index": 1
+    },
+    {
+      "name": "content",
+      "indexed": true,
+      "index_stored": false,
+      "index_type": "text_gl",
+      "store_type": "STRING",
+      "hbase_column": "0",
+      "hbase_family": "B"
+    }
+  ]
+}

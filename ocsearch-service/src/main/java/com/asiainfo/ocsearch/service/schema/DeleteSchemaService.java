@@ -40,7 +40,7 @@ public class DeleteSchemaService extends OCSearchService {
                 throw new ServiceException(String.format("schema :%s  does not exist.", name), ErrorCode.SCHEMA_NOT_EXIST);
             }
 
-            if (metaDataHelper.schemaInUse(name) == false) {
+            if (metaDataHelper.schemaInUse(name) == true) {
                 throw new ServiceException(String.format("schema :%s  is in use.", name), ErrorCode.SCHEMA_IN_USE);
             }
 

@@ -155,7 +155,7 @@ public class MetaDataHelper implements OnReconnect {
 
     private Map<String, String> loadTables() throws KeeperException, InterruptedException {
 
-        if (null == this.zkclient.exists(this.tablePath, true))
+        if (!this.zkclient.exists(this.tablePath, true))
             this.zkclient.makePath(this.tablePath, CreateMode.PERSISTENT, true);
 
         Map<String, String> tableMap = new ConcurrentHashMap();

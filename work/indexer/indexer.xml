@@ -1,0 +1,10 @@
+<indexer table="GPRS__20170510" mapper="com.ngdata.hbaseindexer.parse.DefaultResultToSolrMapper"
+         table-name-field="_table_" read-row="never">
+    <param name="isProductionMode" value="true"/>
+    <field name="basic" source="value" value="B:1" type="com.ngdata.hbaseindexer.parse.InnerFieldArrayValueMapper">
+        <param name="_split_" value=";"/>
+        <param name="length" value="0:int"/>
+        <param name="title" value="1:string"/>
+    </field>
+    <field name="content" source="value" value="B:0" type="string"/>
+</indexer>

@@ -207,7 +207,7 @@ public class CreateSolrConfig implements AtomicOperation {
         fieldEle.add(new DefaultAttribute("indexed", String.valueOf(true)));
         fieldEle.add(new DefaultAttribute("stored", String.valueOf(false)));
         fieldEle.add(new DefaultAttribute("type", contentField.getType()));
-
+        fieldEle.add(new DefaultAttribute("multiValued", String.valueOf(true)));
         return fieldEle;
     }
 }

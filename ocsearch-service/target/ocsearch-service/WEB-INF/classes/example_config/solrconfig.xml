@@ -119,8 +119,8 @@
                         class="${solr.directoryFactory:solr.NRTCachingDirectoryFactory}"/>
     -->
     <directoryFactory name="DirectoryFactory" class="solr.HdfsDirectoryFactory">
-        <str name="solr.hdfs.home">hdfs://ochadoop19:8020/solr</str>
-        <str name="solr.hdfs.confdir">/etc/hadoop/2.5.0.0-1245/0/</str>
+        <str name="solr.hdfs.home">hdfs://yj01:8020/user/solr/</str>
+       <!-- <str name="solr.hdfs.confdir">/etc/hadoop/2.5.0.0-1245/0/</str>-->
         <bool name="solr.hdfs.blockcache.enabled">true</bool>
         <int name="solr.hdfs.blockcache.slab.count">1</int>
         <bool name="solr.hdfs.blockcache.direct.memory.allocation">true</bool>

@@ -58,13 +58,13 @@ public class IndexerService {
 
     /**
      * @param table
-     * @param confXml conf xml  absolute path
+     * @param indexerConf
      */
-    public void createTable(String table, String confXml) throws IndexerModelException, IndexerValidityException, IndexerExistsException {
+    public void createTable(String table,  byte[] indexerConf) throws IndexerModelException, IndexerValidityException, IndexerExistsException {
 
         IndexerDefinition indexer = null;
         try {
-            IndexerDefinitionBuilder builder = buildIndexerDefinition(table, confXml, null);
+            IndexerDefinitionBuilder builder = buildIndexerDefinition(table, indexerConf, null);
             indexer = builder.build();
         } catch (Exception e) {
             logger.error(e);
@@ -73,10 +73,56 @@ public class IndexerService {
     }
 
     /**
-     * @param table
+     * @param indexerName
      */
-    public void deleteTable(String table) throws IndexerModelException {
-        model.deleteIndexerInternal(table);
+    public void deleteTable(String indexerName) throws Exception{
+        try {
+            IndexerDefinition indexerDef = model.getIndexer(indexerName);
+
+            if (indexerDef.getLifecycleState() == IndexerDefinition.LifecycleState.DELETE_REQUESTED
+                    || indexerDef.getLifecycleState() == IndexerDefinition.LifecycleState.DELETING) {
+                System.err.printf("Delete of '%s' is already in progress\n", indexerName);
+                return;
+            }
+
+            IndexerDefinitionBuilder builder = new IndexerDefinitionBuilder();
+            builder.startFrom(indexerDef);
+            builder.lifecycleState(IndexerDefinition.LifecycleState.DELETE_REQUESTED);
+
+            model.updateIndexerInternal(builder.build());
+            waitForDeletion(indexerName);
+        } catch (Exception e){
+            throw e;
+        }
+
+    }
+
+    private void waitForDeletion(String indexerName) throws InterruptedException, KeeperException {
+        System.out.printf("Deleting indexer '%s'", indexerName);
+        while (model.hasIndexer(indexerName)) {
+            IndexerDefinition indexerDef;
+            try {
+                indexerDef = model.getFreshIndexer(indexerName);
+            } catch (IndexerNotFoundException e) {
+                // The indexer was deleted between the call to hasIndexer and getIndexer, that's ok
+                break;
+            }
+
+            switch (indexerDef.getLifecycleState()) {
+                case DELETE_FAILED:
+                    System.err.println("\nDelete failed");
+                    return;
+                case DELETE_REQUESTED:
+                case DELETING:
+                    System.out.print(".");
+                    Thread.sleep(500);
+                    continue;
+                default:
+                    throw new IllegalStateException("Illegal lifecycle state while deleting: "
+                            + indexerDef.getLifecycleState());
+            }
+        }
+        System.out.printf("\nDeleted indexer '%s'\n", indexerName);
     }
 
     public boolean exists(String table) {
@@ -89,7 +135,7 @@ public class IndexerService {
         Closer.close(zk);
     }
 
-    private IndexerDefinitionBuilder buildIndexerDefinition(String indexerName, String confXml, IndexerDefinition oldIndexerDef)
+    private IndexerDefinitionBuilder buildIndexerDefinition(String indexerName,  byte[] indexerConf, IndexerDefinition oldIndexerDef)
             throws IOException {
 
         IndexerDefinitionBuilder builder = new IndexerDefinitionBuilder();
@@ -109,8 +155,6 @@ public class IndexerService {
 
         builder.indexerComponentFactory(defaultFactory);
 
-        byte[] indexerConf = getIndexerConf(indexerName, confXml);
-
         if (indexerConf != null)
             builder.configuration(indexerConf);
 
@@ -127,7 +171,26 @@ public class IndexerService {
         return paramas;
     }
 
+    private void connectWithZooKeeper() throws Exception {
 
+        int zkSessionTimeout = HBaseIndexerConfiguration.getSessionTimeout(conf);
+        zk = new StateWatchingZooKeeper(zkConnectString, zkSessionTimeout);
+
+        final String zkRoot = conf.get("hbaseindexer.zookeeper.znode.parent");
+
+        boolean indexerNodeExists = zk.retryOperation(new ZooKeeperOperation<Boolean>() {
+            @Override
+            public Boolean execute() throws KeeperException, InterruptedException {
+                return zk.exists(zkRoot, false) != null;
+            }
+        });
+
+        if (!indexerNodeExists) {
+            throw new Exception("WARNING: No " + zkRoot + " node found in ZooKeeper.");
+        }
+    }
+
+    @Deprecated
     private byte[] getIndexerConf(String name, String confXml) throws IOException {
 
         Document indexerDoc = DocumentHelper.createDocument();
@@ -164,24 +227,5 @@ public class IndexerService {
         }
 
         return out.toByteArray();
-    }
-
-    private void connectWithZooKeeper() throws Exception {
-
-        int zkSessionTimeout = HBaseIndexerConfiguration.getSessionTimeout(conf);
-        zk = new StateWatchingZooKeeper(zkConnectString, zkSessionTimeout);
-
-        final String zkRoot = conf.get("hbaseindexer.zookeeper.znode.parent");
-
-        boolean indexerNodeExists = zk.retryOperation(new ZooKeeperOperation<Boolean>() {
-            @Override
-            public Boolean execute() throws KeeperException, InterruptedException {
-                return zk.exists(zkRoot, false) != null;
-            }
-        });
-
-        if (!indexerNodeExists) {
-            throw new Exception("WARNING: No " + zkRoot + " node found in ZooKeeper.");
-        }
     }
 }

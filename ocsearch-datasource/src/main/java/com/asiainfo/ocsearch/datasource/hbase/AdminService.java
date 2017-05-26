@@ -4,7 +4,6 @@ import com.asiainfo.ocsearch.datasource.hbase.util.RegionSplitsUtil;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.util.Set;
@@ -21,7 +20,7 @@ public class AdminService extends AbstractService {
         if (regions == -1) {
             createTable(tableName, columnFamilies, (byte[][]) null);
         } else {
-            createTable(tableName, columnFamilies, RegionSplitsUtil.splits(regions-1));
+            createTable(tableName, columnFamilies, RegionSplitsUtil.splits(regions - 1));
         }
     }
 
@@ -38,19 +37,21 @@ public class AdminService extends AbstractService {
 
     private boolean createTable(String tableName, Set<String> columnFamilies, byte[][] regionSplits) {
 
-        return execute(admin->{
+        return execute(admin -> {
 
             HTableDescriptor tableDesc = new HTableDescriptor(TableName.valueOf(tableName));
 
-            tableDesc.setDurability(Durability.SKIP_WAL);
+//            tableDesc.setDurability(Durability.USE_DEFAULT);
             //maxVersions
             //CompressionType
             //setBloomFilterType
             //setBlockCacheEnabled
+//            tableDesc.setConfiguration("REPLICATION_SCOPE","1");
             for (String columnFamily : columnFamilies) {
 
                 HColumnDescriptor cd = new HColumnDescriptor(columnFamily);
-
+               if(columnFamily.equals("B"))
+                   cd.setScope(1);
                 tableDesc.addFamily(cd);
             }
 
@@ -58,7 +59,7 @@ public class AdminService extends AbstractService {
                 admin.createTable(tableDesc);
             else
                 admin.createTable(tableDesc, regionSplits);
-           return true;
+            return true;
         });
     }
 

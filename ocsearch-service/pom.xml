@@ -34,6 +34,11 @@
             <artifactId>ocsearch-datasource</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.asiainfo</groupId>
+            <artifactId>ocsearch-expression</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

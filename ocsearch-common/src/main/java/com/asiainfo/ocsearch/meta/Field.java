@@ -59,7 +59,7 @@ public class Field implements Serializable {
             //inner field and index
             if (field.has("inner_field"))
                 this.innerField = field.get("inner_field").asText();
-            if (field.has("innner_index"))
+            if (field.has("inner_index"))
                 this.innerIndex = field.get("inner_index").asInt();
 
             this.indexed = field.get("indexed").asBoolean();
@@ -238,8 +238,8 @@ public class Field implements Serializable {
         return innerIndex;
     }
 
-    public void setInerIndex(int innnerIndex) {
-        this.innerIndex = innnerIndex;
+    public void setInnerIndex(int innerIndex) {
+        this.innerIndex = innerIndex;
     }
 
     public boolean isIndexContented() {

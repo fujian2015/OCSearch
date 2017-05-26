@@ -144,7 +144,7 @@ public class Schema implements Serializable {
                 if (!innerMap.containsKey(innerField.name))
                     throw new ServiceException("inner field " + innerField.getName() + " never be used in field list ", ErrorCode.PARSE_ERROR);
                 for (Field f : innerMap.get(innerField.name)) {
-                    f.setInerIndex(order++);
+                    f.setInnerIndex(order++);
                 }
             }
         } else {

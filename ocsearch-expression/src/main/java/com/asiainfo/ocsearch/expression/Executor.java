@@ -15,7 +15,7 @@ public class Executor {
         this.jexlExpression = jexlExpression;
     }
 
-    public String evaluate(Map<String, Object> map) {
-        return (String) jexlExpression.evaluate(new MapContext(map));
+    public Object evaluate(Map<String, Object> map) {
+        return jexlExpression.evaluate(new MapContext(map));
     }
 }

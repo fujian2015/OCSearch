@@ -58,9 +58,8 @@ public class CreateTableService extends OCSearchService {
 
             schema.getFields().values().stream()
                     .filter(field -> field.getInnerField()==null)
-                    .map(field -> families.add(field.getHbaseFamily()));
-
-            schema.getInnerFields().values().stream().map(innerField ->families.add(innerField.getHbaseFamily()));
+                    .forEach(field -> families.add(field.getHbaseFamily()));
+            schema.getInnerFields().values().stream().forEach(innerField ->families.add(innerField.getHbaseFamily()));
 
             transaction.add(new CreateHbaseTable(name, table.getHbaseRegions(), table.getRegionSplits(), families));
 

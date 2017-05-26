@@ -3,7 +3,6 @@ package com.asiainfo.ocsearch.transaction.atomic.table;
 import com.asiainfo.ocsearch.datasource.indexer.IndexerService;
 import com.asiainfo.ocsearch.datasource.indexer.IndexerServiceManager;
 import com.asiainfo.ocsearch.transaction.atomic.AtomicOperation;
-import com.ngdata.hbaseindexer.model.api.IndexerModelException;
 import org.apache.log4j.Logger;
 
 /**
@@ -27,7 +26,7 @@ public class DeleteIndexerTable implements AtomicOperation {
             if (indexerService.exists(table))
                 indexerService.deleteTable(table);
             log.info("delete indexer table " + table + " success!");
-        } catch (IndexerModelException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return true;

@@ -43,11 +43,11 @@ public class GetService extends QueryService {
 
             ArrayNode returnNode = (ArrayNode) request.get("return_fields");
 
-            HbaseQuery hbaseQuery = new HbaseQuery(schema, table, generateReturnFields(schema, returnNode));
+            HbaseQuery hbaseQuery = new HbaseQuery(schema, table, generateReturnFields(schema, returnNode), ids);
 
             CountDownLatch runningThreadNum = new CountDownLatch(1);
 
-            QueryActor queryActor = new GetQueryActor(hbaseQuery, ids, runningThreadNum);
+            QueryActor queryActor = new GetQueryActor(hbaseQuery, runningThreadNum);
 
             ThreadPoolManager.getExecutor("getQuery").submit(queryActor);
 
@@ -62,7 +62,15 @@ public class GetService extends QueryService {
 
                 data.put("total", result.getTotal());
 
-                data.put("docs", result.getData());
+                ArrayNode docs = JsonNodeFactory.instance.arrayNode();
+                ids.forEach(id -> {
+                    ObjectNode node = result.getData().remove(0);
+                    if (node.get("id") == null)
+                        node.put("id", id);
+                    node.put("_table_", table);
+                    docs.add(node);
+                });
+                data.put("docs", docs);
 
                 return data;
             }

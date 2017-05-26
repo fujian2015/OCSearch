@@ -7,6 +7,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.node.JsonNodeFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +20,10 @@ public class GetQueryActor extends QueryActor {
 
     static Logger logger = Logger.getLogger(GetQueryActor.class);
 
-    List<String> rowKeys;
 
-    public GetQueryActor(HbaseQuery hbaseQuery, List<String> rowKeys,CountDownLatch runningThreadNum) {
+    public GetQueryActor(HbaseQuery hbaseQuery,CountDownLatch runningThreadNum) {
         super(hbaseQuery,runningThreadNum);
-        this.rowKeys = rowKeys;
+
     }
 
     @Override
@@ -31,34 +31,41 @@ public class GetQueryActor extends QueryActor {
         try {
             GetService getService = HbaseServiceManager.getInstance().getGetService();
 
-            List<Pair<byte[], byte[]>> columnFamiles = this.hbaseQuery.getColumns();
+            List<Pair<byte[], byte[]>> columnFamilies = this.hbaseQuery.getColumns();
 
-            if (rowKeys.size() == 1) {
+           List<String> rowKeys= this.hbaseQuery.getRowKeys();
+            if (this.hbaseQuery.getRowKeys().size() == 1) {
                 Get get = new Get(Bytes.toBytes(rowKeys.get(0)));
                 get.setCacheBlocks(true);
-                columnFamiles.forEach(column -> get.addColumn(column.getFirst(), column.getSecond()));
+                columnFamilies.forEach(column -> get.addColumn(column.getFirst(), column.getSecond()));
                 Result result = getService.getResult(hbaseQuery.table, get);
                 this.queryResult.addData(hbaseQuery.extractResult(result));
-
             } else {
                 List<Get> gets = new ArrayList<>(rowKeys.size());
                 rowKeys.forEach(rowkey -> {
                     Get get = new Get(Bytes.toBytes(rowkey));
                     gets.add(get);
                     get.setCacheBlocks(true);
-                    columnFamiles.forEach(column -> get.addColumn(column.getFirst(), column.getSecond()));
+                    columnFamilies.forEach(column -> get.addColumn(column.getFirst(), column.getSecond()));
                 });
 
                 Result[] results = getService.getList(hbaseQuery.table, gets);
                 for (Result result : results) {
-                    if (result != null) {
+                    if (result != null&&!result.isEmpty()) {
                         this.queryResult.addData(hbaseQuery.extractResult(result));
+                    }
+                    else{
+                        this.queryResult.addData(JsonNodeFactory.instance.objectNode());
                     }
                 }
             }
+            this.queryResult.setTotal(queryResult.getData().size());
+
         } catch (Exception e) {
             logger.error("occur error in get query,exceptions:", e);
             this.queryResult.setLastError(e);
+        }finally {
+            runningThreadNum.countDown();
         }
 
     }

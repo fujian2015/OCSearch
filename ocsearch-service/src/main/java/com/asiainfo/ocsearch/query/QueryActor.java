@@ -7,7 +7,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public abstract class QueryActor implements Runnable {
 
-    QueryResult queryResult;
+    QueryResult queryResult=new QueryResult();
 
     HbaseQuery hbaseQuery;
 

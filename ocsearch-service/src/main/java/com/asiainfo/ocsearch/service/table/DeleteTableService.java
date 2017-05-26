@@ -26,7 +26,7 @@ public class DeleteTableService extends OCSearchService {
     Logger log = Logger.getLogger(getClass());
 
     @Override
-    protected byte[] doService(JsonNode request) throws ServiceException {
+    public byte[] doService(JsonNode request) throws ServiceException {
         String uuid = getRequestId();
         try {
             stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());

@@ -147,7 +147,7 @@
     
     <property>
       <name>hbase.rootdir</name>
-      <value>hdfs://ochadoop19.jcloud.local:8020/apps/hbase/data</value>
+      <value>hdfs://yj01:8020/apps/hbase/data</value>
     </property>
     
     <property>
@@ -187,7 +187,7 @@
     
     <property>
       <name>hbase.zookeeper.quorum</name>
-      <value>ochadoop19.jcloud.local,ochadoop20.jcloud.local</value>
+      <value>yj03,yj02,yj01</value>
     </property>
     
     <property>
@@ -233,16 +233,6 @@
     <property>
       <name>zookeeper.znode.parent</name>
       <value>/hbase-unsecure</value>
-    </property>
-    
-    <property>
-      <name>zookeeper.znode.replication</name>
-      <value>replication</value>
-    </property>
-    
-    <property>
-      <name>zookeeper.znode.replication.peers</name>
-      <value>peers</value>
     </property>
     
   </configuration>

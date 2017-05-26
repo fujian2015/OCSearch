@@ -1,8 +1,9 @@
 package com.asiainfo.ocsearch.query;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by mac on 2017/5/16.
@@ -10,13 +11,14 @@ import org.codehaus.jackson.node.JsonNodeFactory;
 public class QueryResult {
 
     int total = 0;
-   ArrayNode data = JsonNodeFactory.instance.arrayNode();
+    List<ObjectNode> data = new ArrayList<>();
 
-    Exception lastError=null;
+    Exception lastError = null;
 
-    public void addData(JsonNode jsonNode) {
+    String nextRowkey;
+
+    public void addData(ObjectNode jsonNode) {
         data.add(jsonNode);
-        total++;
     }
 
     public void setTotal(int total) {
@@ -27,11 +29,11 @@ public class QueryResult {
         return total;
     }
 
-    public ArrayNode getData() {
+    public List<ObjectNode> getData() {
         return data;
     }
 
-    public void setData(ArrayNode data) {
+    public void setData(List<ObjectNode> data) {
         this.data = data;
     }
 
@@ -41,5 +43,13 @@ public class QueryResult {
 
     public void setLastError(Exception lastError) {
         this.lastError = lastError;
+    }
+
+    public String getLastRowkey() {
+        return nextRowkey;
+    }
+
+    public void setnextRowkey(String lastRowkey) {
+        this.nextRowkey = lastRowkey;
     }
 }

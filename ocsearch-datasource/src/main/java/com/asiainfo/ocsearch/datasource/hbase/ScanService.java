@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by mac on 2017/4/19.
  */
-public class ScanService extends AbstractService{
+public class ScanService extends AbstractService {
 
     Logger log = Logger.getLogger(getClass());
 
@@ -23,22 +23,23 @@ public class ScanService extends AbstractService{
 
     public List<Result> queryWithScan(final String tableName, final Scan scan) {
 
-        List<Result> results = new ArrayList<>();
-        ResultScanner scanner = null;
-        try {
-            scanner = getTable(tableName).getScanner(scan);
-            for (Result result : scanner) {
-                results.add(result);
+        return execute(tableName, htable -> {
+            List<Result> results = new ArrayList<>();
+            ResultScanner scanner = null;
+            try {
+                scanner = htable.getScanner(scan);
+                for (Result result : scanner) {
+                    results.add(result);
+                }
+            } catch (IOException e) {
+                throw  e;
+            } finally {
+                if (scanner != null) {
+                    scanner.close();
+                }
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Exception occured in executeWithScan method, tableName=" + tableName + "\n scan=" + scan + "\n", e);
-
-        } finally {
-            if (scanner != null) {
-                scanner.close();
-            }
-        }
-        return results;
+            return results;
+        });
 
     }
 

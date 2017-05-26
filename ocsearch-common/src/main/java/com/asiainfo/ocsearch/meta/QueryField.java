@@ -18,6 +18,22 @@ public class QueryField implements Serializable {
         this.weight = jsonNode.get("weight").getIntValue();
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
+    }
+
     String name;
     int weight;
 
