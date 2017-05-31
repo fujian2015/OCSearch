@@ -85,7 +85,7 @@ public class HbaseQuery {
             String file = null;
             if (name.contains(":")) {
                 name = name.substring(0, name.indexOf(":"));
-                file = name.substring(name.indexOf(":" + 1));
+                file = name.substring(name.indexOf(":")+1);
             }
             Field field = fields.get(name);
 
@@ -93,7 +93,7 @@ public class HbaseQuery {
                 byte[] hbaseFamily = Bytes.toBytes(field.getHbaseFamily());
                 byte[] hbaseColumn = Bytes.toBytes(file);
                 columns.add(new Pair(hbaseFamily, hbaseColumn));
-                kvMap.put(field.getHbaseFamily(), file, name);
+                kvMap.put(field.getHbaseFamily(), file, name+":"+file);
                 continue;
             }
             String inf = field.getInnerField();
@@ -127,7 +127,9 @@ public class HbaseQuery {
 
         ObjectNode data = JsonNodeFactory.instance.objectNode();
 
-        data.put("id", Bytes.toString(result.getRow()));
+        String id= Bytes.toString(result.getRow());
+
+        data.put("id",id);
 
         Map<String, Field> fields = schema.getFields();
 
@@ -159,14 +161,14 @@ public class HbaseQuery {
                             String names = Bytes.toString(valueArray);
                             for (String n : names.split(",")) {
                                 if (returnFields.contains(n)) {
-                                    data.put(n, generateFilelUrl(table, n, n));
+                                    data.put(n, generateFilelUrl(table,id, n, n));
                                 }
                             }
                             break;
                         case ATTACHMENT:
                             ArrayNode attachNode = JsonNodeFactory.instance.arrayNode();
                             for (String file : Bytes.toString(valueArray).split(",")) {
-                                attachNode.add(generateFilelUrl(table, name, file));
+                                attachNode.add(generateFilelUrl(table, id,name, file));
                             }
                             data.put(name, attachNode);
                             break;
@@ -210,8 +212,8 @@ public class HbaseQuery {
         return data;
     }
 
-    private String generateFilelUrl(String table, String field, String file) {
-        return "&table=" + table + "&field=" + field + "&file=" + file;
+    private String generateFilelUrl(String table,  String id,String field,String file) {
+        return new FileID(table,field+":"+file,id).toString();
     }
 
 

@@ -5,6 +5,7 @@ import com.asiainfo.ocsearch.datasource.hbase.HbaseServiceManager;
 import com.asiainfo.ocsearch.datasource.hbase.ScanService;
 import com.asiainfo.ocsearch.expression.Engine;
 import com.asiainfo.ocsearch.expression.Executor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -34,7 +35,7 @@ public class ScanQueryActor extends QueryActor {
     @Override
     public void run() {
         try {
-            ScanService scanService = HbaseServiceManager.getInstance().getScanService();
+
 
             List<Pair<byte[], byte[]>> columns = this.hbaseQuery.getColumns();
 
@@ -46,65 +47,11 @@ public class ScanQueryActor extends QueryActor {
             scan.setBatch(Integer.parseInt(OCSearchEnv.getEnvValue("query.batch.size", "1000")));//一次传送会多少列
             scan.setCaching(Integer.parseInt(OCSearchEnv.getEnvValue("query.cache.size", "100")));//一次传送多少行
 
-            Executor ee = Engine.getInstance().createExecutor(hbaseQuery.condition);
-
-
-            List<ObjectNode> resultSet = scanService.execute(this.hbaseQuery.table, htable -> {
-                List<ObjectNode> results = new ArrayList<>();
-                ResultScanner scanner = null;
-                int count = 0;
-                try {
-                    scanner = htable.getScanner(scan);
-                    if (hbaseQuery.needTotal) {
-                        for (Result result : scanner) {
-                            Map<String, Object> dataMap = this.hbaseQuery.extractResult2Map(result);
-                            try {
-                                if (ee.evaluate(dataMap).equals(true)) {
-                                    count++;
-                                    if (count <= hbaseQuery.limit) {
-                                        results.add(this.hbaseQuery.extractResult(result));
-                                    } else if (count == hbaseQuery.limit + 1) {
-                                        this.queryResult.setnextRowkey(Bytes.toString(result.getRow()));
-                                    }
-                                }
-                            } catch (Exception e) {
-                                continue;
-                            }
-                        }
-                        queryResult.setTotal(count);
-                    } else {
-                        for (Result result : scanner) {
-                            Map<String, Object> dataMap = this.hbaseQuery.extractResult2Map(result);
-                            try {
-                                if (ee.evaluate(dataMap).equals(true)) {
-                                    count++;
-                                    if (count <= hbaseQuery.getSkip()) {
-                                        continue;
-                                    } else if (count > hbaseQuery.limit + hbaseQuery.skip) {
-                                        this.queryResult.setnextRowkey(Bytes.toString(result.getRow()));
-                                        break;
-                                    } else {
-                                        results.add(this.hbaseQuery.extractResult(result));
-                                    }
-                                }
-                            } catch (Exception e) {
-                                continue;
-                            }
-                        }
-                        queryResult.setTotal(results.size());
-                    }
-
-                } catch (IOException e) {
-                    throw e;
-                } finally {
-                    if (scanner != null) {
-                        scanner.close();
-                    }
-                }
-                return results;
-            });
-
-            resultSet.forEach(result -> this.queryResult.addData(result));
+            if (StringUtils.isBlank(hbaseQuery.condition)) {
+                executeWithoutCondition(scan);
+            } else {
+                executeWithCondition(scan);
+            }
 
         } catch (Exception e) {
             logger.error("occur error in scan query,exceptions:", e);
@@ -112,6 +59,117 @@ public class ScanQueryActor extends QueryActor {
         } finally {
             runningThreadNum.countDown();
         }
+    }
+
+    private void executeWithCondition(Scan scan) {
+
+        ScanService scanService = HbaseServiceManager.getInstance().getScanService();
+        Executor ee = Engine.getInstance().createExecutor(hbaseQuery.condition);
+
+        List<ObjectNode> resultSet = scanService.execute(this.hbaseQuery.table, htable -> {
+            List<ObjectNode> results = new ArrayList<>();
+            ResultScanner scanner = null;
+            int count = 0;
+            try {
+                scanner = htable.getScanner(scan);
+                if (hbaseQuery.needTotal) {
+                    for (Result result : scanner) {
+                        Map<String, Object> dataMap = this.hbaseQuery.extractResult2Map(result);
+                        try {
+                            if (ee.evaluate(dataMap).equals(true)) {
+                                count++;
+                                if (count <= hbaseQuery.limit) {
+                                    results.add(this.hbaseQuery.extractResult(result));
+                                } else if (count == hbaseQuery.limit + 1) {
+                                    this.queryResult.setnextRowkey(Bytes.toString(result.getRow()));
+                                }
+                            }
+                        } catch (Exception e) {
+                            continue;
+                        }
+                    }
+                    queryResult.setTotal(count);
+                } else {
+                    for (Result result : scanner) {
+                        Map<String, Object> dataMap = this.hbaseQuery.extractResult2Map(result);
+                        try {
+                            if (ee.evaluate(dataMap).equals(true)) {
+                                count++;
+                                if (count <= hbaseQuery.getSkip()) {
+                                    continue;
+                                } else if (count > hbaseQuery.limit + hbaseQuery.skip) {
+                                    this.queryResult.setnextRowkey(Bytes.toString(result.getRow()));
+                                    break;
+                                } else {
+                                    results.add(this.hbaseQuery.extractResult(result));
+                                }
+                            }
+                        } catch (Exception e) {
+                            continue;
+                        }
+                    }
+                    queryResult.setTotal(results.size());
+                }
+
+            } catch (IOException e) {
+                throw e;
+            } finally {
+                if (scanner != null) {
+                    scanner.close();
+                }
+            }
+            return results;
+        });
+        resultSet.forEach(result -> this.queryResult.addData(result));
+    }
+
+    private void executeWithoutCondition(Scan scan) {
+        ScanService scanService = HbaseServiceManager.getInstance().getScanService();
+        List<ObjectNode> resultSet = scanService.execute(this.hbaseQuery.table, htable -> {
+            List<ObjectNode> results = new ArrayList<>();
+            ResultScanner scanner = null;
+            int count = 0;
+            try {
+                scanner = htable.getScanner(scan);
+                if (hbaseQuery.needTotal) {
+                    for (Result result : scanner) {
+                        Map<String, Object> dataMap = this.hbaseQuery.extractResult2Map(result);
+
+                        count++;
+                        if (count <= hbaseQuery.limit) {
+                            results.add(this.hbaseQuery.extractResult(result));
+                        } else if (count == hbaseQuery.limit + 1) {
+                            this.queryResult.setnextRowkey(Bytes.toString(result.getRow()));
+                        }
+
+                    }
+                    queryResult.setTotal(count);
+                } else {
+                    for (Result result : scanner) {
+
+                        count++;
+                        if (count <= hbaseQuery.getSkip()) {
+                            continue;
+                        } else if (count > hbaseQuery.limit + hbaseQuery.skip) {
+                            this.queryResult.setnextRowkey(Bytes.toString(result.getRow()));
+                            break;
+                        } else {
+                            results.add(this.hbaseQuery.extractResult(result));
+                        }
+                    }
+                    queryResult.setTotal(results.size());
+                }
+
+            } catch (IOException e) {
+                throw e;
+            } finally {
+                if (scanner != null) {
+                    scanner.close();
+                }
+            }
+            return results;
+        });
+        resultSet.forEach(result -> this.queryResult.addData(result));
     }
 
 }

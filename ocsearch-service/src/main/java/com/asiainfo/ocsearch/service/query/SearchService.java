@@ -7,7 +7,6 @@ import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.listener.ThreadPoolManager;
 import com.asiainfo.ocsearch.meta.QueryField;
 import com.asiainfo.ocsearch.meta.Schema;
-import com.asiainfo.ocsearch.metahelper.MetaDataHelper;
 import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.query.GetQueryActor;
 import com.asiainfo.ocsearch.query.HbaseQuery;
@@ -47,10 +46,8 @@ public class SearchService extends QueryService {
 
             String cacheKey = generateCacheKey(qs, condition, tableSet);
 
-            ArrayNode returnNode = (ArrayNode) request.get("return_fields");
-
             String cacheStartKey = start + "|" + rows;
-            Map<String, String> cacheValue = null;
+            Map<String, String> cacheValue;
             try {
                 cacheValue = CacheManager.getCache().get(cacheKey, Arrays.asList("total", cacheStartKey));
             } catch (Exception e) {
@@ -61,8 +58,11 @@ public class SearchService extends QueryService {
             List<OCRowKey> rowKeys = new ArrayList<>(rows);
 
             final Map<String, List<String>> rowKeyMap = new HashMap<>();
+            String tableFirst = tableSet.iterator().next();
+            Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(tableFirst);
 
             if (cacheValue.containsKey("total") && cacheValue.containsKey(cacheStartKey)) {
+                //get ids from cache
                 ArrayNode keyNode = (ArrayNode) new ObjectMapper().readTree(cacheValue.get(cacheStartKey));
                 keyNode.forEach(node -> {
                     String rs[] = StringUtils.split(node.asText(), "||");
@@ -73,12 +73,9 @@ public class SearchService extends QueryService {
                 });
                 total = Integer.parseInt(cacheValue.get("total"));
             } else {
-
-                String tableFirst = tableSet.iterator().next();
-                Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(tableFirst);
-
+                //get ids from solr
                 SolrQuery solrQuery = constructQuery(start, rows, qs, condition, sort, tableSet, schema.getQueryFields());
-                System.err.println("solr query is:"+solrQuery.toString());
+                System.err.println("solr query is:" + solrQuery.toString());
                 SolrDocumentList solrResults = SolrServerManager.getInstance().query(tableFirst, solrQuery);
 
                 total = (int) solrResults.getNumFound();
@@ -93,36 +90,42 @@ public class SearchService extends QueryService {
                 });
             }
 
-            MetaDataHelper metaDataHelper = MetaDataHelperManager.getInstance();
-
-            Schema schema = null;
-
-            CountDownLatch runningThreadNum = new CountDownLatch(rowKeyMap.keySet().size());
-
-            Map<String, QueryActor> actors = new HashMap<>();
-            for (String table : rowKeyMap.keySet()) {
-                schema = metaDataHelper.getSchemaByTable(table);
-
-                HbaseQuery hbaseQuery = new HbaseQuery(schema, table, generateReturnFields(schema, returnNode), rowKeyMap.get(table));
-
-                QueryActor queryActor = new GetQueryActor(hbaseQuery, runningThreadNum);
-
-                ThreadPoolManager.getExecutor("getQuery").submit(queryActor);
-
-                actors.put(table, queryActor);
-            }
-            runningThreadNum.await();
+            Set<String> returnFields = generateReturnFields(schema, (ArrayNode) request.get("return_fields"));
 
             ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
-            for (OCRowKey rowKey : rowKeys) {
-                ObjectNode data = actors.get(rowKey.table).getQueryResult().getData().remove(0);
-                if (data.get("id") == null) {
-                    data.put("id", rowKey.rowKey);
-                }
-                data.put("_table_", rowKey.table);
-                arrayNode.add(data);
-            }
+            if (returnFields.isEmpty()) {
+                //need id only
+                rowKeys.forEach(ocRowKey -> {
+                    ObjectNode doc = JsonNodeFactory.instance.objectNode();
+                    doc.put("id", ocRowKey.rowKey);
+                    doc.put("_table_", ocRowKey.table);
+                    arrayNode.add(doc);
+                });
+            } else {
+                //read data from hbase
+                CountDownLatch runningThreadNum = new CountDownLatch(rowKeyMap.keySet().size());
 
+                Map<String, QueryActor> actors = new HashMap<>();
+                for (String table : rowKeyMap.keySet()) {
+
+                    HbaseQuery hbaseQuery = new HbaseQuery(schema, table, returnFields, rowKeyMap.get(table));
+
+                    QueryActor queryActor = new GetQueryActor(hbaseQuery, runningThreadNum);
+
+                    ThreadPoolManager.getExecutor("getQuery").submit(queryActor);
+
+                    actors.put(table, queryActor);
+                }
+                runningThreadNum.await();
+                for (OCRowKey rowKey : rowKeys) {
+                    ObjectNode data = actors.get(rowKey.table).getQueryResult().getData().remove(0);
+                    if (data.get("id") == null) {
+                        data.put("id", rowKey.rowKey);
+                    }
+                    data.put("_table_", rowKey.table);
+                    arrayNode.add(data);
+                }
+            }
 
             //cache put
             Map<String, String> caches = new HashMap<>();

@@ -13,6 +13,7 @@ import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
 import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ObjectNode;
 
 /**
  * Created by mac on 2017/3/21.
@@ -28,6 +29,9 @@ public class AddSchemaService extends OCSearchService {
         try {
 
             stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());
+
+            ((ObjectNode) request).put("request", true);
+
             Schema tableSchema = new Schema(request);
 
             if (MetaDataHelperManager.getInstance().hasSchema(tableSchema.getName())) {

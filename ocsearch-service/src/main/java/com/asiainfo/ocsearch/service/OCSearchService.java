@@ -81,6 +81,7 @@ public abstract class OCSearchService extends HttpServlet {
             throws ServletException, IOException {
         String id = getRequestId();
         long start = System.currentTimeMillis();
+        log.info("start request:" + id);
         try {
             Map<String, String[]> params = request.getParameterMap();
             ObjectNode jsonNode = new ObjectMapper().createObjectNode();

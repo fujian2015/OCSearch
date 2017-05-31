@@ -12,18 +12,16 @@ public class ScanServiceTest {
     public void testQuery() throws Exception {
         new SystemListener().initAll();
         String request = "{\n" +
-                "    \"row\": \"content\",\n" +
                 "    \"start\": 0,\n" +
                 "    \"rows\": 60,\n" +
-                "    \"rowkey_prefix\": \"hahed\",\n" +
-                "    \"condition\": \"title=='content'\",\n" +
+                "    \"rowkey_prefix\": \"test\",\n" +
                 "    \"tables\": [\n" +
-                "        \"GPRS__20170510\"\n" +
+                "        \"file__table\"\n" +
                 "    ],\n" +
                 "    \"return_fields\": [\n" +
-                "        \"title\"\n" +
                 "    ]\n" +
                 "}";
+        System.out.println(request);
         System.out.println(new ScanService().query(new ObjectMapper().readTree(request)));
     }
 

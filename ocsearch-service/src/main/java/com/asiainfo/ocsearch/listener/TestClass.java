@@ -2,8 +2,6 @@ package com.asiainfo.ocsearch.listener;
 
 import com.asiainfo.ocsearch.datasource.indexer.IndexerServiceManager;
 import com.asiainfo.ocsearch.meta.Schema;
-import com.asiainfo.ocsearch.service.schema.AddSchemaService;
-import com.asiainfo.ocsearch.service.table.CreateTableService;
 import com.asiainfo.ocsearch.transaction.atomic.AtomicOperation;
 import com.asiainfo.ocsearch.transaction.atomic.table.CreateIndexerTable;
 import com.asiainfo.ocsearch.utils.PropertiesLoadUtil;
@@ -22,7 +20,7 @@ public class TestClass {
 //        SolrServerManager.setUp(properties);
 //        DataSourceProvider.setUp(properties);
 
-        new SystemListener().initAll();
+//        new SystemListener().initAll();
         JsonNode jsonNode = new ObjectMapper().readTree("{\n" +
                 "\t\"request\":true,\n" +
                 "    \"name\": \"testSchema10\",\n" +
@@ -97,8 +95,8 @@ public class TestClass {
                 "        \"replicas\": 2\n" +
                 "    }\n" +
                 "}";
-
-        new CreateTableService().doService(new ObjectMapper().readTree(tableString));
+System.out.println(jsonNode);
+//        new CreateTableService().doService(new ObjectMapper().readTree(tableString));
 //        new DeleteTableService().doService(new ObjectMapper().readTree(tableString));
 //        new CreateIndexerTable("GPRS__20170510",schema).execute();
 //        Configuration conf = new Configuration();
@@ -128,77 +126,6 @@ public class TestClass {
 
     }
 
-    /**
-     * test
-     * @throws Exception
-     */
-    public static void testAddSchema() throws Exception {
 
-//        SolrServerManager.setUp(properties);
-//        DataSourceProvider.setUp(properties);
-
-        new SystemListener().initAll();
-        JsonNode jsonNode = new ObjectMapper().readTree("{\n" +
-                "\t\"request\":true,\n" +
-                "    \"name\": \"testSchema10\",\n" +
-                "    \"rowkey_expression\": \"md5(phone,imsi)+‘|‘+phone+‘|‘+imsi\",\n" +
-                "    \"table_expression\": \"table+’_'+time\",\n" +
-                "    \"index_type\": 0,\n" +
-                "    \"content_fields\": [\n" +
-                "        {\n" +
-                "            \"name\": \"_root_\",\n" +
-                "            \"type\": \"text_gl\"\n" +
-                "        }\n" +
-                "    ],\n" +
-                "    \"inner_fields\": [\n" +
-                "        {\n" +
-                "            \"name\": \"basic\",\n" +
-                "            \"separator\": \";\"\n" +
-                "        }\n" +
-                "    ],\n" +
-                "    \"query_fields\": [\n" +
-                "        {\n" +
-                "            \"name\": \"title\",\n" +
-                "            \"weight\": 10\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"name\": \"content\",\n" +
-                "            \"weight\": 20\n" +
-                "        }\n" +
-                "    ],\n" +
-                "    \"fields\": [\n" +
-                "        {\n" +
-                "            \"name\": \"length\",\n" +
-                "            \"indexed\": true,\n" +
-                "            \"index_stored\": false,\n" +
-                "            \"index_type\": \"int\",\n" +
-                "            \"store_type\": \"INT\",\n" +
-                "            \"content_field\": \"_root_\",\n" +
-                "            \"inner_field\": \"basic\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"name\": \"title\",\n" +
-                "            \"indexed\": true,\n" +
-                "            \"index_stored\": true,\n" +
-                "            \"index_type\": \"text_gl\",\n" +
-                "            \"store_type\": \"STRING\",\n" +
-                "            \"content_field\": \"_root_\",\n" +
-                "            \"inner_field\": \"basic\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"name\": \"content\",\n" +
-                "            \"indexed\": true,\n" +
-                "            \"index_stored\": false,\n" +
-                "            \"index_type\": \"text_gl\",\n" +
-                "            \"store_type\": \"STRING\"\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}");
-
-        Schema schema = new Schema(jsonNode);
-        new AddSchemaService().doService(jsonNode);
-//        new DeleteSchemaService().doService(jsonNode);
-
-    }
 
 }

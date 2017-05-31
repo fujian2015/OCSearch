@@ -34,7 +34,9 @@ public class ScanService extends QueryService {
         int total = 0;
         try {
             String rowKey = request.get("rowkey_prefix").asText();
-            String condition = request.get("condition").asText();
+            String condition = null;
+            if (request.has(condition))
+                condition = request.get("condition").asText();
 
             int start = request.get("start").asInt();
             int rows = request.get("rows").asInt();
@@ -243,7 +245,6 @@ public class ScanService extends QueryService {
         stopKey[stopKey.length - 1]++;
         return Bytes.toString(stopKey);
     }
-
 
 
 }

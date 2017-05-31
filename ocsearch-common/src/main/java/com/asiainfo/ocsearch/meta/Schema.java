@@ -104,6 +104,18 @@ public class Schema implements Serializable {
                     throw new ServiceException(checkResult, ErrorCode.PARSE_ERROR);
                 fillBlanks();
             }
+            else {
+                //initial inner map
+                for (Field field : this.fields.values()) {
+
+                    String innerField = field.getInnerField();
+
+                    if (innerField != null) {
+
+                        this.innerMap.put(innerField, field);
+                    }
+                }
+            }
 
 
         } catch (ServiceException se) {
