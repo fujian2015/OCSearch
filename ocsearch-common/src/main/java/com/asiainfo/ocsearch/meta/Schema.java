@@ -41,14 +41,13 @@ public class Schema implements Serializable {
 
     private Map<String, InnerField> innerFields = new HashMap<>();
 
-    private  Multimap<String, Field> innerMap = ArrayListMultimap.create();
+    private Multimap<String, Field> innerMap = ArrayListMultimap.create();
 
     public Schema(String name, String tableExpression, String rowkeyExpression) {
         this.name = name;
         this.tableExpression = tableExpression;
         this.rowkeyExpression = rowkeyExpression;
     }
-
 
 
     /**
@@ -103,8 +102,7 @@ public class Schema implements Serializable {
                 if (null != checkResult)
                     throw new ServiceException(checkResult, ErrorCode.PARSE_ERROR);
                 fillBlanks();
-            }
-            else {
+            } else {
                 //initial inner map
                 for (Field field : this.fields.values()) {
 
@@ -128,6 +126,15 @@ public class Schema implements Serializable {
     }
 
     private void fillBlanks() throws ServiceException {
+        //use the origin name when using phoenix sql
+        if (indexType == IndexType.PHOENIX) {
+            for (Field field : this.fields.values()) {
+                field.setHbaseFamily(BASIC_FAMILY);
+                field.setHbaseColumn(field.name);
+            }
+            return;
+        }
+
         List<Field> basicFields = new ArrayList<>();
         List<Field> fileFields = new ArrayList<>();
         List<Field> attachmentFields = new ArrayList<>();

@@ -3,6 +3,7 @@ package com.asiainfo.ocsearch.listener;
 import com.asiainfo.ocsearch.constants.OCSearchEnv;
 import com.asiainfo.ocsearch.datasource.hbase.HbaseServiceManager;
 import com.asiainfo.ocsearch.datasource.indexer.IndexerServiceManager;
+import com.asiainfo.ocsearch.datasource.jdbc.pool.DbPool;
 import com.asiainfo.ocsearch.datasource.mysql.MyBaseService;
 import com.asiainfo.ocsearch.datasource.solr.SolrServerManager;
 import com.asiainfo.ocsearch.meta.*;
@@ -180,6 +181,13 @@ public class SystemListener implements ServletContextListener {
         if (!hbaseOnly) {
             SolrServerManager.setUp(properties);
             IndexerServiceManager.setUp(properties);
+        }
+        //initial phoenix connection pool
+        boolean usePhoenix = Boolean.valueOf(OCSearchEnv.getEnvValue("USE_PHOENIX"));
+        if (usePhoenix) {
+            Properties hbase = PropertiesLoadUtil.loadXmlFile("hbase-site.xml");
+            Properties druid = PropertiesLoadUtil.loadProFile("druid.properties");
+            DbPool.setUp(druid, hbase);
         }
 
         int processPeriod = Integer.parseInt(OCSearchEnv.getEnvValue("TRANSACTION_PROCESS_PERIOD", "10"));

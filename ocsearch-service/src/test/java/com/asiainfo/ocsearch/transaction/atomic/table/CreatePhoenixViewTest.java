@@ -1,27 +1,24 @@
-package com.asiainfo.ocsearch.service.schema;
+package com.asiainfo.ocsearch.transaction.atomic.table;
 
-import com.asiainfo.ocsearch.listener.SystemListener;
+import com.asiainfo.ocsearch.datasource.jdbc.pool.DbPool;
 import com.asiainfo.ocsearch.meta.Schema;
+import com.asiainfo.ocsearch.utils.PropertiesLoadUtil;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.Test;
 
+import java.util.Properties;
+
 /**
- * Created by mac on 2017/5/31.
+ * Created by mac on 2017/6/1.
  */
-public class AddSchemaServiceTest {
+public class CreatePhoenixViewTest {
     @Test
-    public void testQuery() throws Exception {
-        testAddSchema();
+    public void testExecute() throws Exception {
 
-    }
-
-    public static void testAddSchema() throws Exception {
-
-        new SystemListener().initAll();
         JsonNode jsonNode = new ObjectMapper().readTree("{\n" +
                 "   \"request\":true,\n" +
-                "    \"name\": \"phoenixSchema\",\n" +
+                "    \"name\": \"testSchema10\",\n" +
                 "    \"rowkey_expression\": \"md5(phone,imsi)+‘|‘+phone+‘|‘+imsi\",\n" +
                 "    \"table_expression\": \"table+’_'+time\",\n" +
                 "    \"index_type\": 2,\n" +
@@ -57,11 +54,14 @@ public class AddSchemaServiceTest {
                 "        }\n" +
                 "    ]\n" +
                 "}");
+        Schema schema =new Schema(jsonNode);
 
-        System.out.println(new Schema(jsonNode));
-        new AddSchemaService().doService(jsonNode);
+        Properties hbase = PropertiesLoadUtil.loadXmlFile("hbase-site.xml");
+        Properties druid = PropertiesLoadUtil.loadProFile("druid.properties");
+        DbPool.setUp(druid,hbase);
+
+        new CreatePhoenixView("GPRS__20170511",schema).recovery();
 
     }
-
 
 }

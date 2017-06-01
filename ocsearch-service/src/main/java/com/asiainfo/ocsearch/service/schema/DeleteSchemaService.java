@@ -49,7 +49,8 @@ public class DeleteSchemaService extends OCSearchService {
 //            transaction.add(new RemoveSchemaFromDb(name));
             transaction.add(new RemoveSchemaFromZk(name)); //instead db with zookeeper
 
-            if (schema.getIndexType() != IndexType.HBASE_ONLY) {
+            if (schema.getIndexType() == IndexType.HBASE_SOLR_INDEXER||
+                    schema.getIndexType() == IndexType.HBASE_SOLR_BATCH) {
 //                transaction.add(new DeleteIndexerConfig(name));
                 transaction.add(new DeleteSolrConfig(name));
             }

@@ -64,6 +64,11 @@
             <artifactId>phoenix-core</artifactId>
             <version>${version.phoenix}</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
 </project>

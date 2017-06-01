@@ -7,10 +7,7 @@ import com.asiainfo.ocsearch.meta.Schema;
 import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
-import com.asiainfo.ocsearch.transaction.atomic.table.DeleteHbaseTable;
-import com.asiainfo.ocsearch.transaction.atomic.table.DeleteIndexerTable;
-import com.asiainfo.ocsearch.transaction.atomic.table.DeleteSolrCollection;
-import com.asiainfo.ocsearch.transaction.atomic.table.RemoveTableFromZk;
+import com.asiainfo.ocsearch.transaction.atomic.table.*;
 import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
 import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
 import org.apache.log4j.Logger;
@@ -44,10 +41,13 @@ public class DeleteTableService extends OCSearchService {
 
             IndexType indexType = schema.getIndexType();
 
-            if (indexType == IndexType.HBASE_SOLR_INDEXER)
+            if (indexType == IndexType.HBASE_SOLR_INDEXER||indexType == IndexType.HBASE_SOLR_BATCH) {
                 transaction.add(new DeleteIndexerTable(name));
-            if (indexType != IndexType.HBASE_ONLY)
                 transaction.add(new DeleteSolrCollection(name));
+            }
+            else if (indexType == IndexType.PHOENIX){
+                transaction.add(new DeletePhoenixView(name));
+            }
 
             transaction.add(new DeleteHbaseTable(name));
 

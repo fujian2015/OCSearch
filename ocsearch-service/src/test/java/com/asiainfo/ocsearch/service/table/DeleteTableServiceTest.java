@@ -5,9 +5,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.Test;
 
 /**
- * Created by mac on 2017/5/31.
+ * Created by mac on 2017/6/1.
  */
-public class CreateTableServiceTest {
+public class DeleteTableServiceTest {
     @Test
     public void testDoService() throws Exception {
         new SystemListener().initAll();
@@ -26,8 +26,7 @@ public class CreateTableServiceTest {
                 "    }\n" +
                 "}";
         System.out.println(tableString);
-        new CreateTableService().doService(new ObjectMapper().readTree(tableString));
-//        new DeleteTableService().doService(new ObjectMapper().readTree(tableString));
+        new DeleteTableService().doService(new ObjectMapper().readTree(tableString));
     }
 
 }

@@ -8,10 +8,7 @@ import com.asiainfo.ocsearch.meta.Table;
 import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
-import com.asiainfo.ocsearch.transaction.atomic.table.CreateHbaseTable;
-import com.asiainfo.ocsearch.transaction.atomic.table.CreateIndexerTable;
-import com.asiainfo.ocsearch.transaction.atomic.table.CreateSolrCollection;
-import com.asiainfo.ocsearch.transaction.atomic.table.SaveTableToZk;
+import com.asiainfo.ocsearch.transaction.atomic.table.*;
 import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
 import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
 import org.apache.log4j.Logger;
@@ -65,14 +62,14 @@ public class CreateTableService extends OCSearchService {
 
             IndexType indexType = schema.getIndexType();
 
-            if (indexType == IndexType.HBASE_SOLR_INDEXER) {
+            if (indexType == IndexType.HBASE_SOLR_INDEXER||indexType == IndexType.HBASE_SOLR_BATCH) {
 
                 transaction.add(new CreateSolrCollection(name, schema.getName(), table.getSolrShards(), table.getSolrReplicas()));
 
                 transaction.add(new CreateIndexerTable(name, schema));
 
-            } else if (indexType == IndexType.HBASE_SOLR_BATCH) {
-                transaction.add(new CreateSolrCollection(name, schema.getName(), table.getSolrShards(), table.getSolrReplicas()));
+            } else if (indexType == IndexType.PHOENIX) {
+                transaction.add(new CreatePhoenixView(name, schema));
             }
 
 //            transaction.add(new SaveTableToDb(table));
