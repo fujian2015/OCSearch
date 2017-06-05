@@ -6,17 +6,24 @@ package com.asiainfo.ocsearch.datainput.batch;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles;
 
 public class HFileLoader {
-    public static void doBulkLoad(String pathToHFile, String tableName){
+    public static void doBulkLoad(String pathToHFile, String table){
         try {
             Configuration configuration = new Configuration();
             HBaseConfiguration.addHbaseResources(configuration);
             LoadIncrementalHFiles loadFfiles = new LoadIncrementalHFiles(configuration);
-            HTable hTable = new HTable(configuration, tableName);//指定表名
-            loadFfiles.doBulkLoad(new Path(pathToHFile), hTable);//导入数据
+//            HTable hTable = new HTable(configuration, tableName);//指定表名
+            TableName tableName = TableName.valueOf(table);
+            Connection connection = ConnectionFactory.createConnection(configuration);
+            Table hbasetable = connection.getTable(tableName);
+            Admin admin = connection.getAdmin();
+            RegionLocator regionLocator= connection.getRegionLocator(tableName);
+//            loadFfiles.doBulkLoad(new Path(pathToHFile), hTable);//导入数据
+            loadFfiles.doBulkLoad(new Path(pathToHFile),admin,hbasetable,regionLocator);
             System.out.println("Bulk Load Completed..");
         } catch(Exception exception) {
             exception.printStackTrace();

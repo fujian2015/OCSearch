@@ -38,6 +38,16 @@
             <artifactId>hbase-server</artifactId>
             <version>1.2.4</version>
         </dependency>
+        <dependency>
+            <groupId>com.asiainfo</groupId>
+            <artifactId>ocsearch-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.asiainfo</groupId>
+            <artifactId>ocsearch-expression</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 
