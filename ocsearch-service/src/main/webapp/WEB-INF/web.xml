@@ -45,5 +45,14 @@
     <url-pattern>/table/delete</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>BatchInput</servlet-name>
+    <servlet-class>com.asiainfo.ocsearch.service.datainput.BatchInputService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>BatchInput</servlet-name>
+    <url-pattern>/datainput/batch</url-pattern>
+  </servlet-mapping>
+
 
 </web-app>

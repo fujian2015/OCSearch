@@ -3,6 +3,7 @@ package com.asiainfo.ocsearch.datainput.batch;
 import com.asiainfo.ocsearch.datainput.batch.map.BulkloadMapper;
 import com.asiainfo.ocsearch.datainput.util.ColumnField;
 import com.asiainfo.ocsearch.datainput.util.SchemaProvider;
+import com.asiainfo.ocsearch.meta.Schema;
 import com.google.gson.Gson;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -33,11 +34,15 @@ public class BatchJobClient extends Configured implements Tool {
     private static String TABLE_NAME = "";
 
 
-    public static void commitJob(String inputPath,String outputPath,String tableName,String dataSeparator,Map<String,Integer> fieldSequence) {
+    public static boolean submitJob(String inputPath,String outputPath,String tableName,String dataSeparator,Map<String,Integer> fieldSequence,Schema schema) {
 
         TABLE_NAME = tableName;
 
-        SchemaProvider schemaProvider = new SchemaProvider(tableName,fieldSequence);
+//        SchemaProvider schemaProvider = new SchemaProvider(tableName,fieldSequence);
+
+        SchemaProvider schemaProvider = new SchemaProvider(schema);
+
+        schemaProvider.setFieldSequenceMap(fieldSequence);
 
         String rowKeyExpression = schemaProvider.getRowkeyExpression();
 
@@ -49,21 +54,24 @@ public class BatchJobClient extends Configured implements Tool {
 
         String[] args = new String[]{inputPath,outputPath,tableName,dataSeparator,rowKeyExpression,fieldSequenceStr,columnFamilyStr};
 
-        commitJob(args);
+        return submitJob(args);
 
     }
 
-    public static void commitJob(String[] args) {
+    public static boolean submitJob(String[] args) {
         try {
             int response = ToolRunner.run(HBaseConfiguration.create(), new BatchJobClient(), args);
             if(response == 0) {
                 System.out.println("Job is successfully completed...");
+                return true;
             } else {
                 System.out.println("Job failed...");
+                return false;
             }
         } catch(Exception exception) {
             exception.printStackTrace();
         }
+        return false;
     }
 
     private Configuration confInit(String[] args) {

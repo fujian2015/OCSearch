@@ -30,6 +30,17 @@ public class SchemaProvider {
         this.fields = schema.getFields();
     }
 
+    public SchemaProvider(Schema schema) {
+        this.schema = schema;
+        this.rowkeyExpression = schema.getRowkeyExpression();
+        this.innerFields = schema.getInnerFields();
+        this.fields = schema.getFields();
+    }
+
+    public void setFieldSequenceMap(Map<String, Integer> fieldSequenceMap) {
+        this.fieldSequenceMap = fieldSequenceMap;
+    }
+
     public Schema getSchema() {
         return schema;
     }
