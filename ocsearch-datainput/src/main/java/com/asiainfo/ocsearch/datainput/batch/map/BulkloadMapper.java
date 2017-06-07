@@ -5,8 +5,10 @@ package com.asiainfo.ocsearch.datainput.batch.map;
  */
 import com.asiainfo.ocsearch.datainput.util.ColumnField;
 import com.asiainfo.ocsearch.datainput.util.ColumnMapConverter;
+import com.asiainfo.ocsearch.datainput.util.FieldTypeChecker;
 import com.asiainfo.ocsearch.expression.Engine;
 import com.asiainfo.ocsearch.expression.Executor;
+import com.asiainfo.ocsearch.meta.FieldType;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.hadoop.conf.Configuration;
@@ -53,7 +55,12 @@ public class BulkloadMapper extends Mapper<LongWritable, Text, ImmutableBytesWri
             byte[] rowKeyBytes = Bytes.toBytes(executor.evaluate(dataMap).toString());
             ImmutableBytesWritable rowKey = new ImmutableBytesWritable(rowKeyBytes);
             Put put = dataPutfromValues(rowKeyBytes,values);
-            context.write(rowKey, put);
+            if(put == null) {
+
+            }
+            else {
+                context.write(rowKey, put);
+            }
         } catch(Exception exception) {
             exception.printStackTrace();
         }
@@ -90,11 +97,62 @@ public class BulkloadMapper extends Mapper<LongWritable, Text, ImmutableBytesWri
                         content = content.concat(entry.getValue().getSeperator());
                 }
 
+                put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(content));
+
             }else {
-                content = values[entry.getValue().getSequence().get(0)];
+                FieldType type = entry.getValue().getType();
+                String value = values[entry.getValue().getSequence().get(0)];
+                switch (type){
+                    case INT:
+                        if(FieldTypeChecker.isInteger(value))
+                        {
+                            try {
+                                int intContent = Integer.parseInt(value);
+                                put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(intContent));
+                            }catch(NumberFormatException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        else {
+                            return null;
+                        }
+                        break;
+                    case DOUBLE:
+                        if(FieldTypeChecker.isDouble(value))
+                        {
+                            try {
+                                double doubleContent = Double.parseDouble(value);
+                                put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(doubleContent));
+                            }catch (NumberFormatException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        else {
+                            return null;
+                        }
+                        break;
+                    case FLOAT:
+                        if(FieldTypeChecker.isDouble(value))
+                        {
+                            try {
+                                float floatContent = Float.parseFloat(value);
+                                put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(floatContent));
+                            }catch (NumberFormatException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        else {
+                            return null;
+                        }
+                        break;
+                    default:
+                        put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(value));
+
+                }
+//                content = values[entry.getValue().getSequence().get(0)];
             }
 
-            put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(content));
+//            put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(content));
         }
         return put;
     }
