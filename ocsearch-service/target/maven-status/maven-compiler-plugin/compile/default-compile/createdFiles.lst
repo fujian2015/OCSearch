@@ -2,6 +2,8 @@ com/asiainfo/ocsearch/metahelper/MetaDataHelper.class
 com/asiainfo/ocsearch/scheduler/ProcessTransaction.class
 com/asiainfo/ocsearch/transaction/atomic/table/CreateSolrCollection.class
 com/asiainfo/ocsearch/query/HbaseQuery.class
+com/asiainfo/ocsearch/service/index/BatchIndexService.class
+com/asiainfo/ocsearch/service/query/SqlService.class
 com/asiainfo/ocsearch/transaction/atomic/table/CreateHbaseTable.class
 com/asiainfo/ocsearch/cache/CacheManager.class
 com/asiainfo/ocsearch/transaction/Transaction.class
@@ -13,6 +15,8 @@ com/asiainfo/ocsearch/cache/HbaseCache.class
 com/asiainfo/ocsearch/transaction/atomic/schema/SaveSchemaToZk.class
 com/asiainfo/ocsearch/transaction/atomic/table/SaveTableToZk.class
 com/asiainfo/ocsearch/service/query/QueryService.class
+com/asiainfo/ocsearch/query/FileID.class
+com/asiainfo/ocsearch/transaction/atomic/table/CreatePhoenixView.class
 com/asiainfo/ocsearch/transaction/internal/TransactionUtil.class
 com/asiainfo/ocsearch/scheduler/RollBackTranscation.class
 com/asiainfo/ocsearch/transaction/atomic/schema/AddSchemaToMemory.class
@@ -28,6 +32,7 @@ com/asiainfo/ocsearch/transaction/atomic/table/RemoveTableFromZk.class
 com/asiainfo/ocsearch/service/query/GetService.class
 com/asiainfo/ocsearch/transaction/atomic/schema/CreateSolrConfig.class
 com/asiainfo/ocsearch/service/schema/DeleteSchemaService.class
+com/asiainfo/ocsearch/transaction/atomic/table/CreatePhoenixView$1.class
 com/asiainfo/ocsearch/listener/ThreadPoolManager.class
 com/asiainfo/ocsearch/query/ScanQueryActor.class
 com/asiainfo/ocsearch/transaction/atomic/table/DeleteIndexerTable.class
@@ -42,9 +47,12 @@ com/asiainfo/ocsearch/transaction/atomic/table/CreateIndexerTable.class
 com/asiainfo/ocsearch/transaction/atomic/table/SaveTableToDb.class
 com/asiainfo/ocsearch/service/schema/AddSchemaService.class
 com/asiainfo/ocsearch/transaction/atomic/table/DeleteHbaseTable.class
+com/asiainfo/ocsearch/service/datainput/BatchInputService.class
 com/asiainfo/ocsearch/metahelper/MetaDataHelper$SchemaWatcher.class
 com/asiainfo/ocsearch/query/HbaseQuery$1.class
 com/asiainfo/ocsearch/transaction/atomic/schema/RemoveSchemaFromZk.class
+com/asiainfo/ocsearch/transaction/atomic/table/DeletePhoenixView.class
+com/asiainfo/ocsearch/service/query/FileGetService.class
 com/asiainfo/ocsearch/transaction/atomic/schema/DeleteIndexerConfig.class
 com/asiainfo/ocsearch/service/schema/UpdateSchemaService.class
 com/asiainfo/ocsearch/query/GetQueryActor.class

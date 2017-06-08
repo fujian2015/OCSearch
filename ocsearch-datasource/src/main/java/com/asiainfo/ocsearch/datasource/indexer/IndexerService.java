@@ -1,11 +1,13 @@
 package com.asiainfo.ocsearch.datasource.indexer;
 
+import com.beust.jcommander.internal.Lists;
 import com.ngdata.hbaseindexer.ConfKeys;
 import com.ngdata.hbaseindexer.HBaseIndexerConfiguration;
 import com.ngdata.hbaseindexer.conf.DefaultIndexerComponentFactory;
 import com.ngdata.hbaseindexer.conf.IndexerComponentFactoryUtil;
 import com.ngdata.hbaseindexer.model.api.*;
 import com.ngdata.hbaseindexer.model.impl.IndexerModelImpl;
+import com.ngdata.hbaseindexer.mr.HBaseMapReduceIndexerTool;
 import com.ngdata.hbaseindexer.util.zookeeper.StateWatchingZooKeeper;
 import com.ngdata.sep.util.io.Closer;
 import com.ngdata.sep.util.zookeeper.ZooKeeperItf;
@@ -22,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -227,5 +230,38 @@ public class IndexerService {
         }
 
         return out.toByteArray();
+    }
+    public int batchIndex(String table,long startTime,long endTime){
+         org.apache.http.impl.client.CloseableHttpClient closeableHttpClient;
+        List<String> args = Lists.newArrayList("--hbase-indexer-zk",zkConnectString,"--hbase-indexer-name",table,"--go-live");
+
+        String[] a=new String[args.size()];
+        if(startTime!=-1){
+            args.add("--hbase-start-time");
+            args.add(String.valueOf(startTime));
+        }
+        if(endTime!=-1&&endTime!=-1){
+            args.add("--hbase-end-time");
+            args.add(String.valueOf(endTime));
+        }
+
+        try {
+            HBaseMapReduceIndexerTool h= new HBaseMapReduceIndexerTool();
+            h.setConf(getConfiguration());
+           return  h.run(args.toArray(a));
+//            return ToolRunner.run(getConfiguration(), new HBaseMapReduceIndexerTool(),args.toArray(a));
+        } catch (Exception e) {
+            logger.error(e);
+           throw new RuntimeException("execute batch index error!",e);
+        }
+    }
+
+    private Configuration getConfiguration() {
+        conf.set("mapreduce.framework.name", "yarn");
+        conf.addResource("hdfs-site.xml");
+        conf.addResource("yarn-site.xml");
+        conf.addResource("mapred-site.xml");
+
+        return conf;
     }
 }

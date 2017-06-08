@@ -1,21 +1,21 @@
 <!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
+        "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
-  <listener>
-    <listener-class>com.asiainfo.ocsearch.listener.SystemListener</listener-class>
-  </listener>
-  <display-name>Archetype Created Web Application</display-name>
-
-  <servlet>
-    <servlet-name>AddSchema</servlet-name>
-    <servlet-class>com.asiainfo.ocsearch.service.schema.AddSchemaService</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>AddSchema</servlet-name>
-    <url-pattern>/schema/add</url-pattern>
-  </servlet-mapping>
+    <listener>
+        <listener-class>com.asiainfo.ocsearch.listener.SystemListener</listener-class>
+    </listener>
+    <display-name>Archetype Created Web Application</display-name>
+    <!--schema service begin-->
+    <servlet>
+        <servlet-name>AddSchema</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.schema.AddSchemaService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AddSchema</servlet-name>
+        <url-pattern>/schema/add</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>DeleteSchema</servlet-name>
@@ -25,25 +25,97 @@
         <servlet-name>DeleteSchema</servlet-name>
         <url-pattern>/schema/delete</url-pattern>
     </servlet-mapping>
+    <!--schema service end-->
 
-  <servlet>
-    <servlet-name>CreateTable</servlet-name>
-    <servlet-class>com.asiainfo.ocsearch.service.table.CreateTableService</servlet-class>
-  </servlet>
+    <!--table service begin-->
+    <servlet>
+        <servlet-name>CreateTable</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.table.CreateTableService</servlet-class>
+    </servlet>
 
-  <servlet-mapping>
-    <servlet-name>CreateTable</servlet-name>
-    <url-pattern>/table/create</url-pattern>
-  </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateTable</servlet-name>
+        <url-pattern>/table/create</url-pattern>
+    </servlet-mapping>
 
-  <servlet>
-    <servlet-name>DeleteTable</servlet-name>
-    <servlet-class>com.asiainfo.ocsearch.service.table.DeleteTableService</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>DeleteTable</servlet-name>
-    <url-pattern>/table/delete</url-pattern>
-  </servlet-mapping>
+    <servlet>
+        <servlet-name>DeleteTable</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.table.DeleteTableService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DeleteTable</servlet-name>
+        <url-pattern>/table/delete</url-pattern>
+    </servlet-mapping>
+    <!--table service end-->
+
+    <!--query service begin -->
+    <servlet>
+        <servlet-name>FileGet</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.query.FileGetService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FileGet</servlet-name>
+        <url-pattern>/query/fileget</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Get</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.query.GetService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Get</servlet-name>
+        <url-pattern>/query/get</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Scan</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.query.ScanService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Scan</servlet-name>
+        <url-pattern>/query/scan</url-pattern>
+    </servlet-mapping>
 
 
+    <servlet>
+        <servlet-name>Search</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.query.SearchService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Search</servlet-name>
+        <url-pattern>/query/search</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Sql</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.query.SqlService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Sql</servlet-name>
+        <url-pattern>/query/sql</url-pattern>
+    </servlet-mapping>
+
+    <!--query service end-->
+
+    <!--data input  service begin-->
+    <servlet>
+        <servlet-name>BatchInput</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.datainput.BatchInputService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BatchInput</servlet-name>
+        <url-pattern>/datainput/batch</url-pattern>
+    </servlet-mapping>
+    <!--data input  service end-->
+
+    <!--index  service begin-->
+    <servlet>
+        <servlet-name>BatchIndex</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.index.BatchIndexService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BatchIndex</servlet-name>
+        <url-pattern>/index/batch</url-pattern>
+    </servlet-mapping>
+    <!--index  service end-->
 </web-app>

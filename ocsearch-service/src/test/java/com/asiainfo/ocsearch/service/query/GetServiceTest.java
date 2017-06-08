@@ -5,7 +5,6 @@ import com.asiainfo.ocsearch.listener.SystemListener;
 import org.apache.hadoop.hbase.client.Put;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.Test;
-
 /**
  * Created by mac on 2017/5/25.
  */
