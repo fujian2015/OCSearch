@@ -1,9 +1,0 @@
-com/asiainfo/ocsearch/datainput/batch/BatchJobClient.class
-com/asiainfo/ocsearch/datainput/batch/HFileLoader.class
-com/asiainfo/ocsearch/datainput/util/SchemaProvider.class
-com/asiainfo/ocsearch/datainput/batch/map/BulkloadMapper.class
-com/asiainfo/ocsearch/datainput/batch/map/BulkloadMapper$1.class
-com/asiainfo/ocsearch/datainput/util/ColumnMapConverter.class
-com/asiainfo/ocsearch/datainput/util/ColumnField.class
-com/asiainfo/ocsearch/datainput/batch/ConfigurationManager.class
-com/asiainfo/ocsearch/datainput/batch/map/BulkloadMapper$2.class
