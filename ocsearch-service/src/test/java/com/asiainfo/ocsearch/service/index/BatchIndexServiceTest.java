@@ -1,7 +1,7 @@
 package com.asiainfo.ocsearch.service.index;
 
-import com.asiainfo.ocsearch.datasource.indexer.IndexerServiceManager;
 import com.asiainfo.ocsearch.listener.SystemListener;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.Test;
 
 /**
@@ -23,8 +23,8 @@ public class BatchIndexServiceTest {
                 "}";
 //        System.out.println(request);
 
-//        new BatchIndexService().doService(new ObjectMapper().readTree(request));
-        System.out.println(IndexerServiceManager.getIndexerService().batchIndex("GPRS__20170510",-1,-1));
+        new BatchIndexService().doService(new ObjectMapper().readTree(request));
+//        System.out.println(IndexerServiceManager.getIndexerService().getConfiguration());
     }
 
 }

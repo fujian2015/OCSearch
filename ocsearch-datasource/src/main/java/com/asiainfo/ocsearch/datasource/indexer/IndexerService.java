@@ -12,7 +12,11 @@ import com.ngdata.hbaseindexer.util.zookeeper.StateWatchingZooKeeper;
 import com.ngdata.sep.util.io.Closer;
 import com.ngdata.sep.util.zookeeper.ZooKeeperItf;
 import com.ngdata.sep.util.zookeeper.ZooKeeperOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.KeeperException;
 import org.dom4j.Document;
@@ -23,9 +27,7 @@ import org.dom4j.io.XMLWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by mac on 2017/5/3.
@@ -36,16 +38,20 @@ public class IndexerService {
 
     final String zkConnectString;
     final String solrZkConnectString;
+    final String libPath;
 
 
     protected Configuration conf;
     protected ZooKeeperItf zk;
     protected WriteableIndexerModel model;
 
-    public IndexerService(String solrZkConnectString) throws Exception {
+    Configuration batchConf = null;
+
+    public IndexerService(Properties p) throws Exception {
 
         try {
-            this.solrZkConnectString = solrZkConnectString;
+            this.solrZkConnectString = p.getProperty("solr.zookeeper");
+            this.libPath = p.getProperty("indexer.lib.path");
 
             conf = HBaseIndexerConfiguration.create();
             zkConnectString = conf.get(ConfKeys.ZK_CONNECT_STRING);
@@ -63,7 +69,7 @@ public class IndexerService {
      * @param table
      * @param indexerConf
      */
-    public void createTable(String table,  byte[] indexerConf) throws IndexerModelException, IndexerValidityException, IndexerExistsException {
+    public void createTable(String table, byte[] indexerConf) throws IndexerModelException, IndexerValidityException, IndexerExistsException {
 
         IndexerDefinition indexer = null;
         try {
@@ -78,7 +84,7 @@ public class IndexerService {
     /**
      * @param indexerName
      */
-    public void deleteTable(String indexerName) throws Exception{
+    public void deleteTable(String indexerName) throws Exception {
         try {
             IndexerDefinition indexerDef = model.getIndexer(indexerName);
 
@@ -94,7 +100,7 @@ public class IndexerService {
 
             model.updateIndexerInternal(builder.build());
             waitForDeletion(indexerName);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw e;
         }
 
@@ -138,7 +144,7 @@ public class IndexerService {
         Closer.close(zk);
     }
 
-    private IndexerDefinitionBuilder buildIndexerDefinition(String indexerName,  byte[] indexerConf, IndexerDefinition oldIndexerDef)
+    private IndexerDefinitionBuilder buildIndexerDefinition(String indexerName, byte[] indexerConf, IndexerDefinition oldIndexerDef)
             throws IOException {
 
         IndexerDefinitionBuilder builder = new IndexerDefinitionBuilder();
@@ -231,37 +237,56 @@ public class IndexerService {
 
         return out.toByteArray();
     }
-    public int batchIndex(String table,long startTime,long endTime){
-         org.apache.http.impl.client.CloseableHttpClient closeableHttpClient;
-        List<String> args = Lists.newArrayList("--hbase-indexer-zk",zkConnectString,"--hbase-indexer-name",table,"--go-live");
 
-        String[] a=new String[args.size()];
-        if(startTime!=-1){
+    public int batchIndex(String table, long startTime, long endTime) {
+
+        List<String> args = Lists.newArrayList("--hbase-indexer-zk", zkConnectString, "--hbase-indexer-name", table, "--go-live");
+
+        if (startTime != -1) {
             args.add("--hbase-start-time");
             args.add(String.valueOf(startTime));
         }
-        if(endTime!=-1&&endTime!=-1){
+        if (endTime != -1 && endTime != -1) {
             args.add("--hbase-end-time");
             args.add(String.valueOf(endTime));
         }
 
+        String[] a = new String[args.size()];
         try {
-            HBaseMapReduceIndexerTool h= new HBaseMapReduceIndexerTool();
+            HBaseMapReduceIndexerTool h = new HBaseMapReduceIndexerTool();
             h.setConf(getConfiguration());
-           return  h.run(args.toArray(a));
-//            return ToolRunner.run(getConfiguration(), new HBaseMapReduceIndexerTool(),args.toArray(a));
+            return h.run(args.toArray(a));
         } catch (Exception e) {
             logger.error(e);
-           throw new RuntimeException("execute batch index error!",e);
+            throw new RuntimeException("execute batch index error!", e);
         }
     }
 
-    private Configuration getConfiguration() {
-        conf.set("mapreduce.framework.name", "yarn");
-        conf.addResource("hdfs-site.xml");
-        conf.addResource("yarn-site.xml");
-        conf.addResource("mapred-site.xml");
+    public Configuration getConfiguration() {
+        if (batchConf == null) {
+            batchConf = new Configuration(conf);
+            batchConf.set("mapreduce.framework.name", "yarn");
+            batchConf.addResource("hdfs-site.xml");
+            batchConf.addResource("yarn-site.xml");
+            batchConf.addResource("mapred-site.xml");
+            batchConf.set("mapreduce.job.user.classpath.first", "true", "mapred-site.xml");
 
-        return conf;
+            List<String> jars = new ArrayList<>();
+            try {
+                FileSystem fileSystem = FileSystem.get(batchConf);
+                for (FileStatus fs : fileSystem.listStatus(new Path(this.libPath))) {
+                    System.out.println(fs.getPath());
+                    jars.add(fs.getPath().toString());
+                }
+                fileSystem.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                logger.error(e);
+                throw new RuntimeException(e);
+            }
+            String tmpJars = StringUtils.join(jars, ",");
+            batchConf.set("tmpjars", tmpJars);
+        }
+        return batchConf;
     }
 }

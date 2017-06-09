@@ -24,9 +24,19 @@ public class ThreadPoolManager {
         boolean hbaseOnly = Boolean.valueOf(OCSearchEnv.getEnvValue("HBASE_ONLY"));
         if (!hbaseOnly) {
            initSolrPool();
+            initBatchPool();
         }
 
     }
+
+    private static void initBatchPool() {
+        int coreSize=Integer.parseInt(OCSearchEnv.getEnvValue("batch.index.threadpool.core.size"));
+        int maxSize=Integer.parseInt(OCSearchEnv.getEnvValue("batch.index.threadpool.max.size"));
+
+        treadPools.put("batchIndex",new ThreadPoolExecutor(coreSize,maxSize,60l, TimeUnit.SECONDS,
+                new SynchronousQueue<Runnable>(), Threads.newDaemonThreadFactory("batchIndex")));
+    }
+
     public static  void initSolrPool(){
         int coreSize=Integer.parseInt(OCSearchEnv.getEnvValue("solr.threadpool.core.size"));
         int maxSize=Integer.parseInt(OCSearchEnv.getEnvValue("solr.threadpool.max.size"));

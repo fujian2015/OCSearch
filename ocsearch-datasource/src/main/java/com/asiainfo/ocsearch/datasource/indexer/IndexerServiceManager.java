@@ -16,7 +16,7 @@ public class IndexerServiceManager {
 
     public synchronized  static void setUp(Properties p) throws Exception {
         try {
-            instance = new IndexerService(p.getProperty("solr.zookeeper"));
+            instance = new IndexerService(p);
         } catch (Exception e) {
             throw e;
         }

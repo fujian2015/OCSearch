@@ -19,3 +19,10 @@ hs_err_pid*
 /.idea
 
 logs/
+
+ocsearch-service/target
+ocsearch-common/target
+ocsearch-expression/target
+ocsearch-datasource/target
+ocsearch-datainput/target
+
