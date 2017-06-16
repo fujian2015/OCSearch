@@ -1,5 +1,7 @@
 import com.asiainfo.ocsearch.datainput.util.ColumnField;
 import com.asiainfo.ocsearch.datainput.util.ColumnMapConverter;
+import com.asiainfo.ocsearch.expression.Engine;
+import com.asiainfo.ocsearch.expression.Executor;
 import com.asiainfo.ocsearch.meta.FieldType;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -69,6 +71,25 @@ public class testColumnMapConvert {
         Map<String,ColumnField> resultMap = gson.fromJson(str,new TypeToken<Map<String,ColumnField>>(){}.getType());
         System.out.println(resultMap.toString());
         System.out.println(resultMap.get("B+1").getSeperator());
+    }
+
+    @Test
+    public void testExpression()
+    {
+        Map<String, Object> jc = new HashMap<>();
+
+        jc.put("phone", "13800000000");
+
+        jc.put("imsi", "sdgsdgsdg");
+
+        jc.put("pi","20170611");
+
+
+//        Executor ee = Engine.getInstance().createExecutor("phone+'_'+imsi");
+
+        Executor ee = Engine.getInstance().createExecutor("'GPRS__'+ $date:format($date:toDate(pi,'yyyyMMdd').getTime(),'yyyyMMddHH')");
+
+        System.out.println(ee.evaluate(jc));
     }
 
 }

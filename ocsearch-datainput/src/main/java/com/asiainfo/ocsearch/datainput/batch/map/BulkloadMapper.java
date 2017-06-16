@@ -56,6 +56,7 @@ public class BulkloadMapper extends Mapper<LongWritable, Text, ImmutableBytesWri
             ImmutableBytesWritable rowKey = new ImmutableBytesWritable(rowKeyBytes);
             Put put = dataPutfromValues(rowKeyBytes,values);
             if(put == null) {
+                //Todo
 
             }
             else {
@@ -101,7 +102,7 @@ public class BulkloadMapper extends Mapper<LongWritable, Text, ImmutableBytesWri
 
             }else {
                 FieldType type = entry.getValue().getType();
-                String value = values[entry.getValue().getSequence().get(0)];
+                String value = values[entry.getValue().getSequence().get(0)-1];
                 switch (type){
                     case INT:
                         if(FieldTypeChecker.isInteger(value))

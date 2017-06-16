@@ -77,7 +77,10 @@ public class BatchJobClient extends Configured implements Tool {
     private Configuration confInit(String[] args) {
 
         Configuration configuration = getConf();
-        configuration.set("data.seperator", args[3]);
+        configuration.addResource("core-site.xml");
+        configuration.addResource("hdfs-site.xml");
+        configuration.addResource("hbase-site.xml");
+        configuration.set("data.separator", args[3]);
         configuration.set("hbase.table.name", args[2]);
         configuration.set("hbase.table.rowkey.expression",args[4]);
         configuration.set("hbase.column.family.map",args[6]);

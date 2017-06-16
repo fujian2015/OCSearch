@@ -13,7 +13,14 @@ public class EngineTest {
     public void testCreateExecutor() throws Exception {
         Map<String, Object> jc = new HashMap<>();
 
-        jc.put("pi", "20170511");
+        jc.put("phone", "13800000000");
+
+        jc.put("imsi", "sdgsdgsdg");
+
+        jc.put("pi","20170611");
+
+
+//        Executor ee = Engine.getInstance().createExecutor("phone+‘_‘+imsi");
 
         Executor ee = Engine.getInstance().createExecutor("'GPRS__'+ $date:format($date:todate(pi,'yyyyMMdd').getTime(),'yyyyMMddHH')");
 
