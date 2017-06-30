@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * Created by mac on 2017/3/24.
  */
-public class Schema implements Serializable {
+public class Schema implements Serializable, Cloneable {
 
     static final String BASIC_FAMILY = "B";
     static final String FILE_FAMILY = "C";
@@ -63,7 +63,7 @@ public class Schema implements Serializable {
     public Schema(JsonNode request) throws ServiceException {
 
         try {
-            boolean isRequest = request.has("request") ? true : false;
+            boolean isRequest = request.has("request") ? request.get("request").asBoolean() : false;
 
             this.name = request.get("name").getTextValue();
 
@@ -311,7 +311,7 @@ public class Schema implements Serializable {
         } catch (ServiceException e) {
             e.printStackTrace();
         }
-        return null;
+        return new Object();
     }
 
 

@@ -61,6 +61,7 @@ public class DeleteSchemaService extends OCSearchService {
                 TransactionUtil.serialize(uuid + "_schema_delete_" + name, transaction, false);
                 throw e;
             }
+            return success;
         } catch (ServiceException e) {
             log.warn(e);
             throw e;
@@ -70,6 +71,6 @@ public class DeleteSchemaService extends OCSearchService {
         } finally {
             stateLog.info("end request " + uuid + " at " + System.currentTimeMillis());
         }
-        return success;
+
     }
 }

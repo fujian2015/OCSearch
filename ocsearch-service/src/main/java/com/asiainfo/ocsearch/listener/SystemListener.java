@@ -197,5 +197,7 @@ public class SystemListener implements ServletContextListener {
         scheduledThreadPool.scheduleAtFixedRate(new RollBackTranscation(), 0, rollbackPeriod, TimeUnit.MINUTES);
 
         logger.info("end init ocsearch...");
+
     }
+
 }

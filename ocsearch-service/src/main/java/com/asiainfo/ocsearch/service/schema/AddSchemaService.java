@@ -30,7 +30,10 @@ public class AddSchemaService extends OCSearchService {
 
             stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());
 
-            ((ObjectNode) request).put("request", true);
+            if (request.has("with_hbase"))
+                ((ObjectNode) request).put("request", false);
+            else
+                ((ObjectNode) request).put("request", true);
 
             Schema tableSchema = new Schema(request);
 
@@ -40,7 +43,7 @@ public class AddSchemaService extends OCSearchService {
 
             Transaction transaction = new TransactionImpl();
 
-            if (tableSchema.getIndexType() == IndexType.HBASE_SOLR_INDEXER||
+            if (tableSchema.getIndexType() == IndexType.HBASE_SOLR_INDEXER ||
                     tableSchema.getIndexType() == IndexType.HBASE_SOLR_BATCH) {
                 transaction.add(new CreateSolrConfig(tableSchema));
 //                transaction.add(new CreateIndexerConfig(tableSchema));
@@ -66,6 +69,7 @@ public class AddSchemaService extends OCSearchService {
                 }
                 throw e;
             }
+            return success;
         } catch (ServiceException e) {
             log.warn(e);
             throw e;
@@ -75,7 +79,6 @@ public class AddSchemaService extends OCSearchService {
         } finally {
             stateLog.info("end request " + uuid + " at " + System.currentTimeMillis());
         }
-        return success;
     }
 
 }

@@ -1,6 +1,7 @@
 package com.asiainfo.ocsearch.service;
 
 
+import com.asiainfo.ocsearch.constants.Constants;
 import com.asiainfo.ocsearch.constants.OCSearchEnv;
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
@@ -32,7 +33,7 @@ public abstract class OCSearchService extends HttpServlet {
     public OCSearchService() {
 
         try {
-            success = "{\"result\":{\"error_code\":0,\"error_desc\":\"success\"}}".getBytes();
+            success = "{\"result\":{\"error_code\":0,\"error_desc\":\"success\"}}".getBytes(Constants.DEFUAT_CHARSET);
             successResult = (ObjectNode) new ObjectMapper().readTree("{\"result\":{\"error_code\":0,\"error_desc\":\"success\"}}");
 
         } catch (IOException e) {
@@ -63,14 +64,14 @@ public abstract class OCSearchService extends HttpServlet {
                     re = serviceException.getErrorResponse();
                 }
             }
-
+            log.info("return request:" + id + "," + (System.currentTimeMillis() - start) + "ms used.");
             response.setCharacterEncoding("utf-8");
             ServletOutputStream so = response.getOutputStream();
             so.write(re);
             so.flush();
             so.close();
         } catch (Exception e) {
-
+            log.error("transport data failure:",e);
         } finally {
             log.info("end request:" + id + "," + (System.currentTimeMillis() - start) + "ms used.");
         }
@@ -86,8 +87,8 @@ public abstract class OCSearchService extends HttpServlet {
             Map<String, String[]> params = request.getParameterMap();
             ObjectNode jsonNode = new ObjectMapper().createObjectNode();
 
-            for (String key : params.keySet()) {
-                jsonNode.put(key, params.get(key)[0]);
+            for (Map.Entry<String, String[]> entry : params.entrySet()) {
+                jsonNode.put(entry.getKey(), entry.getValue()[0]);
             }
 
             byte[] re;

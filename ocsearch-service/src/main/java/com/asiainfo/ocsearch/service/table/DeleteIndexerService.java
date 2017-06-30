@@ -7,25 +7,21 @@ import com.asiainfo.ocsearch.meta.Schema;
 import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
-import com.asiainfo.ocsearch.transaction.atomic.table.*;
+import com.asiainfo.ocsearch.transaction.atomic.table.DeleteIndexerTable;
 import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
 import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
-import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 
 /**
- * Created by mac on 2017/5/4.
+ * Created by mac on 2017/6/30.
  */
-public class DeleteTableService extends OCSearchService {
-
-    Logger stateLog = Logger.getLogger("state");
-
+public class DeleteIndexerService extends OCSearchService {
 
     @Override
     public byte[] doService(JsonNode request) throws ServiceException {
         String uuid = getRequestId();
         try {
-            stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());
+
             String name = request.get("name").asText();
 
             if (!MetaDataHelperManager.getInstance().hasTable(name)) {
@@ -35,33 +31,25 @@ public class DeleteTableService extends OCSearchService {
 
             Transaction transaction = new TransactionImpl();
 
-//            transaction.add(new RemoveTableFromDb(name));
-            transaction.add(new RemoveTableFromZk(name));  //instead db with zookeeper
-
             IndexType indexType = schema.getIndexType();
 
             if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_BATCH) {
                 transaction.add(new DeleteIndexerTable(name));
-                transaction.add(new DeleteSolrCollection(name));
-            } else if (indexType == IndexType.PHOENIX) {
-                transaction.add(new DeletePhoenixView(name));
+            } else {
+                throw new ServiceException("indexer " + name + " does not exist!", ErrorCode.TABLE_NOT_EXIST);
             }
-            if (false == request.has("hbase_exist") || false == request.get("hbase_exist").asBoolean())
-                transaction.add(new DeleteHbaseTable(name));
 
             try {
                 transaction.execute();
             } catch (Exception e) {
-                TransactionUtil.serialize(uuid + "_table_delete_" + name, transaction, false);
-                log.error("delete table " + name + " failure", e);
+                TransactionUtil.serialize(uuid + "_indexer_delete_" + name, transaction, false);
+                log.error("delete indexer " + name + " failure", e);
                 throw e;
             }
             return success;
         } catch (Exception e) {
             log.error(e);
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
-        } finally {
-            stateLog.info("end request " + uuid + " at " + System.currentTimeMillis());
         }
     }
 }

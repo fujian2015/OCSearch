@@ -10,7 +10,7 @@ import org.codehaus.jackson.JsonNode;
 public class UpdateSchemaService extends OCSearchService{
     @Override
     protected byte[] doService(JsonNode request) throws ServiceException {
-          
+
 
         return new byte[0];
     }

@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by mac on 2017/3/23.
  */
-public class Field implements Serializable {
+public class Field implements Serializable, Cloneable {
 
     String name = "";
 
@@ -24,7 +24,7 @@ public class Field implements Serializable {
     boolean indexed = false;  //index in solr
     boolean indexStored = false;    //store in solr
 
-    String indexType="";
+    String indexType = "";
 
     String hbaseColumn; //hbase column
 
@@ -243,6 +243,6 @@ public class Field implements Serializable {
     }
 
     public boolean isIndexContented() {
-        return contentField!=null;
+        return contentField != null;
     }
 }

@@ -50,8 +50,8 @@ public class AdminService extends AbstractService {
             for (String columnFamily : columnFamilies) {
 
                 HColumnDescriptor cd = new HColumnDescriptor(columnFamily);
-               if(columnFamily.equals("B"))
-                   cd.setScope(1);
+                if (columnFamily.equals("B"))
+                    cd.setScope(1);
                 tableDesc.addFamily(cd);
             }
 
@@ -79,6 +79,18 @@ public class AdminService extends AbstractService {
 
     public boolean existsTable(String tableName) {
         return execute(admin -> admin.tableExists(TableName.valueOf(tableName)));
+    }
+
+    public boolean compact(String tableName) {
+        return execute(admin -> {
+            TableName t = TableName.valueOf(tableName);
+            if (!admin.tableExists(t)) {
+                throw new RuntimeException(String.format("hbase table :%s does not exist.", tableName));
+            } else {
+                admin.compact(t);
+            }
+            return true;
+        });
     }
 
 }

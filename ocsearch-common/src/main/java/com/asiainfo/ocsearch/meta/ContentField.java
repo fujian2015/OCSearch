@@ -9,7 +9,7 @@ import java.io.Serializable;
 /**
  * Created by mac on 2017/4/17.
  */
-public class ContentField implements Serializable {
+public class ContentField implements Serializable, Cloneable {
     String name;
     String type;
 
@@ -30,10 +30,11 @@ public class ContentField implements Serializable {
         return contentNode;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
-    public String getType(){
+
+    public String getType() {
         return type;
     }
 
@@ -42,9 +43,10 @@ public class ContentField implements Serializable {
     public String toString() {
         return toJsonNode().toString();
     }
+
     @Override
     public Object clone() {
-        return new ContentField(this.name,this.type);
+        return new ContentField(this.name, this.type);
     }
 
 }

@@ -133,8 +133,6 @@ public class ScanQueryActor extends QueryActor {
                 scanner = htable.getScanner(scan);
                 if (hbaseQuery.needTotal) {
                     for (Result result : scanner) {
-                        Map<String, Object> dataMap = this.hbaseQuery.extractResult2Map(result);
-
                         count++;
                         if (count <= hbaseQuery.limit) {
                             results.add(this.hbaseQuery.extractResult(result));

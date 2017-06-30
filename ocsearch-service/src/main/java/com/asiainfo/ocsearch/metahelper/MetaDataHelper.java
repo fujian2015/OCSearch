@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -300,6 +301,10 @@ public class MetaDataHelper implements OnReconnect {
         isInUse = tableMap.values().contains(name);
         lock.readLock().unlock();
         return isInUse;
+    }
+
+    public Set<String> getTables() {
+        return tableMap.keySet();
     }
 
 

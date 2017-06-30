@@ -5,6 +5,7 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.util.Threads;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.SynchronousQueue;
@@ -15,6 +16,8 @@ import java.util.concurrent.TimeUnit;
  * Created by mac on 2017/4/1.
  */
 public class HbaseServiceManager {
+
+    Logger logger = Logger.getLogger(HbaseServiceManager.class);
 
     private static HbaseServiceManager instance;
 
@@ -76,8 +79,6 @@ public class HbaseServiceManager {
 
 
     private Connection createConnection(Configuration conf) throws IOException {
-
-
         return ConnectionFactory.createConnection(conf);
     }
 
@@ -105,24 +106,26 @@ public class HbaseServiceManager {
         }
     }
 
-    public synchronized  void reconnect() {
+
+
+    public synchronized void reconnect() {
+        logger.info("reconnect hbase connection start!");
         try {
-            synchronized (connection) {
-                if (connection != null) {
-                    connection.close();
-                }
-                connection = createConnection(config);
+            if (!connection.isClosed()) {
+                connection.close();
             }
+            connection = createConnection(config);
+            logger.info("reconnect hbase connection success!");
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("reconnect hbase connection failure!", e);
         }
+
     }
 
-    public Connection getHBaseConnection() throws IOException {
-        synchronized (connection) {
-            if (connection == null || connection.isClosed()) {
-                connection = createConnection(config);
-            }
+    public synchronized Connection getHBaseConnection() throws IOException {
+
+        if (connection.isClosed()) {
+            reconnect();
         }
         return connection;
     }

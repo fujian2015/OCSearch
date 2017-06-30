@@ -1,5 +1,6 @@
 package com.asiainfo.ocsearch.transaction.atomic.schema;
 
+import com.asiainfo.ocsearch.constants.Constants;
 import com.asiainfo.ocsearch.datasource.solr.SolrServerManager;
 import com.asiainfo.ocsearch.meta.ContentField;
 import com.asiainfo.ocsearch.meta.Field;
@@ -19,8 +20,9 @@ import org.dom4j.tree.DefaultAttribute;
 import org.dom4j.tree.DefaultElement;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,7 @@ import java.util.Map;
  */
 public class CreateSolrConfig implements AtomicOperation {
 
-    static  Logger log = Logger.getLogger("state");
+    static Logger log = Logger.getLogger("state");
     Schema tableSchema;
 
     public CreateSolrConfig(Schema tableSchema) {
@@ -86,7 +88,8 @@ public class CreateSolrConfig implements AtomicOperation {
 
             }
             root.addText("\n");
-            XMLWriter xmlWriter = new XMLWriter(new FileWriter(managed_schema));
+
+            XMLWriter xmlWriter = new XMLWriter(new OutputStreamWriter(new FileOutputStream(managed_schema), Constants.DEFUAT_CHARSET));
 
             xmlWriter.write(schemaDoc);
             xmlWriter.close();
@@ -139,6 +142,8 @@ public class CreateSolrConfig implements AtomicOperation {
             return true;
         if (dir.isDirectory()) {
             String[] children = dir.list();
+            if (children == null)
+                return true;
             for (int i = 0; i < children.length; i++) {
                 boolean success = deleteDir(new File(dir, children[i]));
                 if (!success) {
@@ -161,9 +166,9 @@ public class CreateSolrConfig implements AtomicOperation {
             solrFields.add(asSolrField(field));
         });
 
-        for(ContentField contentField:tableSchema.getContentFields()){
+        for (ContentField contentField : tableSchema.getContentFields()) {
             solrFields.add(generateContentField(contentField));
-            fields.values().stream().filter(f-> StringUtils.equals(contentField.getName(),f.getContentField())).forEach(field -> {
+            fields.values().stream().filter(f -> StringUtils.equals(contentField.getName(), f.getContentField())).forEach(field -> {
 
                 Element fieldEle = new DefaultElement("copyField");
                 fieldEle.add(new DefaultAttribute("source", field.getName()));

@@ -27,6 +27,9 @@ public class GetService extends QueryService {
     protected JsonNode query(JsonNode request) throws ServiceException {
 
         try {
+            if (false == (request.has("table") && request.has("ids"))) {
+                throw new ServiceException("the get service request must have 'table' and 'ids' param keys!", ErrorCode.PARSE_ERROR);
+            }
             String table = request.get("table").asText();
 
             Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(table);
@@ -61,13 +64,18 @@ public class GetService extends QueryService {
                 ObjectNode data = JsonNodeFactory.instance.objectNode();
 
                 data.put("total", result.getTotal());
-
+                boolean withTable = hasTable(returnNode);
+                boolean withId = hasId(returnNode);
                 ArrayNode docs = JsonNodeFactory.instance.arrayNode();
                 ids.forEach(id -> {
                     ObjectNode node = result.getData().remove(0);
                     if (node.get("id") == null)
                         node.put("id", id);
-                    node.put("_table_", table);
+                    
+                    if (withTable == true)
+                        data.put("_table_", table);
+                    if (withId == false)
+                        data.remove("id");
                     docs.add(node);
                 });
                 data.put("docs", docs);

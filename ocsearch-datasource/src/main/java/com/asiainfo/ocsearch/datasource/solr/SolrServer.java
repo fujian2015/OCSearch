@@ -49,8 +49,8 @@ public class SolrServer {
 
         CollectionAdminRequest.Create create = CollectionAdminRequest.createCollection(collection, config, numShards, numReplicas);
 
-        create.setAutoAddReplicas(true);
-        create.setMaxShardsPerNode(2);
+        create.setAutoAddReplicas(solrConfig.isAutoAddReplicas());
+        create.setMaxShardsPerNode(solrConfig.getMaxShardsPerNode());
         CollectionAdminResponse response = create.process(solrServer);
 
         if (!response.isSuccess()) {
@@ -65,10 +65,22 @@ public class SolrServer {
     }
 
 
-    public synchronized SolrDocumentList query(String collection, SolrParams solrParams) throws Exception {
+    public  SolrDocumentList query(String collection, SolrParams solrParams) throws Exception {
         try {
             QueryResponse queryResponse = solrServer.query(collection, solrParams);
             return queryResponse.getResults();
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public  QueryResponse queryWithCursorMark(String collection, SolrParams solrParams) throws Exception {
+
+        try {
+            return solrServer.query(collection, solrParams);
         } catch (SolrServerException e) {
             e.printStackTrace();
             throw e;

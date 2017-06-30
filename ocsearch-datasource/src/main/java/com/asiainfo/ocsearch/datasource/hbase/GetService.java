@@ -2,7 +2,6 @@ package com.asiainfo.ocsearch.datasource.hbase;
 
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
-import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +11,6 @@ import java.util.Map;
  * Created by mac on 2017/4/19.
  */
 public class GetService extends AbstractService {
-
-    Logger log = Logger.getLogger(getClass());
-
 
     //多个HTable用同一个connection,同一个pool
 

@@ -12,11 +12,11 @@ public class OCSearchEnv {
     private static Properties prop = new Properties();
 
     public static void setUp(Properties p) {
-        for (Object key : p.keySet()) {
-            String k = String.valueOf(key);
+        p.entrySet().forEach(entry->{
+            String k = String.valueOf(entry.getKey());
             if (StringUtils.startsWith(k, "global."))
-                prop.setProperty(k.substring(7), (String) p.get(key));
-        }
+                prop.setProperty(k.substring(7), (String) entry.getValue());
+        });
     }
 
     public static String getEnvValue(String key) {

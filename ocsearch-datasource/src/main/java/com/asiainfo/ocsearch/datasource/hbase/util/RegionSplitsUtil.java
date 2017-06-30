@@ -49,33 +49,37 @@ public class RegionSplitsUtil {
             throw new UnsupportedOperationException("not support more than 16 * 16 * 16 of ranges");
         }
         byte[][] result = new byte[numRegions][length];
-        int div = total / (numRegions);
+        try {
+            int div = total / (numRegions);
 
-        int diff = total - div * numRegions;
-        int lastValue = 0;
-        for (int i = 0; i < numRegions; i++) {
+            int diff = total - div * numRegions;
+            int lastValue = 0;
+            for (int i = 0; i < numRegions; i++) {
 
-            lastValue += div;
-            if(diff != 0 && i < diff) {
-                lastValue += 1;
-            }
-            if(i == numRegions - 1) {
-                lastValue --;
-            }
-            int curr = lastValue;
-            byte[] temp = Integer.toHexString(curr).getBytes();
-            if (temp.length < length) {
-                int j = 0;
-                for (; j < length - temp.length; j++) {
-                    result[i][j] = '0';
+                lastValue += div;
+                if (diff != 0 && i < diff) {
+                    lastValue += 1;
                 }
-                for (int k = 0; k < temp.length; k++) {
-                    result[i][j] = temp[k];
-                    j++;
+                if (i == numRegions - 1) {
+                    lastValue--;
                 }
-            } else {
-                result[i] = temp;
+                int curr = lastValue;
+                byte[] temp = Integer.toHexString(curr).getBytes("UTF-8");
+                if (temp.length < length) {
+                    int j = 0;
+                    for (; j < length - temp.length; j++) {
+                        result[i][j] = '0';
+                    }
+                    for (int k = 0; k < temp.length; k++) {
+                        result[i][j] = temp[k];
+                        j++;
+                    }
+                } else {
+                    result[i] = temp;
+                }
             }
+        }catch (Exception e){
+            e.printStackTrace();
         }
         
         return result;

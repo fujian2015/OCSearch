@@ -9,7 +9,7 @@ import java.io.Serializable;
 /**
  * Created by mac on 2017/4/17.
  */
-public class QueryField implements Serializable {
+public class QueryField implements Serializable, Cloneable {
 
     public QueryField(JsonNode jsonNode) {
 

@@ -20,8 +20,10 @@ public class TransactionUtil {
         String path = getPath(isRollback);
 
         File serializeFile = new File(path);
-        if (!serializeFile.exists())
-            serializeFile.mkdirs();
+        if (!serializeFile.exists()) {
+            if (false == serializeFile.mkdirs())
+                throw new ServiceException("make the transaction dir failure," + path, ErrorCode.RUNTIME_ERROR);
+        }
 
         ObjectOutputStream oos = null;
         try {
@@ -29,7 +31,7 @@ public class TransactionUtil {
             oos.writeObject(transaction);
         } catch (IOException e) {
             deleteTransaction(name, isRollback);
-            throw new ServiceException("can not serialize the transaction:"+name, ErrorCode.RUNTIME_ERROR);
+            throw new ServiceException("can not serialize the transaction:" + name, ErrorCode.RUNTIME_ERROR);
         } finally {
             if (oos != null) try {
                 oos.close();
@@ -52,7 +54,7 @@ public class TransactionUtil {
                 ois = new ObjectInputStream(new FileInputStream(serializeFile));
                 transaction = (Transaction) ois.readObject();
             } catch (Exception e) {
-                throw new ServiceException("can not deserialize the transaction : "+serializeFile.getAbsolutePath(), ErrorCode.RUNTIME_ERROR);
+                throw new ServiceException("can not deserialize the transaction : " + serializeFile.getAbsolutePath(), ErrorCode.RUNTIME_ERROR);
             } finally {
                 if (ois != null) try {
                     ois.close();
@@ -69,20 +71,23 @@ public class TransactionUtil {
 
         File serializeDir = new File(path);
         if (serializeDir.exists()) {
-            return Arrays.asList(serializeDir.list());
+            String[] files = serializeDir.list();
+            if (files != null)
+                return Arrays.asList(files);
         }
 
         return new ArrayList<>(0);
     }
 
-    public static void deleteTransaction(String name, boolean isRollback)  {
+    public static void deleteTransaction(String name, boolean isRollback) {
 
         String path = getPath(isRollback);
 
         File serializeFile = new File(path, name);
 
         if (serializeFile.exists()) {
-            serializeFile.delete();
+            if(false==serializeFile.delete())
+                throw  new RuntimeException("delete the serializeFile failure: "+name);
         }
     }
 

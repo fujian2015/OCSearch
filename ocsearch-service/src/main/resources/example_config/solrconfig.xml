@@ -119,7 +119,7 @@
                         class="${solr.directoryFactory:solr.NRTCachingDirectoryFactory}"/>
     -->
     <directoryFactory name="DirectoryFactory" class="solr.HdfsDirectoryFactory">
-        <str name="solr.hdfs.home">hdfs://yj01:8020/user/solr/</str>
+        <str name="solr.hdfs.home">/user/solr/</str>
        <!-- <str name="solr.hdfs.confdir">/etc/hadoop/2.5.0.0-1245/0/</str>-->
         <bool name="solr.hdfs.blockcache.enabled">true</bool>
         <int name="solr.hdfs.blockcache.slab.count">1</int>
@@ -1196,6 +1196,7 @@
 
          See http://wiki.apache.org/solr/GuessingFieldTypes
       -->
+
     <updateRequestProcessorChain name="add-unknown-fields-to-the-schema">
         <!-- UUIDUpdateProcessorFactory will generate an id if none is present in the incoming document -->
         <processor class="solr.UUIDUpdateProcessorFactory"/>
@@ -1252,7 +1253,6 @@
         <processor class="solr.DistributedUpdateProcessorFactory"/>
         <processor class="solr.RunUpdateProcessorFactory"/>
     </updateRequestProcessorChain>
-
     <!-- Deduplication
 
          An example dedup update processor that creates the "id" field

@@ -13,6 +13,16 @@ public class SolrConfig {
     private final int zkClientTimeout;
     private final int zkConnectTimeout;
     private final int replicas;
+
+    public int getMaxShardsPerNode() {
+        return maxShardsPerNode;
+    }
+
+    public boolean isAutoAddReplicas() {
+        return autoAddReplicas;
+    }
+
+    private final int maxShardsPerNode;
     private final boolean autoAddReplicas;
 
 
@@ -23,6 +33,7 @@ public class SolrConfig {
         zkClientTimeout=Integer.parseInt(prop.getProperty("solr.zkClientTimeout","60000"));
         zkConnectTimeout=Integer.parseInt(prop.getProperty("solr.zkConnectTimeout","60000"));
         replicas = Integer.parseInt(prop.getProperty("solr.replicas","1"));
+        maxShardsPerNode = Integer.parseInt(prop.getProperty("solr.maxShardsPerNode","2"));
         autoAddReplicas =Boolean.parseBoolean(prop.getProperty("solr.autoAddReplicas","true"));
 
     }
@@ -44,4 +55,5 @@ public class SolrConfig {
     public int getReplicas() {
         return replicas;
     }
+
 }

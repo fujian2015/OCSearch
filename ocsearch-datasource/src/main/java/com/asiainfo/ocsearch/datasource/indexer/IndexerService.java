@@ -90,7 +90,7 @@ public class IndexerService {
 
             if (indexerDef.getLifecycleState() == IndexerDefinition.LifecycleState.DELETE_REQUESTED
                     || indexerDef.getLifecycleState() == IndexerDefinition.LifecycleState.DELETING) {
-                System.err.printf("Delete of '%s' is already in progress\n", indexerName);
+                logger.warn(String.format("Delete of '%s' is already in progress", indexerName));
                 return;
             }
 
@@ -107,7 +107,7 @@ public class IndexerService {
     }
 
     private void waitForDeletion(String indexerName) throws InterruptedException, KeeperException {
-        System.out.printf("Deleting indexer '%s'", indexerName);
+        logger.info(String.format("Deleting indexer '%s'", indexerName));
         while (model.hasIndexer(indexerName)) {
             IndexerDefinition indexerDef;
             try {
@@ -131,7 +131,7 @@ public class IndexerService {
                             + indexerDef.getLifecycleState());
             }
         }
-        System.out.printf("\nDeleted indexer '%s'\n", indexerName);
+        logger.info(String.format("Deleted indexer '%s'", indexerName));
     }
 
     public boolean exists(String table) {
@@ -246,7 +246,7 @@ public class IndexerService {
             args.add("--hbase-start-time");
             args.add(String.valueOf(startTime));
         }
-        if (endTime != -1 && endTime != -1) {
+        if (endTime != -1) {
             args.add("--hbase-end-time");
             args.add(String.valueOf(endTime));
         }

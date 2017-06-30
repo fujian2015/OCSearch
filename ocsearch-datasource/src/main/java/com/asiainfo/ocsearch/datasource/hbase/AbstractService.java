@@ -61,7 +61,7 @@ public class AbstractService implements Closeable {
                 try {
                     table.close();
                 } catch (IOException e) {
-
+                    log.error(e);
                 }
             }
         }
@@ -70,7 +70,7 @@ public class AbstractService implements Closeable {
     public <T> T execute(AdminCallBack<T> action) {
 
         try {
-            Admin admin=this.serviceManager.getHBaseConnection().getAdmin();
+            Admin admin = this.serviceManager.getHBaseConnection().getAdmin();
 
             T result = action.doWithAdmin(admin);
 

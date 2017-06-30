@@ -9,8 +9,6 @@ import org.codehaus.jackson.node.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by mac on 2017/6/1.
@@ -26,9 +24,12 @@ public class SqlService extends QueryService {
         ArrayNode results = factory.arrayNode();
         returnData.put("docs", results);
         try {
-            jdbcHelper = new PhoenixJdbcHelper();
+            if (false == request.has("sql"))
+                throw new ServiceException("the sql service request must have 'sql' param key!", ErrorCode.PARSE_ERROR);
+
             String sql = request.get("sql").asText();
 
+            jdbcHelper = new PhoenixJdbcHelper();
             ResultSet rsResultSet = jdbcHelper.executeQueryRaw(sql);
 
             int columnCount = rsResultSet.getMetaData().getColumnCount();
@@ -36,17 +37,18 @@ public class SqlService extends QueryService {
             while (rsResultSet.next()) {
                 count++;
                 ObjectNode objectNode = factory.objectNode();
-                Map<String, Object> map = new HashMap<String, Object>();
                 for (int i = 1; i <= columnCount; i++) {
-                    if(rsResultSet.getObject(i)==null)
+                    if (rsResultSet.getObject(i) == null)
                         continue;
                     objectNode.put(rsResultSet.getMetaData().getColumnName(i), toValueNode(rsResultSet.getObject(i)));
                 }
                 results.add(objectNode);
             }
             returnData.put("total", count);
+        } catch (ServiceException e) {
+            log.warn(e);
+            throw e;
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e);
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
         } finally {
@@ -54,6 +56,7 @@ public class SqlService extends QueryService {
                 try {
                     jdbcHelper.close();
                 } catch (SQLException e1) {
+                    log.error(e1);
                 }
             }
         }

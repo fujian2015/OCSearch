@@ -8,7 +8,7 @@ import java.io.*;
  * Created by mac on 2017/4/5.
  */
 public class ExecuteProcessUtil {
-
+    static  final int MAX_ERROR_LENGTH=1024;
     public synchronized static String  execute(String command, File worDir, Logger logger) throws IOException, InterruptedException {
 
         Process p = Runtime.getRuntime().exec(command, null, worDir);
@@ -29,7 +29,6 @@ public class ExecuteProcessUtil {
         String type;
         Logger logger;
 
-        final int MAX_ERROR_LENGTH=1024;
 
         public StreamGobbler(InputStream is, String type, Logger logger) {
             this.is = is;
@@ -40,7 +39,7 @@ public class ExecuteProcessUtil {
 
         public void run() {
             try {
-                InputStreamReader isr = new InputStreamReader(is);
+                InputStreamReader isr = new InputStreamReader(is,"UTF-8");
                 BufferedReader br = new BufferedReader(isr);
                 String line = null;
                 if (type.equals("Error")) {

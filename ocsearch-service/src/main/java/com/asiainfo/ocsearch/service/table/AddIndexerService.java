@@ -7,61 +7,68 @@ import com.asiainfo.ocsearch.meta.Schema;
 import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
-import com.asiainfo.ocsearch.transaction.atomic.table.*;
+import com.asiainfo.ocsearch.transaction.atomic.table.CreateIndexerTable;
 import com.asiainfo.ocsearch.transaction.internal.TransactionImpl;
 import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 
 /**
- * Created by mac on 2017/5/4.
+ * Created by mac on 2017/6/30.
  */
-public class DeleteTableService extends OCSearchService {
+public class AddIndexerService extends OCSearchService {
 
     Logger stateLog = Logger.getLogger("state");
 
-
     @Override
     public byte[] doService(JsonNode request) throws ServiceException {
+
         String uuid = getRequestId();
+        stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());
+
         try {
-            stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());
+
             String name = request.get("name").asText();
 
-            if (!MetaDataHelperManager.getInstance().hasTable(name)) {
-                throw new ServiceException("table " + name + " does not exist!", ErrorCode.TABLE_NOT_EXIST);
-            }
             Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(name);
 
-            Transaction transaction = new TransactionImpl();
+            if (schema == null) {
+                throw new ServiceException("table : " + name + " does not exist!", ErrorCode.TABLE_NOT_EXIST);
+            }
 
-//            transaction.add(new RemoveTableFromDb(name));
-            transaction.add(new RemoveTableFromZk(name));  //instead db with zookeeper
+            Transaction transaction = new TransactionImpl();
 
             IndexType indexType = schema.getIndexType();
 
             if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_BATCH) {
-                transaction.add(new DeleteIndexerTable(name));
-                transaction.add(new DeleteSolrCollection(name));
-            } else if (indexType == IndexType.PHOENIX) {
-                transaction.add(new DeletePhoenixView(name));
-            }
-            if (false == request.has("hbase_exist") || false == request.get("hbase_exist").asBoolean())
-                transaction.add(new DeleteHbaseTable(name));
 
+                transaction.add(new CreateIndexerTable(name, schema));
+            } else {
+                throw new ServiceException(String.format("table :%s  has a index_type,%s", name, indexType.toString()), ErrorCode.TABLE_NOT_EXIST);
+            }
+
+            if (!transaction.canExecute()) {
+                throw new ServiceException(String.format("add indexer :%s  failure because of transaction can't be executed.", name), ErrorCode.RUNTIME_ERROR);
+            }
             try {
                 transaction.execute();
             } catch (Exception e) {
-                TransactionUtil.serialize(uuid + "_table_delete_" + name, transaction, false);
-                log.error("delete table " + name + " failure", e);
+                log.error(e);
+                try {
+                    transaction.rollBack();
+                } catch (Exception rollBackException) {
+                    TransactionUtil.serialize(uuid + "_indexer_add_" + name, transaction, true);
+                    log.error("roll back create table " + name + " failure", rollBackException);
+                }
                 throw e;
             }
             return success;
+        } catch (ServiceException e) {
+            log.warn(e);
+            throw e;
         } catch (Exception e) {
             log.error(e);
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
-        } finally {
-            stateLog.info("end request " + uuid + " at " + System.currentTimeMillis());
         }
     }
 }

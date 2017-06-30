@@ -1,5 +1,6 @@
 package com.asiainfo.ocsearch.transaction.atomic.table;
 
+import com.asiainfo.ocsearch.constants.Constants;
 import com.asiainfo.ocsearch.datasource.indexer.IndexerService;
 import com.asiainfo.ocsearch.datasource.indexer.IndexerServiceManager;
 import com.asiainfo.ocsearch.meta.Field;
@@ -20,10 +21,7 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.XMLWriter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -98,7 +96,7 @@ public class CreateIndexerTable implements AtomicOperation {
     @Deprecated
     private void generateSchema(File conf) {
         ObjectMapper objectMapper = new ObjectMapper();
-        FileWriter fileWriter = null;
+        OutputStreamWriter fileWriter = null;
         try {
 
             ArrayNode morphlines = objectMapper.createArrayNode();
@@ -119,7 +117,7 @@ public class CreateIndexerTable implements AtomicOperation {
 
             commands.add(getLogCommads());
 
-            fileWriter = new FileWriter(conf);
+            fileWriter = new OutputStreamWriter(new FileOutputStream(conf), Constants.DEFUAT_CHARSET);
 
             fileWriter.write("morphlines\t:" + JsonWirterUtil.toConfigString(morphlines, 0));
 

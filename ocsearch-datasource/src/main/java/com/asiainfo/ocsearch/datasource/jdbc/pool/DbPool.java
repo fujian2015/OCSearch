@@ -26,7 +26,7 @@ import java.util.Properties;
 public final class DbPool {
     private final static Logger log = Logger.getLogger(DbPool.class);
     // 创建一个私有静态的并且是与事务相关联的局部线程变量
-    public static ThreadLocal<Connection> connectionHolder = new ThreadLocal<Connection>();
+    private final  static ThreadLocal<Connection> connectionHolder = new ThreadLocal<Connection>();
     private static DruidDataSource dataSource;
 
     private DbPool() {

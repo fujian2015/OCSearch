@@ -24,7 +24,9 @@ public class FileGetService extends OCSearchService {
     protected byte[] doService(JsonNode request) throws ServiceException {
 
         try {
-
+            if (false == request.has("id")) {
+                throw new ServiceException("the get service request must have 'id' param keys!", ErrorCode.PARSE_ERROR);
+            }
             String oriId = request.get("id").asText();
 
             FileID fileID = FileID.parseId(oriId);

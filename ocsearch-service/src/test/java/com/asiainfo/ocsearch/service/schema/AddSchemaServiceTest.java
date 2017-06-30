@@ -20,46 +20,44 @@ public class AddSchemaServiceTest {
 
         new SystemListener().initAll();
         JsonNode jsonNode = new ObjectMapper().readTree("{\n" +
-                "   \"request\":true,\n" +
-                "    \"name\": \"phoenixSchema\",\n" +
-                "    \"rowkey_expression\": \"md5(phone,imsi)+‘|‘+phone+‘|‘+imsi\",\n" +
+                "\t\"with_hbase\":true,\n" +
+                "    \"name\": \"schemaShanXi1\",\n" +
+                "    \"rowkey_expression\": \"phone+‘|‘+imsi\",\n" +
                 "    \"table_expression\": \"table+’_'+time\",\n" +
-                "    \"index_type\": 2,\n" +
+                "    \"index_type\": 0,\n" +
                 "    \"content_fields\": [\n" +
-                "   \n" +
+                "        \n" +
                 "    ],\n" +
                 "    \"inner_fields\": [\n" +
                 "       \n" +
                 "    ],\n" +
                 "    \"query_fields\": [\n" +
-                "      \n" +
+                "       \n" +
                 "    ],\n" +
                 "    \"fields\": [\n" +
-                "       \n" +
                 "        {\n" +
-                "            \"name\": \"title\",\n" +
-                "            \"indexed\": true,\n" +
-                "            \"index_stored\": true,\n" +
-                "            \"index_type\": \"text_gl\",\n" +
-                "            \"store_type\": \"STRING\",\n" +
-                "            \"content_field\": \"_root_\",\n" +
-                "            \"hbase_column\": \"1\",\n" +
-                "            \"hbase_family\": \"B\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"name\": \"content\",\n" +
+                "            \"name\": \"NAME\",\n" +
                 "            \"indexed\": true,\n" +
                 "            \"index_stored\": false,\n" +
-                "            \"index_type\": \"text_gl\",\n" +
-                "            \"store_type\": \"STRING\",\n" +
-                "            \"hbase_column\": \"0\",\n" +
-                "            \"hbase_family\": \"B\"\n" +
+                "            \"index_type\": \"string\",\n" +
+                "            \"store_type\": \"string\",\n" +
+                "            \"hbase_column\":\"NAME\",\n" +
+                "            \"hbase_family\":\"0\"\n" +
+                "        },\n" +
+                "         {\n" +
+                "            \"name\": \"AGE\",\n" +
+                "            \"indexed\": true,\n" +
+                "            \"index_stored\": false,\n" +
+                "            \"index_type\": \"string\",\n" +
+                "            \"store_type\": \"string\",\n" +
+                "            \"hbase_column\":\"AGE\",\n" +
+                "            \"hbase_family\":\"0\"\n" +
                 "        }\n" +
                 "    ]\n" +
                 "}");
 
         System.out.println(new Schema(jsonNode));
-        new AddSchemaService().doService(jsonNode);
+//        new AddSchemaService().doService(jsonNode);
 
     }
 

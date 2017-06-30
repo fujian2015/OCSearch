@@ -42,7 +42,7 @@ public class CreateTableService extends OCSearchService {
             Table table = parseRequest(request);
 
 //            Schema schema = SchemaManager.getSchemaBySchema(table.getSchema());
-            Schema schema= MetaDataHelperManager.getInstance().getSchemaBySchema(table.getSchema());
+            Schema schema = MetaDataHelperManager.getInstance().getSchemaBySchema(table.getSchema());
 
             if (schema == null) {
                 throw new ServiceException("schema : " + table.getSchema() + " does not exist!", ErrorCode.PARSE_ERROR);
@@ -54,15 +54,16 @@ public class CreateTableService extends OCSearchService {
             Set<String> families = new HashSet<>();
 
             schema.getFields().values().stream()
-                    .filter(field -> field.getInnerField()==null)
+                    .filter(field -> field.getInnerField() == null)
                     .forEach(field -> families.add(field.getHbaseFamily()));
-            schema.getInnerFields().values().stream().forEach(innerField ->families.add(innerField.getHbaseFamily()));
+            schema.getInnerFields().values().stream().forEach(innerField -> families.add(innerField.getHbaseFamily()));
 
-            transaction.add(new CreateHbaseTable(name, table.getHbaseRegions(), table.getRegionSplits(), families));
+            if (!request.get("hbase").has("exist")) //hbase table does not exist
+                transaction.add(new CreateHbaseTable(name, table.getHbaseRegions(), table.getRegionSplits(), families));
 
             IndexType indexType = schema.getIndexType();
 
-            if (indexType == IndexType.HBASE_SOLR_INDEXER||indexType == IndexType.HBASE_SOLR_BATCH) {
+            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_BATCH) {
 
                 transaction.add(new CreateSolrCollection(name, schema.getName(), table.getSolrShards(), table.getSolrReplicas()));
 
@@ -87,11 +88,12 @@ public class CreateTableService extends OCSearchService {
                 try {
                     transaction.rollBack();
                 } catch (Exception rollBackException) {
-                    TransactionUtil.serialize( uuid + "_table_create_" + name, transaction, true);
+                    TransactionUtil.serialize(uuid + "_table_create_" + name, transaction, true);
                     log.error("roll back create table " + name + " failure", rollBackException);
                 }
                 throw e;
             }
+            return success;
         } catch (ServiceException e) {
             log.warn(e);
             throw e;
@@ -102,7 +104,7 @@ public class CreateTableService extends OCSearchService {
             lock.unlock();
             stateLog.info("end request " + uuid + " at " + System.currentTimeMillis());
         }
-        return success;
+
     }
 
     /**

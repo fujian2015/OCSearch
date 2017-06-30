@@ -47,7 +47,7 @@ public class IndexerService1 {
         try {
             ExecuteProcessUtil.execute(cmd.toString(), new File(indexerHome), logger);
         }catch (Exception e){
-            new RuntimeException("create hbase indexer table failure!",e);
+            throw new RuntimeException("create hbase indexer table failure!",e);
         }
     }
     /**
@@ -65,7 +65,7 @@ public class IndexerService1 {
         try {
             ExecuteProcessUtil.execute(cmd.toString(), new File(indexerHome), logger);
         }catch (Exception e){
-            new RuntimeException("delete hbase indexer table failure!",e);
+            throw new RuntimeException("delete hbase indexer table failure!",e);
         }
     }
     public boolean exists(String table){
@@ -83,7 +83,7 @@ public class IndexerService1 {
                     return true;
             }
         }catch (Exception e){
-            new RuntimeException("check hbase indexer table failure!",e);
+            throw new RuntimeException("check hbase indexer table failure!",e);
         }
         return false;
     }

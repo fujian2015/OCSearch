@@ -33,9 +33,14 @@ public class ScanService extends QueryService {
         ArrayNode results = JsonNodeFactory.instance.arrayNode();
         int total = 0;
         try {
+            if (false == (request.has("rowkey_prefix") && request.has("start") && request.has("rows") && request.has("tables"))) {
+                throw new ServiceException("the search service request must have 'rowkey_prefix','start'," +
+                        "'rows','tables' param keys!", ErrorCode.PARSE_ERROR);
+            }
+
             String rowKey = request.get("rowkey_prefix").asText();
             String condition = null;
-            if (request.has(condition))
+            if (request.has("condition"))
                 condition = request.get("condition").asText();
 
             int start = request.get("start").asInt();
@@ -47,7 +52,8 @@ public class ScanService extends QueryService {
 
             String cacheKey = generateCacheKey(rowKey, condition, tableSet);
             ArrayNode returnNode = (ArrayNode) request.get("return_fields");
-
+            boolean withTable = hasTable(returnNode);
+            boolean withId = hasId(returnNode);
             Map<String, String> cacheValue = null;
             try {
                 cacheValue = CacheManager.getCache().get(cacheKey, Arrays.asList("total", start + ""));
@@ -87,8 +93,11 @@ public class ScanService extends QueryService {
 
                 countDownLatch.await();
                 totalNode = JsonNodeFactory.instance.objectNode();
-                for (String table : actors.keySet()) {
-                    QueryResult qr = actors.get(table).getQueryResult();
+
+                for (Map.Entry<String, ScanQueryActor> entry : actors.entrySet()) {
+
+                    String table = entry.getKey();
+                    QueryResult qr = entry.getValue().getQueryResult();
                     totalNode.put(table, qr.getTotal());
                     total += qr.getTotal();
                     for (ObjectNode data : qr.getData()) {
@@ -99,12 +108,17 @@ public class ScanService extends QueryService {
                             nextRowKey = data.get("id").asText();
                             break;
                         }
-                        data.put("_table_", table);
+
+                        if (withTable == true)
+                            data.put("_table_", table);
+                        if (withId == false)
+                            data.remove("id");
                         results.add(data);
                     }
                     if (nextRowKey != null)
                         break;
                 }
+
                 totalNode.put("total", total);
 
             } else {
@@ -130,9 +144,9 @@ public class ScanService extends QueryService {
 
                     totalNode = JsonNodeFactory.instance.objectNode();
 
-                    for (String table : actors.keySet()) {
-                        QueryResult qr = actors.get(table).getQueryResult();
-                        totalNode.put(table, qr.getTotal());
+                    for (Map.Entry<String, ScanQueryActor> entry : actors.entrySet()) {
+                        QueryResult qr = entry.getValue().getQueryResult();
+                        totalNode.put(entry.getKey(), qr.getTotal());
                         total += qr.getTotal();
                         for (ObjectNode data : qr.getData()) {
                             if (firstKey == null) {
@@ -199,13 +213,17 @@ public class ScanService extends QueryService {
                 });
                 countDownLatch.await();
 
-                for (String table : actors.keySet()) {
-                    QueryResult qr = actors.get(table).getQueryResult();
+                for (Map.Entry<String, QueryActor> entry : actors.entrySet()) {
+
+                    QueryResult qr = entry.getValue().getQueryResult();
 
                     for (ObjectNode data : qr.getData()) {
                         if (firstKey == null)
                             firstKey = data.get("id").asText();
-                        data.put("_table_", table);
+                        if (withTable == true)
+                            data.put("_table_", entry.getKey());
+                        if (withId == false)
+                            data.remove("id");
                         results.add(data);
                     }
                     if (qr.getLastRowkey() != null) {

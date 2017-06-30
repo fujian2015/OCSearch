@@ -1,6 +1,5 @@
 package com.asiainfo.ocsearch.service.query;
 
-import com.asiainfo.ocsearch.cache.CacheManager;
 import com.asiainfo.ocsearch.datasource.solr.SolrServerManager;
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
@@ -13,9 +12,9 @@ import com.asiainfo.ocsearch.query.HbaseQuery;
 import com.asiainfo.ocsearch.query.QueryActor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
@@ -24,36 +23,41 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * Created by mac on 2017/5/23.
+ * Created by mac on 2017/6/29.
  */
-public class SearchService extends QueryService {
+public class DeepSearchService extends QueryService {
     @Override
     protected JsonNode query(JsonNode request) throws ServiceException {
 
         ObjectNode returnData = JsonNodeFactory.instance.objectNode();
 
         try {
-            if (false == (request.has("query") && request.has("condition") && request.has("start")
+            if (false == (request.has("query") && request.has("condition") && request.has("cursor_mark")
                     && request.has("rows") && request.has("sort") && request.has("tables"))) {
-                throw new ServiceException("the search service request must have 'query','condition','start'," +
+                throw new ServiceException("the search service request must have 'query','condition','cursor_mark'," +
                         "'rows','sort','tables' param keys!", ErrorCode.PARSE_ERROR);
             }
 
             String qs = request.get("query").asText();
             String condition = request.get("condition").asText();
 
-            int start = request.get("start").asInt();
+            String cursorMark = request.get("cursor_mark").asText();
+
             int rows = request.get("rows").asInt();
             String sort = request.get("sort").asText();
+
+            if (StringUtils.isEmpty(sort))
+                throw new ServiceException("the search service request 'sort' must have a not empty value", ErrorCode.PARSE_ERROR);
+
             ArrayNode returnNode = (ArrayNode) request.get("return_fields");
             ArrayNode tables = (ArrayNode) request.get("tables");
             Set<String> tableSet = new TreeSet<>();
             tables.forEach(table -> tableSet.add(table.asText()));
 
             if (tableSet.size() == 1) {
-                searchSingleTable(qs, condition, start, rows, sort, tableSet, returnNode, returnData);
+                searchSingleTable(qs, condition, cursorMark, rows, sort, tableSet, returnNode, returnData);
             } else {
-                searchMultiTable(qs, condition, start, rows, sort, tableSet, returnNode, returnData);
+                searchMultiTable(qs, condition, cursorMark, rows, sort, tableSet, returnNode, returnData);
             }
 
         } catch (ServiceException e) {
@@ -66,18 +70,9 @@ public class SearchService extends QueryService {
         return returnData;
     }
 
-    private void searchMultiTable(String qs, String condition, int start, int rows, String sort, Set<String> tableSet, ArrayNode returnNode, ObjectNode returnData) throws Exception {
+    private void searchMultiTable(String qs, String condition, String start, int rows, String sort, Set<String> tableSet, ArrayNode returnNode, ObjectNode returnData) throws Exception {
         int total = 0;
-        String cacheKey = generateCacheKey(qs, condition, tableSet);
 
-        String cacheStartKey = start + "|" + rows;
-        Map<String, String> cacheValue;
-        try {
-            cacheValue = CacheManager.getCache().get(cacheKey, Arrays.asList("total", cacheStartKey));
-        } catch (Exception e) {
-            log.error("get cache error,called by:", e);
-            cacheValue = new HashMap<>();
-        }
 
         List<OCRowKey> rowKeys = new ArrayList<>(rows);
 
@@ -85,34 +80,24 @@ public class SearchService extends QueryService {
         String tableFirst = tableSet.iterator().next();
         Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(tableFirst);
 
-        if (cacheValue.containsKey("total") && cacheValue.containsKey(cacheStartKey)) {
-            //get ids from cache
-            ArrayNode keyNode = (ArrayNode) new ObjectMapper().readTree(cacheValue.get(cacheStartKey));
-            keyNode.forEach(node -> {
-                String rs[] = StringUtils.split(node.asText(), "||");
-                rowKeys.add(new OCRowKey(rs[0], rs[1]));
-                if (!rowKeyMap.containsKey(rs[0]))
-                    rowKeyMap.put(rs[0], new ArrayList<>());
-                rowKeyMap.get(rs[0]).add(rs[1]);
-            });
-            total = Integer.parseInt(cacheValue.get("total"));
-        } else {
-            //get ids from solr
-            SolrQuery solrQuery = constructQuery(start, rows, qs, condition, sort, tableSet, schema.getQueryFields());
-            System.err.println("solr query is:" + solrQuery.toString());
-            SolrDocumentList solrResults = SolrServerManager.getInstance().query(tableFirst, solrQuery);
 
-            total = (int) solrResults.getNumFound();
+        //get ids from solr
+        SolrQuery solrQuery = constructQuery(start, rows, qs, condition, sort, tableSet, schema.getQueryFields());
+        System.err.println("solr query is:" + solrQuery.toString());
+        QueryResponse queryResponse = SolrServerManager.getInstance().queryWithCursorMark(tableFirst, solrQuery);
+        SolrDocumentList solrResults = queryResponse.getResults();
 
-            solrResults.forEach(doc -> {
-                String table = (String) doc.get("_table_");
-                String id = (String) doc.get("id");
-                if (!rowKeyMap.containsKey(table))
-                    rowKeyMap.put(table, new ArrayList<>());
-                rowKeyMap.get(table).add(id);
-                rowKeys.add(new OCRowKey(table, id));
-            });
-        }
+        total = (int) solrResults.getNumFound();
+
+        solrResults.forEach(doc -> {
+            String table = (String) doc.get("_table_");
+            String id = (String) doc.get("id");
+            if (!rowKeyMap.containsKey(table))
+                rowKeyMap.put(table, new ArrayList<>());
+            rowKeyMap.get(table).add(id);
+            rowKeys.add(new OCRowKey(table, id));
+        });
+
 
         Set<String> returnFields = generateReturnFields(schema, returnNode);
 
@@ -158,65 +143,38 @@ public class SearchService extends QueryService {
             }
         }
 
-        //cache put
-        Map<String, String> caches = new HashMap<>();
-        if (!cacheValue.containsKey("total")) {
-            caches.put("total", String.valueOf(total));
-        }
-        if (!cacheValue.containsKey(cacheStartKey))
-            caches.put(cacheStartKey, generateMultiCacheValue(rowKeys));
-
-        if (!caches.isEmpty())
-            CacheManager.getCache().put(cacheKey, caches);
         //return data
         returnData.put("total", total);
         returnData.put("docs", arrayNode);
+        returnData.put("next_cursor_mark", queryResponse.getNextCursorMark());
     }
 
 
-    private void searchSingleTable(String qs, String condition, int start, int rows, String sort, Set<String> tableSet, ArrayNode returnNode, ObjectNode returnData) throws Exception {
+    private void searchSingleTable(String qs, String condition, String start, int rows, String sort, Set<String> tableSet, ArrayNode returnNode, ObjectNode returnData) throws Exception {
         int total = 0;
-        long startTime = System.currentTimeMillis();
-        String cacheKey = generateCacheKey(qs, condition, tableSet);
 
-        String cacheStartKey = start + "|" + rows;
-        Map<String, String> cacheValue;
-        try {
-            cacheValue = CacheManager.getCache().get(cacheKey, Arrays.asList("total", cacheStartKey));
-        } catch (Exception e) {
-            log.error("get cache error,called by:", e);
-            cacheValue = new HashMap<>();
-        }
         long cacheTime = System.currentTimeMillis();
-//        if (log.isDebugEnabled())
-        log.info("[ocsearch]get cache use :" + (cacheTime - startTime) + "ms");
 
         List<String> rowKeys = new ArrayList<>(rows);
 
         String table = tableSet.iterator().next();
         Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(table);
 
-        if (cacheValue.containsKey("total") && cacheValue.containsKey(cacheStartKey)) {
-            //get ids from cache
-            ArrayNode keyNode = (ArrayNode) new ObjectMapper().readTree(cacheValue.get(cacheStartKey));
-            keyNode.forEach(node -> {
-                rowKeys.add(node.asText());
-            });
-            total = Integer.parseInt(cacheValue.get("total"));
-        } else {
-            //get ids from solr
-            SolrQuery solrQuery = constructQuery(start, rows, qs, condition, sort, tableSet, schema.getQueryFields());
+        //get ids from solr
+        SolrQuery solrQuery = constructQuery(start, rows, qs, condition, sort, tableSet, schema.getQueryFields());
 
-            log.warn("query sql is:" + solrQuery.toString());
+        log.warn("solr query  is:" + solrQuery.toString());
 
-            SolrDocumentList solrResults = SolrServerManager.getInstance().query(table, solrQuery);
+        QueryResponse queryResponse = SolrServerManager.getInstance().queryWithCursorMark(table, solrQuery);
 
-            total = (int) solrResults.getNumFound();
+        SolrDocumentList solrResults = queryResponse.getResults();
+        total = (int) solrResults.getNumFound();
 
-            solrResults.forEach(doc -> {
-                rowKeys.add((String) doc.get("id"));
-            });
-        }
+        solrResults.forEach(doc -> {
+            rowKeys.add((String) doc.get("id"));
+        });
+
+
         long getIdsTime = System.currentTimeMillis();
 
 //        if (log.isDebugEnabled())
@@ -252,50 +210,27 @@ public class SearchService extends QueryService {
             );
             log.warn("arrayNode  is:" + arrayNode.size());
         }
+
         long getDataTime = System.currentTimeMillis();
 
 //        if (log.isDebugEnabled())
         log.info("[ocsearch]get hbase data use :" + (getDataTime - getIdsTime) + "ms");
         //cache put
-        Map<String, String> caches = new HashMap<>();
-        if (!cacheValue.containsKey("total")) {
-            caches.put("total", String.valueOf(total));
-        }
-        if (!cacheValue.containsKey(cacheStartKey))
-            caches.put(cacheStartKey, generateSingleCacheValue(rowKeys));
-
-        if (!caches.isEmpty())
-            CacheManager.getCache().put(cacheKey, caches);
         //return data
         returnData.put("total", total);
+
         returnData.put("docs", arrayNode);
-        long putCahceTime = System.currentTimeMillis();
+        returnData.put("next_cursor_mark", queryResponse.getNextCursorMark());
 
-//        if (log.isDebugEnabled())
-        log.info("[ocsearch]put cache data use :" + (putCahceTime - getDataTime) + "ms");
     }
 
-    private String generateSingleCacheValue(List<String> rows) {
-        ArrayNode node = JsonNodeFactory.instance.arrayNode();
-        rows.forEach(ocRowKey -> node.add(ocRowKey));
-        return node.toString();
-    }
-
-    private String generateMultiCacheValue(List<OCRowKey> rowKeys) {
-        ArrayNode node = JsonNodeFactory.instance.arrayNode();
-        rowKeys.forEach(ocRowKey -> node.add(ocRowKey.table + "||" + ocRowKey.rowKey));
-        return node.toString();
-    }
-
-
-    private SolrQuery constructQuery(int start, int rows, String qs, String condition, String sort, Set<String> tables, List<QueryField> queryFields) throws ServiceException {
+    private SolrQuery constructQuery(String start, int rows, String qs, String condition, String sort, Set<String> tables, List<QueryField> queryFields) throws ServiceException {
 
         StringBuilder q = new StringBuilder();
 
-
         SolrQuery solrQuery = new SolrQuery(q.toString());
         solrQuery.setRows(rows);
-        solrQuery.setStart(start);
+        solrQuery.set("cursorMark", start);
 
         if (StringUtils.isNotBlank(qs)) {
 
@@ -348,5 +283,4 @@ public class SearchService extends QueryService {
         solrQuery.set("qf", StringUtils.join(names, " "));
         solrQuery.set("pf", StringUtils.join(qfs, " "));
     }
-
 }

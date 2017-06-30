@@ -1,5 +1,6 @@
 package com.asiainfo.ocsearch.transaction.atomic.schema;
 
+import com.asiainfo.ocsearch.constants.Constants;
 import com.asiainfo.ocsearch.meta.Field;
 import com.asiainfo.ocsearch.meta.FieldType;
 import com.asiainfo.ocsearch.meta.InnerField;
@@ -15,9 +16,7 @@ import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +48,8 @@ public class CreateIndexerConfig implements AtomicOperation {
         if (config.exists()) {
             throw new RuntimeException("the work dir exists " + path);
         }
-        config.mkdirs();
+        if(!config.mkdirs())
+            throw new RuntimeException("make the work dir failure " + path);
         try {
 
             File conf = new File(path, "morphlines.conf");
@@ -76,7 +76,7 @@ public class CreateIndexerConfig implements AtomicOperation {
      */
     private void generateSchema(File conf) {
         ObjectMapper objectMapper = new ObjectMapper();
-        FileWriter fileWriter = null;
+        OutputStreamWriter fileWriter = null;
         try {
 
             ArrayNode morphlines = objectMapper.createArrayNode();
@@ -97,7 +97,7 @@ public class CreateIndexerConfig implements AtomicOperation {
 
             commands.add(getLogCommads());
 
-            fileWriter = new FileWriter(conf);
+            fileWriter = new OutputStreamWriter(new FileOutputStream(conf), Constants.DEFUAT_CHARSET);
 
             fileWriter.write("morphlines\t:" + JsonWirterUtil.toConfigString(morphlines, 0));
 
@@ -250,6 +250,8 @@ public class CreateIndexerConfig implements AtomicOperation {
     private boolean deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
+            if(children==null)
+                return true;
             for (int i = 0; i < children.length; i++) {
                 boolean success = deleteDir(new File(dir, children[i]));
                 if (!success) {

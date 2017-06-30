@@ -22,7 +22,7 @@ public class EngineTest {
 
 //        Executor ee = Engine.getInstance().createExecutor("phone+‘_‘+imsi");
 
-        Executor ee = Engine.getInstance().createExecutor("'GPRS__'+ $date:format($date:todate(pi,'yyyyMMdd').getTime(),'yyyyMMddHH')");
+        Executor ee = Engine.getInstance().createExecutor("'GPRS__'+ $date:format($date:toDate(pi,'yyyyMMdd').getTime(),'yyyyMMddHH')");
 
         System.out.println(ee.evaluate(jc));
     }
