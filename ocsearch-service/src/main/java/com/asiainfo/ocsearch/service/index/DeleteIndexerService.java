@@ -1,5 +1,6 @@
 package com.asiainfo.ocsearch.service.index;
 
+import com.asiainfo.ocsearch.datasource.indexer.IndexerServiceManager;
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.meta.IndexType;
@@ -39,6 +40,10 @@ public class DeleteIndexerService extends OCSearchService {
                 throw new ServiceException("indexer " + name + " does not exist!", ErrorCode.TABLE_NOT_EXIST);
             }
 
+            if (!IndexerServiceManager.getIndexerService().exists(name)) {
+                throw new ServiceException(String.format("indexer %s does not exist!", name), ErrorCode.INDEXER_NOT_EXIST);
+            }
+
             try {
                 transaction.execute();
             } catch (Exception e) {
@@ -47,6 +52,9 @@ public class DeleteIndexerService extends OCSearchService {
                 throw e;
             }
             return success;
+        } catch (ServiceException se) {
+            log.warn(se);
+            throw se;
         } catch (Exception e) {
             log.error(e);
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);

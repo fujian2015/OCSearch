@@ -48,7 +48,7 @@ public class AddIndexerService extends OCSearchService {
             }
 
             if (!transaction.canExecute()) {
-                throw new ServiceException(String.format("add indexer :%s  failure because of transaction can't be executed.", name), ErrorCode.RUNTIME_ERROR);
+                throw new ServiceException(String.format("add indexer :%s  failure because of transaction can't be executed.", name), ErrorCode.INDEXER_EXIST);
             }
             try {
                 transaction.execute();

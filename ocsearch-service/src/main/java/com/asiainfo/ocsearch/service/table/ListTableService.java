@@ -31,7 +31,7 @@ public class ListTableService extends OCSearchService {
 
         } catch (Exception e) {
             log.error(e);
-            throw new ServiceException(e, ErrorCode.PARSE_ERROR);
+            throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
         } finally {
             if (successResult.has("tables"))
                 successResult.remove("tables");

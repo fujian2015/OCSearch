@@ -9,6 +9,7 @@ import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.query.HbaseQuery;
 import com.asiainfo.ocsearch.query.QueryResult;
 import com.asiainfo.ocsearch.query.ScanQueryActor;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.codehaus.jackson.JsonNode;
@@ -57,6 +58,8 @@ public class DeepScanService extends QueryService {
             MetaDataHelper metaDataHelper = MetaDataHelperManager.getInstance();
 
             String table = tables.get(0).asText();
+
+            assertTables(Sets.newHashSet(table));
 
             Schema schema = metaDataHelper.getSchemaByTable(table);
             Set<String> returnFields = generateReturnFields(schema, returnNode);

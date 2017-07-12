@@ -4,6 +4,8 @@ import com.asiainfo.ocsearch.constants.Constants;
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.meta.Schema;
+import com.asiainfo.ocsearch.metahelper.MetaDataHelper;
+import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonNode;
@@ -20,19 +22,21 @@ public abstract class QueryService extends OCSearchService {
     public boolean hasTable(ArrayNode returnNodes) {
         for (JsonNode node : returnNodes) {
             String name = node.asText();
-            if ( name.equals("_table_"))
+            if (name.equals("_table_"))
                 return true;
         }
-        return  false;
+        return false;
     }
+
     public boolean hasId(ArrayNode returnNodes) {
         for (JsonNode node : returnNodes) {
             String name = node.asText();
-            if ( name.equals("id"))
+            if (name.equals("id"))
                 return true;
         }
-        return  false;
+        return false;
     }
+
     public Set<String> generateReturnFields(Schema schema, ArrayNode returnNodes) throws ServiceException {
         Set<String> returnFields;
         if (returnNodes == null || returnNodes.size() == 0) {
@@ -63,7 +67,7 @@ public abstract class QueryService extends OCSearchService {
         } catch (ServiceException e) {
             throw e;
         } catch (UnsupportedEncodingException e) {
-            throw new ServiceException(e,ErrorCode.RUNTIME_ERROR);
+            throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
         } finally {
             successResult.remove("data");
         }
@@ -74,5 +78,17 @@ public abstract class QueryService extends OCSearchService {
     }
 
     protected abstract JsonNode query(JsonNode request) throws ServiceException;
+
+    protected void assertTables(Set<String> tableSet) throws ServiceException {
+        if (tableSet == null || tableSet.size() == 0) {
+            throw new ServiceException("the 'tables' node must have one node at least!", ErrorCode.PARSE_ERROR);
+        } else {
+            MetaDataHelper metaDataHelper = MetaDataHelperManager.getInstance();
+            for (String t : tableSet) {
+                if (!metaDataHelper.hasTable(t))
+                    throw new ServiceException("table " + t + " does not exist!", ErrorCode.TABLE_NOT_EXIST);
+            }
+        }
+    }
 
 }

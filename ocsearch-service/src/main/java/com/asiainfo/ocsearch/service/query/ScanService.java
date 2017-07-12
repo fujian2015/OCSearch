@@ -50,6 +50,8 @@ public class ScanService extends QueryService {
             Set<String> tableSet = new TreeSet<>();
             tables.forEach(table -> tableSet.add(table.asText()));
 
+            assertTables(tableSet);
+
             String cacheKey = generateCacheKey(rowKey, condition, tableSet);
             ArrayNode returnNode = (ArrayNode) request.get("return_fields");
             boolean withTable = hasTable(returnNode);

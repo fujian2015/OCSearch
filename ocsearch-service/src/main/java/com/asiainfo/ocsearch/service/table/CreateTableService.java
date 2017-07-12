@@ -5,6 +5,7 @@ import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.meta.IndexType;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.asiainfo.ocsearch.meta.Table;
+import com.asiainfo.ocsearch.metahelper.MetaDataHelper;
 import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
@@ -42,12 +43,15 @@ public class CreateTableService extends OCSearchService {
             Table table = parseRequest(request);
 
 //            Schema schema = SchemaManager.getSchemaBySchema(table.getSchema());
-            Schema schema = MetaDataHelperManager.getInstance().getSchemaBySchema(table.getSchema());
+            MetaDataHelper metaDataHelper=MetaDataHelperManager.getInstance();
+            Schema schema = metaDataHelper.getSchemaBySchema(table.getSchema());
 
             if (schema == null) {
-                throw new ServiceException("schema : " + table.getSchema() + " does not exist!", ErrorCode.PARSE_ERROR);
+                throw new ServiceException("schema : " + table.getSchema() + " does not exist!", ErrorCode.SCHEMA_NOT_EXIST);
             }
             String name = table.getName();
+            if(metaDataHelper.hasTable(name))
+                throw new ServiceException("table : " + name + " exists!", ErrorCode.TABLE_EXIST);
 
             Transaction transaction = new TransactionImpl();
 

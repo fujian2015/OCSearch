@@ -54,6 +54,8 @@ public class DeepSearchService extends QueryService {
             Set<String> tableSet = new TreeSet<>();
             tables.forEach(table -> tableSet.add(table.asText()));
 
+            assertTables(tableSet);
+
             if (tableSet.size() == 1) {
                 searchSingleTable(qs, condition, cursorMark, rows, sort, tableSet, returnNode, returnData);
             } else {
