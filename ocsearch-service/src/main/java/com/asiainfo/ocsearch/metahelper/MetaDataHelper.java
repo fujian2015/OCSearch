@@ -4,6 +4,7 @@ import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.asiainfo.ocsearch.meta.Table;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.solr.common.cloud.OnReconnect;
 import org.apache.solr.common.cloud.SolrZkClient;
@@ -15,10 +16,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -64,9 +62,9 @@ public class MetaDataHelper implements OnReconnect {
 //    private final Set<EventListener> listeners =
 //            Collections.newSetFromMap(new IdentityHashMap<EventListener, Boolean>());
 
-    private JsonNode readData(String path) throws KeeperException, InterruptedException, IOException {
+    private JsonNode readData(String path,Watcher watcher) throws KeeperException, InterruptedException, IOException {
 
-        byte data[] = zkclient.getData(path, null, null, true);
+        byte data[] = zkclient.getData(path, watcher, null, true);
         return new ObjectMapper().readTree(data);
     }
 
@@ -146,7 +144,7 @@ public class MetaDataHelper implements OnReconnect {
         for (String name : schemas) {
             String path = this.schemaPath + "/" + name;
             try {
-                schemaMap.put(name, new Schema(readData(path)));
+                schemaMap.put(name, new Schema(readData(path,schemaWatcher)));
             } catch (IOException | ServiceException e) {
                 log.error("illegal json data:" + path, e);
             }
@@ -166,7 +164,7 @@ public class MetaDataHelper implements OnReconnect {
         for (String name : schemas) {
             String path = this.tablePath + "/" + name;
             try {
-                tableMap.put(name, new Table(readData(path)).getSchema());
+                tableMap.put(name, new Table(readData(path,null)).getSchema());
             } catch (IOException | ServiceException e) {
                 log.error("illegal json data:" + path, e);
             }
@@ -223,6 +221,21 @@ public class MetaDataHelper implements OnReconnect {
                 zkclient.create(path, schema.toString().getBytes("UTF-8"), CreateMode.PERSISTENT, true);
             } else {
                 throw new ServiceException("the schema exists at zookeeper!", ErrorCode.SCHEMA_EXIST);
+            }
+        } catch (Exception e) {
+            log.error(e);
+            throw e;
+        }
+    }
+
+    public void updateSchema(Schema schema) throws Exception {
+
+        String path = this.schemaPath + "/" + schema.getName();
+        try {
+            if (true == zkclient.exists(path, true)) {
+                zkclient.setData(path, schema.toString().getBytes("UTF-8"), true);
+            } else {
+                throw new ServiceException("the schema does not exist at zookeeper!", ErrorCode.SCHEMA_NOT_EXIST);
             }
         } catch (Exception e) {
             log.error(e);
@@ -307,6 +320,22 @@ public class MetaDataHelper implements OnReconnect {
         return tableMap.keySet();
     }
 
+    public Set<String> getTablesBySchema(String schema) {
+        Set<String> tables=new TreeSet<>();
+        lock.readLock().lock();
+        for (Map.Entry<String, String> entry : tableMap.entrySet()) {
+            if(StringUtils.equals(schema,entry.getValue())){
+                tables.add(entry.getKey());
+            }
+        }
+        lock.readLock().unlock();
+        return tables;
+    }
+
+    public Collection<Schema> getSchemas() {
+        return schemaMap.values();
+    }
+
 
     /**
      * watcher for schema path
@@ -317,7 +346,7 @@ public class MetaDataHelper implements OnReconnect {
         @Override
         public void process(WatchedEvent event) {
 
-            if (event.getType() == Event.EventType.NodeChildrenChanged) {
+            if (event.getType() == Event.EventType.NodeChildrenChanged||event.getType()== Event.EventType.NodeDataChanged) {
                 reloadLock.lock();
                 reloadSchemas();
                 reloadLock.unlock();

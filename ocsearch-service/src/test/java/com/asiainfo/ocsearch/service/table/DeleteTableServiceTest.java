@@ -95,13 +95,13 @@ public class DeleteTableServiceTest {
 
         public void run() {
             try {
-                PutService putService = HbaseServiceManager.getInstance().createPutService("SITE");
-                for (int j = 0; j < 10000; j++) {
+                PutService putService = HbaseServiceManager.getInstance().createPutService("SITEPOSITION");
+                for (int j = 0; j < 1; j++) {
                     List<Put> puts = new ArrayList<>();
                     for (int i = 0; i < 1000; i++) {
                         puts.add(generateData());
                     }
-                    putService.execute("SITE", htable -> {
+                    putService.execute("SITEPOSITION", htable -> {
                         htable.put(puts);
                         return true;
                     });
@@ -122,7 +122,9 @@ public class DeleteTableServiceTest {
             Put put = new Put(random.nextHexString(8).getBytes());
             put.addColumn("INFO".getBytes(), "SECURITY_AREA".getBytes(), areas[random.nextInt(0, areas.length - 1)].getBytes());
             put.addColumn("INFO".getBytes(), "LAC".getBytes(), "37194".getBytes());
+            put.addColumn("0".getBytes(), "EPARCHY_ID".getBytes(), "61402".getBytes());
             put.addColumn("INFO".getBytes(), "CELL".getBytes(), "61402".getBytes());
+
             put.addColumn("0".getBytes(), "PHONENUM".getBytes(), ("135" + random.nextLong(10000000l, 99999999l)).getBytes());
             return put;
         }

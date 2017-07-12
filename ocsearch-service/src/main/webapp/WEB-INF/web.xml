@@ -25,6 +25,33 @@
         <servlet-name>DeleteSchema</servlet-name>
         <url-pattern>/schema/delete</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ListSchema</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.schema.ListSchemaService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ListSchema</servlet-name>
+        <url-pattern>/schema/list</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>GetSchema</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.schema.GetSchemaService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GetSchema</servlet-name>
+        <url-pattern>/schema/get</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>UpdateSchema</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.schema.UpdateSchemaService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UpdateSchema</servlet-name>
+        <url-pattern>/schema/update</url-pattern>
+    </servlet-mapping>
     <!--schema service end-->
 
     <!--table service begin-->
@@ -45,6 +72,15 @@
     <servlet-mapping>
         <servlet-name>DeleteTable</servlet-name>
         <url-pattern>/table/delete</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CompactTable</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.table.CompactTableService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CompactTable</servlet-name>
+        <url-pattern>/table/compact-table</url-pattern>
     </servlet-mapping>
     <!--table service end-->
 
@@ -95,6 +131,24 @@
         <url-pattern>/query/sql</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>DeepSearch</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.query.DeepSearchService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DeepSearch</servlet-name>
+        <url-pattern>/query/deep-search</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DeepScan</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.query.DeepScanService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DeepScan</servlet-name>
+        <url-pattern>/query/deep-scan</url-pattern>
+    </servlet-mapping>
+
     <!--query service end-->
 
     <!--data input  service begin-->
@@ -117,5 +171,44 @@
         <servlet-name>BatchIndex</servlet-name>
         <url-pattern>/index/batch</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AddIndexer</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.index.AddIndexerService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AddIndexer</servlet-name>
+        <url-pattern>/index/add-indexer</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DeleteIndexer</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.index.DeleteIndexerService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DeleteIndexer</servlet-name>
+        <url-pattern>/index/delete-indexer</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>UpdateIndexer</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.index.UpdateIndexerService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UpdateIndexer</servlet-name>
+        <url-pattern>/index/reload-indexer</url-pattern>
+    </servlet-mapping>
     <!--index  service end-->
+
+    <!--expression  service begin-->
+    <servlet>
+        <servlet-name>ListExpression</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.expression.ListExpressionService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ListExpression</servlet-name>
+        <url-pattern>/expression/list</url-pattern>
+    </servlet-mapping>
+    <!--expression  service end-->
+
 </web-app>

@@ -2,6 +2,7 @@ package com.asiainfo.ocsearch.meta;
 
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
@@ -245,4 +246,26 @@ public class Field implements Serializable, Cloneable {
     public boolean isIndexContented() {
         return contentField != null;
     }
+
+    public boolean equals(Field field) {
+        if(indexEquals(field)&&
+                field.getInnerIndex()==innerIndex
+                &&StringUtils.equals(field.getInnerField(),innerField)
+                &&StringUtils.equals(field.getHbaseColumn(),hbaseColumn)
+                &&StringUtils.equals(field.getHbaseFamily(),hbaseFamily)
+                &&field.getStoreType()==storeType)
+            return true;
+        return false;
+    }
+
+    public boolean indexEquals(Field field) {
+        if (field.isIndexed() == indexed
+                && field.isIndexContented() == isIndexContented()
+                && field.isIndexStored() == indexStored
+                && StringUtils.equals(field.getIndexType(), indexType)
+                )
+            return true;
+        return false;
+    }
+
 }

@@ -9,6 +9,7 @@ import com.ngdata.hbaseindexer.model.api.*;
 import com.ngdata.hbaseindexer.model.impl.IndexerModelImpl;
 import com.ngdata.hbaseindexer.mr.HBaseMapReduceIndexerTool;
 import com.ngdata.hbaseindexer.util.zookeeper.StateWatchingZooKeeper;
+import com.ngdata.hbaseindexer.util.zookeeper.ZkLockException;
 import com.ngdata.sep.util.io.Closer;
 import com.ngdata.sep.util.zookeeper.ZooKeeperItf;
 import com.ngdata.sep.util.zookeeper.ZooKeeperOperation;
@@ -69,7 +70,7 @@ public class IndexerService {
      * @param table
      * @param indexerConf
      */
-    public void createTable(String table, byte[] indexerConf) throws IndexerModelException, IndexerValidityException, IndexerExistsException {
+    public void createTable(String table, byte[] indexerConf) throws IndexerModelException, IndexerValidityException, IndexerExistsException, IOException {
 
         IndexerDefinition indexer = null;
         try {
@@ -77,10 +78,48 @@ public class IndexerService {
             indexer = builder.build();
         } catch (Exception e) {
             logger.error(e);
+            throw e;
         }
         model.addIndexer(indexer);
     }
+    /**
+     * @param table
+     * @param indexerConf
+     */
+    public void updateTable(String table, byte[] indexerConf) throws IndexerModelException, IndexerValidityException, IndexerExistsException, InterruptedException, ZkLockException, IndexerNotFoundException, KeeperException {
 
+        if (!model.hasIndexer(table)) {
+            throw new RuntimeException("Indexer does not exist: " + table);
+        }
+
+        IndexerDefinition newIndexer = null;
+        String lock = model.lockIndexer(table);
+        try {
+            IndexerDefinition indexer = model.getFreshIndexer(table);
+
+            IndexerDefinitionBuilder builder =buildIndexerDefinition(table, indexerConf, indexer);
+            newIndexer = builder.build();
+
+            if (newIndexer.equals(indexer)) {
+                throw new RuntimeException("Index already matches the specified settings, did not update it.");
+            } else {
+                model.updateIndexer(newIndexer, lock);
+                logger.info("Index updated: " + table);
+            }
+        } catch (IndexerUpdateException e) {
+            e.printStackTrace();
+        } catch (IndexerConcurrentModificationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // In case we requested deletion of an index, it might be that the lock is already removed
+            // by the time we get here as part of the index deletion.
+            boolean ignoreMissing = newIndexer != null
+                    && newIndexer.getLifecycleState() == IndexerDefinition.LifecycleState.DELETE_REQUESTED;
+            model.unlockIndexer(lock, ignoreMissing);
+        }
+    }
     /**
      * @param indexerName
      */

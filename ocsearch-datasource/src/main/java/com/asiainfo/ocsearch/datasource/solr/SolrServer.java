@@ -12,8 +12,7 @@ import org.apache.solr.common.params.SolrParams;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -30,11 +29,11 @@ public class SolrServer {
 
         this.solrConfig = new SolrConfig(prop);
 
-        solrServer = careateSolrClient();
+        solrServer = createSolrClient();
     }
 
 
-    private CloudSolrClient careateSolrClient() {
+    private CloudSolrClient createSolrClient() {
 
         CloudSolrClient solrClient = new CloudSolrClient.Builder().withZkHost(solrConfig.getZookeeper()).build();
 
@@ -65,7 +64,7 @@ public class SolrServer {
     }
 
 
-    public  SolrDocumentList query(String collection, SolrParams solrParams) throws Exception {
+    public SolrDocumentList query(String collection, SolrParams solrParams) throws Exception {
         try {
             QueryResponse queryResponse = solrServer.query(collection, solrParams);
             return queryResponse.getResults();
@@ -77,7 +76,8 @@ public class SolrServer {
             throw e;
         }
     }
-    public  QueryResponse queryWithCursorMark(String collection, SolrParams solrParams) throws Exception {
+
+    public QueryResponse queryWithCursorMark(String collection, SolrParams solrParams) throws Exception {
 
         try {
             return solrServer.query(collection, solrParams);
@@ -148,5 +148,63 @@ public class SolrServer {
         }
         return true;
     }
-    
+
+    public boolean addField(Map<String, Object> params, String collection) {
+
+        try {
+            SchemaRequest.AddField addField = new SchemaRequest.AddField(params);
+
+            SchemaResponse.UpdateResponse response = addField.process(solrServer, collection);
+            if (response.getStatus() == 0)
+                return true;
+            else
+                throw new RuntimeException("add field error:" + params.get("name"));
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+    }
+    public boolean addCopyField(String source,String dest,String collection){
+        try {
+            SchemaRequest.AddCopyField addField = new SchemaRequest.AddCopyField(source, Arrays.asList(dest));
+
+            SchemaResponse.UpdateResponse response = addField.process(solrServer, collection);
+            if (response.getStatus() == 0)
+                return true;
+            else
+                throw new RuntimeException("add source field error:" + source);
+
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean updateFields(List<SchemaRequest.Update> updates,String collection){
+        try {
+            SchemaRequest.MultiUpdate mu = new SchemaRequest.MultiUpdate(updates);
+
+            SchemaResponse.UpdateResponse response = mu.process(solrServer, collection);
+            if (response.getStatus() == 0)
+                return true;
+            else
+                throw new RuntimeException("update field error" );
+
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

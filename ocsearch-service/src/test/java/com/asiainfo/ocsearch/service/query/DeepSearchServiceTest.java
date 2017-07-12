@@ -18,11 +18,12 @@ public class DeepSearchServiceTest {
     public void testQuery() throws Exception {
         new SystemListener().initAll();
 
-        String request = "{\"query\":\"\",\"sort\":\"id asc\",\"tables\":[\"SITE\",\"SITEPOSITION\"],\"rows\":10000,\"return_fields\":[\"id\"],\"batchs_send_cnt\":2000,\"condition\":\"SECURITY_AREA:A0A211025\",\"cursor_mark\":\"*\"}";
+        String request = "{\"query\":\"\",\"sort\":\"id asc\",\"tables\":[\"SITE\"],\"rows\":10000,\"return_fields\":[\"id\"],\"batchs_send_cnt\":2000,\"condition\":\"id:*\",\"cursor_mark\":\"*\"}";
 
         ObjectNode q = (ObjectNode) new ObjectMapper().readTree(request);
         Set<String> phones = new HashSet<>();
         String mark = "*";
+        int i=0;
         while (true) {
             q.put("cursor_mark", mark);
 
@@ -31,12 +32,14 @@ public class DeepSearchServiceTest {
             mark=result.get("next_cursor_mark").asText();
             ArrayNode arrayNode = (ArrayNode) result.get("docs");
 
-            arrayNode.forEach(node -> {
-                if (phones.contains(node.get("id").asText()))
-                    System.out.println(node.get("id").asText());
-                else
-                    phones.add(node.get("id").asText());
-            });
+            System.out.println(i+":"+arrayNode.size());
+            i++;
+//            arrayNode.forEach(node -> {
+//                if (phones.contains(node.get("id").asText()))
+//                    System.out.println(node.get("id").asText());
+//                else
+//                    phones.add(node.get("id").asText());
+//            });
             if(arrayNode.size()<10000)
                 break;
         }

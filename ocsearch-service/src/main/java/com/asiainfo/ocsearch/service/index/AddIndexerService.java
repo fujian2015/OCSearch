@@ -1,4 +1,4 @@
-package com.asiainfo.ocsearch.service.table;
+package com.asiainfo.ocsearch.service.index;
 
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;

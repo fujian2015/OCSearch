@@ -14,7 +14,7 @@ public class GetSchemaServiceTest {
         new SystemListener().initAll();
         JsonNode jsonNode = new ObjectMapper().readTree("{\n" +
                 "   \"type\":\"schema\",\n" +
-                "    \"name\": \"schemaShanXi\"\n" +
+                "    \"name\": \"schemaYidong\"\n" +
                 "}");
 
         System.out.println(new ObjectMapper().readTree(new GetSchemaService().doService(jsonNode)));
