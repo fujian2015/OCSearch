@@ -12,6 +12,7 @@
         <module>ocsearch-datainput</module>
         <module>ocsearch-service</module>
         <module>ocsearch-expression</module>
+        <module>ocsearch-flume</module>
     </modules>
 
     <properties>

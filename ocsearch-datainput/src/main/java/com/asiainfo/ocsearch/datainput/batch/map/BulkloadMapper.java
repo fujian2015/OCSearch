@@ -4,8 +4,7 @@ package com.asiainfo.ocsearch.datainput.batch.map;
  * Created by Aaron on 17/5/26.
  */
 import com.asiainfo.ocsearch.datainput.util.ColumnField;
-import com.asiainfo.ocsearch.datainput.util.ColumnMapConverter;
-import com.asiainfo.ocsearch.datainput.util.FieldTypeChecker;
+import com.asiainfo.ocsearch.meta.FieldTypeChecker;
 import com.asiainfo.ocsearch.expression.Engine;
 import com.asiainfo.ocsearch.expression.Executor;
 import com.asiainfo.ocsearch.meta.FieldType;
