@@ -1,6 +1,8 @@
 package com.asiainfo.ocsearch.query;
 
+import com.asiainfo.ocsearch.constants.Constants;
 import com.asiainfo.ocsearch.meta.Field;
+import com.asiainfo.ocsearch.meta.FieldType;
 import com.asiainfo.ocsearch.meta.InnerField;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.google.common.collect.ArrayListMultimap;
@@ -84,8 +86,9 @@ public class HbaseQuery {
             // get attachment file  "name:test.txt" or get file "name:name"
             String file = null;
             if (name.contains(":")) {
+
+                file = name.substring(name.indexOf(":") + 1);
                 name = name.substring(0, name.indexOf(":"));
-                file = name.substring(name.indexOf(":")+1);
             }
             Field field = fields.get(name);
 
@@ -93,9 +96,18 @@ public class HbaseQuery {
                 byte[] hbaseFamily = Bytes.toBytes(field.getHbaseFamily());
                 byte[] hbaseColumn = Bytes.toBytes(file);
                 columns.add(new Pair(hbaseFamily, hbaseColumn));
-                kvMap.put(field.getHbaseFamily(), file, name+":"+file);
+                kvMap.put(field.getHbaseFamily(), file, name + ":" + file);
                 continue;
             }
+            if (field.getStoreType() == FieldType.FILE) {
+                if (!kvMap.contains(field.getHbaseFamily(), Constants.FILE_NAMES_COLUMN)) {
+                    byte[] hbaseFamily = Bytes.toBytes(field.getHbaseFamily());
+                    columns.add(new Pair(hbaseFamily, Bytes.toBytes(Constants.FILE_NAMES_COLUMN)));
+                    kvMap.put(field.getHbaseFamily(), Constants.FILE_NAMES_COLUMN, Constants.FILE_NAMES_COLUMN);
+                }
+                continue;
+            }
+
             String inf = field.getInnerField();
             if (StringUtils.isEmpty(inf)) {
                 byte[] hbaseFamily = Bytes.toBytes(field.getHbaseFamily());
@@ -127,9 +139,9 @@ public class HbaseQuery {
 
         ObjectNode data = JsonNodeFactory.instance.objectNode();
 
-        String id= Bytes.toString(result.getRow());
+        String id = Bytes.toString(result.getRow());
 
-        data.put("id",id);
+        data.put("id", id);
 
         Map<String, Field> fields = schema.getFields();
 
@@ -148,6 +160,9 @@ public class HbaseQuery {
                         case INT:
                             data.put(name, Bytes.toInt(valueArray));
                             break;
+                        case LONG:
+                            data.put(name,Bytes.toLong(valueArray));
+                            break;
                         case FLOAT:
                             data.put(name, Bytes.toFloat(valueArray));
                             break;
@@ -157,18 +172,10 @@ public class HbaseQuery {
                         case BOOLEAN:
                             data.put(name, Bytes.toBoolean(valueArray));
                             break;
-                        case FILE:
-                            String names = Bytes.toString(valueArray);
-                            for (String n : names.split(",")) {
-                                if (returnFields.contains(n)) {
-                                    data.put(n, generateFilelUrl(table,id, n, n));
-                                }
-                            }
-                            break;
                         case ATTACHMENT:
                             ArrayNode attachNode = JsonNodeFactory.instance.arrayNode();
                             for (String file : Bytes.toString(valueArray).split(",")) {
-                                attachNode.add(generateFilelUrl(table, id,name, file));
+                                attachNode.add(generateFilelUrl(table, id, name, file));
                             }
                             data.put(name, attachNode);
                             break;
@@ -177,6 +184,13 @@ public class HbaseQuery {
                     }
                 } else {  //get attachment file
                     data.put(name, valueArray);
+                }
+            } else if (StringUtils.equals(Constants.FILE_NAMES_COLUMN, name)) {
+                String names = Bytes.toString(valueArray);
+                for (String n : names.split(",")) {
+                    if (returnFields.contains(n)) {
+                        data.put(n, generateFilelUrl(table, id, n, fields.get(n).getHbaseColumn()));
+                    }
                 }
             } else { //inner field
                 String innerValue = Bytes.toString(valueArray);
@@ -189,6 +203,9 @@ public class HbaseQuery {
                                 switch (field.getStoreType()) {
                                     case INT:
                                         data.put(field.getName(), Integer.parseInt(value));
+                                        break;
+                                    case LONG:
+                                        data.put(field.getName(),Long.parseLong(value));
                                         break;
                                     case FLOAT:
                                         data.put(field.getName(), Float.parseFloat(value));
@@ -212,8 +229,8 @@ public class HbaseQuery {
         return data;
     }
 
-    private String generateFilelUrl(String table,  String id,String field,String file) {
-        return new FileID(table,field+":"+file,id).toString();
+    private String generateFilelUrl(String table, String id, String field, String file) {
+        return new FileID(table, field, id, file).toString();
     }
 
 
@@ -248,6 +265,9 @@ public class HbaseQuery {
                         case INT:
                             map.put(name, Bytes.toInt(valueArray));
                             break;
+                        case LONG:
+                            map.put(name,Bytes.toLong(valueArray));
+                            break;
                         case FLOAT:
                             map.put(name, Bytes.toFloat(valueArray));
                             break;
@@ -273,6 +293,9 @@ public class HbaseQuery {
                                 switch (field.getStoreType()) {
                                     case INT:
                                         map.put(field.getName(), Integer.parseInt(value));
+                                        break;
+                                    case LONG:
+                                        map.put(field.getName(), Long.parseLong(value));
                                         break;
                                     case FLOAT:
                                         map.put(field.getName(), Float.parseFloat(value));

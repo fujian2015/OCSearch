@@ -31,11 +31,13 @@ public class FileID {
     String table;
     String field;
     String rowKey;
+    String file;
 
-    public FileID(String table, String field, String rowKey) {
+    public FileID(String table, String field, String rowKey,String file) {
         this.field = field;
         this.table = table;
         this.rowKey = rowKey;
+        this.file=file;
     }
 
     JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
@@ -46,6 +48,7 @@ public class FileID {
         ObjectNode objectNode = jsonNodeFactory.objectNode();
         objectNode.put("t", table);
         objectNode.put("f", field);
+        objectNode.put("e",file);
         objectNode.put("r", rowKey);
 
         String id = "";
@@ -54,8 +57,8 @@ public class FileID {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
-        return id;
+       return StringUtils.replace(id,"\n","");
+//        return id.replace("\\\\n","");
     }
 
     public static FileID parseId(String oriId) throws IOException {
@@ -65,10 +68,14 @@ public class FileID {
         String table = jsonNode.get("t").asText();
         String rowKey = jsonNode.get("r").asText();
         String field = jsonNode.get("f").asText();
+        String file=jsonNode.get("e").asText();
 
         if (StringUtils.isEmpty(table) || StringUtils.isEmpty(rowKey) || StringUtils.isEmpty(field))
             throw new IOException();
-        return new FileID(table, field, rowKey);
+        return new FileID(table, field, rowKey,file);
     }
 
+    public String getFile() {
+        return file;
+    }
 }

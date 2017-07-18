@@ -33,7 +33,8 @@ public class FileGetService extends OCSearchService {
 
             String table = fileID.getTable();
 
-            String field=fileID.getField();
+            String field=fileID.getField()+":"+fileID.getFile();
+
             Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(table);
 
             if (schema == null)

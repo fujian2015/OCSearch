@@ -57,6 +57,9 @@ public class DeleteTableService extends OCSearchService {
                 throw e;
             }
             return success;
+        }catch (ServiceException se){
+            log.warn(se);
+            throw se;
         } catch (Exception e) {
             log.error(e);
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);

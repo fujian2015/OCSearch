@@ -62,7 +62,7 @@ public class CreateTableService extends OCSearchService {
                     .forEach(field -> families.add(field.getHbaseFamily()));
             schema.getInnerFields().values().stream().forEach(innerField -> families.add(innerField.getHbaseFamily()));
 
-            if (!request.get("hbase").has("exist")) //hbase table does not exist
+            if (!request.get("hbase").has("exist")||!request.get("hbase").get("exist").asBoolean()) //hbase table does not exist
                 transaction.add(new CreateHbaseTable(name, table.getHbaseRegions(), table.getRegionSplits(), families));
 
             IndexType indexType = schema.getIndexType();

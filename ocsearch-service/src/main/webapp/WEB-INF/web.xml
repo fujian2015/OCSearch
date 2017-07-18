@@ -82,6 +82,15 @@
         <servlet-name>CompactTable</servlet-name>
         <url-pattern>/table/compact-table</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ListTable</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.table.ListTableService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ListTable</servlet-name>
+        <url-pattern>/table/list</url-pattern>
+    </servlet-mapping>
     <!--table service end-->
 
     <!--query service begin -->

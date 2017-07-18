@@ -1,5 +1,6 @@
 package com.asiainfo.ocsearch.meta;
 
+import com.asiainfo.ocsearch.constants.Constants;
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.google.common.collect.ArrayListMultimap;
@@ -24,7 +25,7 @@ public class Schema implements Serializable, Cloneable {
     static final String FILE_FAMILY = "C";
     static final String ATTACHMENT_FAMILY = "D";
     static final String NETSTED_FAMILY = "E";
-    static final String FILE_NAMES_COLUMN = "FILES";
+
     public final String name;
 
     IndexType indexType;  //-1: hbase ,0 solr+hbase hbase-indexer
@@ -186,7 +187,7 @@ public class Schema implements Serializable, Cloneable {
         int fileOrder = 0;
         for (Field field : fileFields) {
             field.setHbaseFamily(FILE_FAMILY);
-            field.setHbaseColumn(FILE_NAMES_COLUMN);
+            field.setHbaseColumn(field.name);
         }
 
         //attachment type family
@@ -194,11 +195,11 @@ public class Schema implements Serializable, Cloneable {
         if (attachmentFields.size() == 1) {
             Field field = attachmentFields.get(0);
             field.setHbaseFamily(ATTACHMENT_FAMILY);
-            field.setHbaseColumn(FILE_NAMES_COLUMN);
+            field.setHbaseColumn(Constants.FILE_NAMES_COLUMN);
         } else {
             for (Field field : attachmentFields) {
                 field.setHbaseFamily(ATTACHMENT_FAMILY + (attachmentOrder++));
-                field.setHbaseColumn(FILE_NAMES_COLUMN);  //存放文件名列表
+                field.setHbaseColumn(Constants.FILE_NAMES_COLUMN);  //存放文件名列表
             }
         }
 

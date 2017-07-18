@@ -30,7 +30,7 @@ public class AddSchemaService extends OCSearchService {
 
             stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());
 
-            if (request.has("with_hbase"))
+            if (request.has("with_hbase")&&request.get("with_hbase").asBoolean())
                 ((ObjectNode) request).put("request", false);
             else
                 ((ObjectNode) request).put("request", true);

@@ -1,7 +1,6 @@
 package com.asiainfo.ocsearch.service.query;
 
 import com.asiainfo.ocsearch.listener.SystemListener;
-import com.asiainfo.ocsearch.query.FileID;
 import org.apache.commons.io.FileUtils;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
@@ -17,19 +16,22 @@ public class FileGetServiceTest {
     public void testDoService() throws Exception {
         new SystemListener().initAll();
 //        Put put = new Put("test1".getBytes("UTF-8"));
-//        put.addColumn("C".getBytes(), "picture".getBytes(), FileUtils.readFileToByteArray(new File("/Users/mac/Documents/timg.jpg")));
-//        put.addColumn("C".getBytes(), "FILES".getBytes(), "picture".getBytes());
+//        put.addColumn("C".getBytes(), "pic".getBytes(), FileUtils.readFileToByteArray(new File("/Users/mac/Documents/timg.jpg")));
+//        put.addColumn("C".getBytes(), "FILES".getBytes(), "pic".getBytes());
+//        put.addColumn("B".getBytes(), "0".getBytes(), "普通文件".getBytes());
+//        put.addColumn("B".getBytes(), "1".getBytes(), "20170712 12:12:12".getBytes());
+//        put.addColumn("B".getBytes(), "2".getBytes(), "我的而一个测试文件".getBytes());
 //
-//        HbaseServiceManager.getInstance().getAdminService().execute("file__table", table -> {
+//        HbaseServiceManager.getInstance().getAdminService().execute("FILE__201707", table -> {
 //            table.put(put);
 //            return true;
 //        });
-        FileID fileID = new FileID("file__table", "picture:picture", "test1");
-        System.out.println(fileID);
+//        FileID fileID = new FileID("file__table", "picture:picture", "test1");
+//        System.out.println(fileID);
         ObjectNode o = JsonNodeFactory.instance.objectNode();
-        o.put("id", "eyJ0IjoiZmlsZV9fdGFibGUiLCJmIjoicGljdHVyZTpwaWN0dXJlIiwiciI6InRlc3QxIn0=");
+        o.put("id", "eyJ0IjoiRklMRV9fMjAxNzA3IiwiZiI6InBpYyIsImUiOiJGSUxFUyIsInIiOiI4NWU0NDViZS1kOTgwLTQ1M2MtOTg0OS0xNGQ5ZjUxYzA2MzUifQ==");
 
-        FileUtils.writeByteArrayToFile(new File("/Users/mac/Documents/timg2.jpg"), new FileGetService().doService(o));
+        FileUtils.writeByteArrayToFile(new File("/Users/mac/Documents/timg.jpg"), new FileGetService().doService(o));
     }
 
 }

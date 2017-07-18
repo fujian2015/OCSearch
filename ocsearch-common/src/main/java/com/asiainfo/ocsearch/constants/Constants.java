@@ -5,4 +5,5 @@ package com.asiainfo.ocsearch.constants;
  */
 public class Constants {
     public final static String DEFUAT_CHARSET="UTF-8";
+    public  final static String FILE_NAMES_COLUMN = "EXISTFILES";
 }

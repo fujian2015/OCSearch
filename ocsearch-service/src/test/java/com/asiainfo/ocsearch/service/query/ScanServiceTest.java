@@ -14,11 +14,13 @@ public class ScanServiceTest {
         String request = "{\n" +
                 "    \"start\": 0,\n" +
                 "    \"rows\": 60,\n" +
-                "    \"rowkey_prefix\": \"test\",\n" +
+                "    \"rowkey_prefix\": \"4\",\n" +
+                "    \"condition\":\"CELL=='61891'\",\n" +
                 "    \"tables\": [\n" +
-                "        \"file__table\"\n" +
+                "        \"SITE2\"\n" +
                 "    ],\n" +
                 "    \"return_fields\": [\n" +
+                "    \"PHONENUM\"\n" +
                 "    ]\n" +
                 "}";
         System.out.println(request);

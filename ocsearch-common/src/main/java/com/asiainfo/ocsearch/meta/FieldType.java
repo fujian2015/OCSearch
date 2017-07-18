@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public enum FieldType implements Serializable {
 
-    INT("int"), FLOAT("float"), DOUBLE("double"), BOOLEAN("boolean"), STRING("string"), NETSTED("netsted"), FILE("file"), ATTACHMENT("attachment"),NONE("none");
+    INT("int"), LONG("long"), FLOAT("float"), DOUBLE("double"), BOOLEAN("boolean"), STRING("string"), NETSTED("netsted"), FILE("file"), ATTACHMENT("attachment"), NONE("none");
 
 
     private String value;
@@ -17,7 +17,7 @@ public enum FieldType implements Serializable {
         this.value = value;
     }
 
-    public String getValue(){
+    public String getValue() {
         return this.value;
     }
     // Int

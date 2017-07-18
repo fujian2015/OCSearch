@@ -239,7 +239,7 @@ public class ScanService extends QueryService {
             if (!cacheValue.containsKey("total")) {
                 caches.put("total", totalNode.toString());
             }
-            if (!cacheValue.containsKey("" + start))
+            if (!cacheValue.containsKey("" + start)&&firstKey!=null)
                 caches.put("" + start, firstKey);
             if (nextRowKey != null)
                 caches.put("" + (start + rows), nextRowKey);

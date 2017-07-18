@@ -73,6 +73,8 @@ public class CreatePhoenixView implements AtomicOperation {
         switch (storeType) {
             case INT:
                 return "INTEGER";
+            case LONG:
+                return "BIGINT";
             case DOUBLE:
                 return "DOUBLE";
             case FLOAT:

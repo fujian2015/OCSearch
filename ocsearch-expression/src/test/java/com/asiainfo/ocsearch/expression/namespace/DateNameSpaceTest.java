@@ -1,5 +1,7 @@
 package com.asiainfo.ocsearch.expression.namespace;
 
+import com.asiainfo.ocsearch.expression.Engine;
+import com.asiainfo.ocsearch.expression.Executor;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
@@ -15,7 +17,15 @@ import java.util.Map;
 public class DateNameSpaceTest {
     @Test
     public void testFormat() throws Exception {
+        Map<String, Object> jc = new HashMap<>();
 
+        jc.put("time","20170712 08:12:12");
+        jc.put("name","hello");
+
+        Executor ee =Engine.getInstance().createExecutor("'FILE__' + time.substring(0,6)");
+//        Executor ee = Engine.getInstance().createExecutor("count>10");
+
+        System.out.println(ee.evaluate(jc));
     }
 
     @Test

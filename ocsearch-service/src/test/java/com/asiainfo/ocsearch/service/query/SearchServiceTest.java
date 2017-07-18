@@ -14,15 +14,23 @@ public class SearchServiceTest {
     public void testQuery() throws Exception {
         new SystemListener().initAll();
 
-        String request = "{\"query\":\"\",\"sort\":\"id asc\",\"tables\":[\"SITE\"],\"rows\":10000,\"return_fields\":[\"id\"],\"batchs_send_cnt\":2000,\"condition\":\"id:*\",\"nextCursor\":\"*\"}";
+        String request = "{\n" +
+                "    \"query\": \"\",\n" +
+                "    \"start\": 0,\n" +
+                "    \"rows\": 20,\n" +
+                "    \"sort\": \"\",\n" +
+                "    \"condition\": \"*:*\",\n" +
+                "    \"tables\": [\"FILE__201707\"],\n" +
+                "    \"return_fields\": [\"id\",\"name\",\"pic\"]\n" +
+                "}";
 
         ObjectNode q=(ObjectNode)new ObjectMapper().readTree(request);
 //        Set<String> phones = new HashSet<>();
-        for(int i=0;i<1000;i++) {
+        for(int i=0;i<1;i++) {
             q.put("start",10000*i);
 
             ArrayNode arrayNode = (ArrayNode)  new SearchService().query(q).get("docs");
-            System.out.println(i+":"+arrayNode.size());
+            System.out.println(i+":"+arrayNode);
 //            if(arrayNode.size()<10000)
 //                break;
 
