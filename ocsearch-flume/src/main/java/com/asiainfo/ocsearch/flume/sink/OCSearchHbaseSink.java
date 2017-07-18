@@ -580,6 +580,10 @@ public class OCSearchHbaseSink extends AbstractSink implements Configurable {
 
     private <T> Map<String,List<T>> addMap(Map<String,List<T>> batchMap,Map<String,List<T>> actionMap) {
 
+        if(actionMap == null) {
+            return batchMap;
+        }
+
         for(Map.Entry<String,List<T>> entry : actionMap.entrySet()) {
             String key = entry.getKey();
             List<T> value = entry.getValue();

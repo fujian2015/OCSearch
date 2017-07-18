@@ -85,6 +85,9 @@ public class SchemaBasedEventSerializer implements OCHbaseEventSerializer {
 
         try {
             Put put = rowPutGenerator.generatePut(dataMap,rowKeyBytes,fileName);
+            if(put == null) {
+                return null;
+            }
             actions.add(put);
             actionMap.put(tableName,actions);
         }catch (Exception e) {

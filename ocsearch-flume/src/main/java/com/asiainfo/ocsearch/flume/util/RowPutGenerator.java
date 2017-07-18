@@ -97,6 +97,9 @@ public class RowPutGenerator {
             if(separater == null) {//field
                 String fieldName = fieldList.get(0);
                 String value = String.valueOf(dataMap.get(fieldList.get(0)));
+                if(value.equals("")) {//if value == "",means this column cannot put into hbase
+                    continue;
+                }
                 switch (type) {
                     case FILE:
                         if(fileName!=null) {
@@ -140,41 +143,43 @@ public class RowPutGenerator {
                         }
                         break;
                     case INT:
-                        if (FieldTypeChecker.isInteger(value)) {
-                            try {
-                                int intContent = Integer.parseInt(value);
-                                put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(intContent));
-                            } catch (NumberFormatException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
+                        try {
+                            int intContent = Integer.parseInt(value);
+                            put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(intContent));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
                             return null;
                         }
                         break;
                     case DOUBLE:
-                        if (FieldTypeChecker.isDouble(value)) {
-                            try {
-                                double doubleContent = Double.parseDouble(value);
-                                put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(doubleContent));
-                            } catch (NumberFormatException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
+                        try {
+                            double doubleContent = Double.parseDouble(value);
+                            put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(doubleContent));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
                             return null;
                         }
                         break;
                     case FLOAT:
-                        if (FieldTypeChecker.isDouble(value)) {
-                            try {
-                                float floatContent = Float.parseFloat(value);
-                                put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(floatContent));
-                            } catch (NumberFormatException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
+                        try {
+                            float floatContent = Float.parseFloat(value);
+                            put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(floatContent));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
                             return null;
                         }
                         break;
+                    case BOOLEAN:
+                        try {
+                            boolean boolContent = Boolean.parseBoolean(value);
+                            if((!value.equals("false"))&&(!boolContent)) {
+                                return null;
+                            }
+                            put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(boolContent));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return null;
+                        }
                     default:
                         put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(value));
                 }
@@ -198,7 +203,7 @@ public class RowPutGenerator {
         return put;
     }
 
-
+    @Deprecated
     public Put generatePut(Schema schema,Map<String,String> dataMap,byte[] rowkey) {
 
         Put put = new Put(rowkey);

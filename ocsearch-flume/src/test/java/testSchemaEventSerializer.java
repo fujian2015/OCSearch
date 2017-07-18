@@ -5,6 +5,8 @@ import com.asiainfo.ocsearch.flume.util.RowPutGenerator;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.client.Durability;
+import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -13,10 +15,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Aaron on 17/7/13.
@@ -103,6 +102,52 @@ public class testSchemaEventSerializer {
         String fileName="/data/flume/spool/test/SITE.txt";
         fileName = fileName.substring(fileName.lastIndexOf("/")+1,fileName.length());
         System.out.println(fileName);
+    }
+
+    @Test
+    public void testGetAction() {
+        ArrayList actions = Lists.newArrayList();
+        Map<String,List<Row>> actionMap = new HashMap<>();
+        Put put = null;
+        Put put1 = new Put(Bytes.toBytes("123"));
+        put1.addColumn(Bytes.toBytes("1"),Bytes.toBytes("2"),Bytes.toBytes("3"));
+//        actions.add(put);
+        actions.add(put1);
+        String tableName = "table";
+        actionMap.put(tableName,actions);
+        System.out.println(actionMap);
+        actionMap = addMap(actionMap,null);
+        System.out.println(actionMap);
+
+        for(Map.Entry<String,List<Row>> entry: actionMap.entrySet()) {
+            List<Row> actions1 = entry.getValue();
+            String tableName1 = entry.getKey();
+            Iterator i$ = actions1.iterator();
+            while(i$.hasNext()) {
+                System.out.println("123");
+                System.out.println(i$.next());
+            }
+        }
+
+    }
+    private <T> Map<String,List<T>> addMap(Map<String,List<T>> batchMap,Map<String,List<T>> actionMap) {
+
+        if(actionMap == null) {
+            return batchMap;
+        }
+
+        for(Map.Entry<String,List<T>> entry : actionMap.entrySet()) {
+            String key = entry.getKey();
+            List<T> value = entry.getValue();
+            if(batchMap.containsKey(key)) {
+                List<T> batchValue = batchMap.get(key);
+                batchValue.addAll(value);
+                batchMap.put(key,batchValue);
+            }else {
+                batchMap.put(key,value);
+            }
+        }
+        return batchMap;
     }
 
 }
