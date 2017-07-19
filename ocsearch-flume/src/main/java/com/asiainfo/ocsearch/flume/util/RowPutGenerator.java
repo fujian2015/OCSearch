@@ -151,6 +151,15 @@ public class RowPutGenerator {
                             return null;
                         }
                         break;
+                    case LONG:
+                        try {
+                            long longContent = Long.parseLong(value);
+                            put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(longContent));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                        break;
                     case DOUBLE:
                         try {
                             double doubleContent = Double.parseDouble(value);
