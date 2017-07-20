@@ -50,14 +50,13 @@ public class ListExpressionService extends OCSearchService {
                     }
                 });
             });
+
+            ObjectNode successResult = getSuccessResult();
             successResult.put("expressions", expressions);
             return successResult.toString().getBytes(Constants.DEFUAT_CHARSET);
         } catch (Exception e) {
             log.error(e);
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
-        } finally {
-            if (successResult.has("expressions"))
-                successResult.remove("expressions");
         }
     }
 }

@@ -8,6 +8,7 @@ import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ObjectNode;
 
 /**
  * Created by mac on 2017/6/12.
@@ -31,6 +32,7 @@ public class GetSchemaService extends OCSearchService {
             if (schema == null)
                 throw new ServiceException("the schema does not exist", ErrorCode.SCHEMA_NOT_EXIST);
 
+            ObjectNode successResult = getSuccessResult();
             successResult.put("schema", schema.toJsonNode());
 
             return successResult.toString().getBytes(Constants.DEFUAT_CHARSET);
@@ -40,9 +42,6 @@ public class GetSchemaService extends OCSearchService {
         } catch (Exception e) {
             log.error(e);
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
-        } finally {
-            if (successResult.has("schema"))
-                successResult.remove("schema");
         }
     }
 }

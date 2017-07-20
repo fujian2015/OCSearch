@@ -10,6 +10,7 @@ import com.asiainfo.ocsearch.service.OCSearchService;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.ObjectNode;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
@@ -59,7 +60,7 @@ public abstract class QueryService extends OCSearchService {
     @Override
     protected byte[] doService(JsonNode request) throws ServiceException {
         try {
-
+            ObjectNode successResult = getSuccessResult();
             successResult.put("data", query(request));
 
             return successResult.toString().getBytes(Constants.DEFUAT_CHARSET);
@@ -68,8 +69,6 @@ public abstract class QueryService extends OCSearchService {
             throw e;
         } catch (UnsupportedEncodingException e) {
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
-        } finally {
-            successResult.remove("data");
         }
     }
 

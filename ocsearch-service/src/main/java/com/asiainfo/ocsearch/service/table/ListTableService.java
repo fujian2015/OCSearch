@@ -8,6 +8,7 @@ import com.asiainfo.ocsearch.service.OCSearchService;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
 
 import java.util.Set;
 
@@ -25,6 +26,7 @@ public class ListTableService extends OCSearchService {
 
             tables.forEach(table -> tableNodes.add(table));
 
+            ObjectNode successResult = getSuccessResult();
             successResult.put("tables", tableNodes);
 
             return successResult.toString().getBytes(Constants.DEFUAT_CHARSET);
@@ -32,9 +34,6 @@ public class ListTableService extends OCSearchService {
         } catch (Exception e) {
             log.error(e);
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
-        } finally {
-            if (successResult.has("tables"))
-                successResult.remove("tables");
         }
     }
 }

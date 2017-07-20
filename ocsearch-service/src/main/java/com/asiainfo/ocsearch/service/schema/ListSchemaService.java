@@ -9,6 +9,7 @@ import com.asiainfo.ocsearch.service.OCSearchService;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
 
 import java.util.Collection;
 
@@ -26,6 +27,7 @@ public class ListSchemaService extends OCSearchService {
 
             schemas.forEach(schema -> schemaNodes.add(schema.toJsonNode()));
 
+            ObjectNode successResult = getSuccessResult();
             successResult.put("schemas", schemaNodes);
 
             return successResult.toString().getBytes(Constants.DEFUAT_CHARSET);
@@ -33,9 +35,6 @@ public class ListSchemaService extends OCSearchService {
         } catch (Exception e) {
             log.error(e);
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
-        } finally {
-            if (successResult.has("tables"))
-                successResult.remove("tables");
         }
     }
 }

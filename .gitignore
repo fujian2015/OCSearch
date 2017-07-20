@@ -25,4 +25,5 @@ ocsearch-common/target
 ocsearch-expression/target
 ocsearch-datasource/target
 ocsearch-datainput/target
+ocsearch-flume/target
 

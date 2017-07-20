@@ -26,16 +26,12 @@ public abstract class OCSearchService extends HttpServlet {
 
     protected Logger log = Logger.getLogger(getClass());
 
-    protected ObjectNode successResult;
-
     protected byte[] success;
 
     public OCSearchService() {
 
         try {
             success = "{\"result\":{\"error_code\":0,\"error_desc\":\"success\"}}".getBytes(Constants.DEFUAT_CHARSET);
-            successResult = (ObjectNode) new ObjectMapper().readTree("{\"result\":{\"error_code\":0,\"error_desc\":\"success\"}}");
-
         } catch (IOException e) {
         }
     }
@@ -71,7 +67,7 @@ public abstract class OCSearchService extends HttpServlet {
             so.flush();
             so.close();
         } catch (Exception e) {
-            log.error("transport data failure:",e);
+            log.error("transport data failure:", e);
         } finally {
             log.info("end request:" + id + "," + (System.currentTimeMillis() - start) + "ms used.");
         }
@@ -98,13 +94,16 @@ public abstract class OCSearchService extends HttpServlet {
             } catch (ServiceException serviceException) {
                 re = serviceException.getErrorResponse();
             }
+
+            log.info("result:" + new ObjectMapper().readTree(re).toString());
+
             response.setCharacterEncoding("utf-8");
             ServletOutputStream so = response.getOutputStream();
             so.write(re);
             so.flush();
             so.close();
         } catch (Exception e) {
-
+            log.error(e);
         } finally {
             log.info("end request:" + id + "," + (System.currentTimeMillis() - start) + "ms used.");
         }
@@ -114,6 +113,15 @@ public abstract class OCSearchService extends HttpServlet {
 
     protected String getRequestId() {
         return UUID.randomUUID().toString();
+    }
+
+    protected ObjectNode getSuccessResult() {
+        try {
+            return (ObjectNode) new ObjectMapper().readTree("{\"result\":{\"error_code\":0,\"error_desc\":\"success\"}}");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

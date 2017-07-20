@@ -35,7 +35,7 @@
          that you fully re-index after changing this setting as it can
          affect both how text is indexed and queried.
     -->
-    <luceneMatchVersion>6.3.0</luceneMatchVersion>
+    <luceneMatchVersion>6.4.1</luceneMatchVersion>
 
     <!-- <lib/> directives can be used to instruct Solr to load any Jars
          identified and use them to resolve any "plugins" specified in
@@ -119,8 +119,8 @@
                         class="${solr.directoryFactory:solr.NRTCachingDirectoryFactory}"/>
     -->
     <directoryFactory name="DirectoryFactory" class="solr.HdfsDirectoryFactory">
-        <str name="solr.hdfs.home">/user/solr/</str>
-        <!-- <str name="solr.hdfs.confdir">/etc/hadoop/2.5.0.0-1245/0/</str>-->
+        <str name="solr.hdfs.home">hdfs://yj01:8020/user/solr/</str>
+       <!-- <str name="solr.hdfs.confdir">/etc/hadoop/2.5.0.0-1245/0/</str>-->
         <bool name="solr.hdfs.blockcache.enabled">true</bool>
         <int name="solr.hdfs.blockcache.slab.count">1</int>
         <bool name="solr.hdfs.blockcache.direct.memory.allocation">true</bool>
@@ -172,7 +172,7 @@
              before flushing.
              If both ramBufferSizeMB and maxBufferedDocs is set, then
              Lucene will flush based on whichever limit is hit first.  -->
-        <ramBufferSizeMB>100</ramBufferSizeMB>
+        <!-- <ramBufferSizeMB>100</ramBufferSizeMB> -->
         <!-- <maxBufferedDocs>1000</maxBufferedDocs> -->
 
         <!-- Expert: Merge Policy
@@ -323,7 +323,7 @@
              have some sort of hard autoCommit to limit the log size.
           -->
         <autoCommit>
-            <maxTime>300000</maxTime>
+            <maxTime>100000</maxTime>
             <openSearcher>false</openSearcher>
         </autoCommit>
 
@@ -334,7 +334,7 @@
           -->
 
         <autoSoftCommit>
-            <maxTime>15000</maxTime>
+            <maxTime>100</maxTime>
         </autoSoftCommit>
 
         <!-- Update Related Event Listeners
@@ -1196,7 +1196,6 @@
 
          See http://wiki.apache.org/solr/GuessingFieldTypes
       -->
-
     <updateRequestProcessorChain name="add-unknown-fields-to-the-schema">
         <!-- UUIDUpdateProcessorFactory will generate an id if none is present in the incoming document -->
         <processor class="solr.UUIDUpdateProcessorFactory"/>
@@ -1253,6 +1252,7 @@
         <processor class="solr.DistributedUpdateProcessorFactory"/>
         <processor class="solr.RunUpdateProcessorFactory"/>
     </updateRequestProcessorChain>
+
     <!-- Deduplication
 
          An example dedup update processor that creates the "id" field
