@@ -3,6 +3,8 @@ package com.asiainfo.ocsearch.flume.util;
 import com.asiainfo.ocsearch.meta.*;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ public class RowPutGenerator {
     private Map<String,ColumnField> columnFieldMap;
     private String fileRootFolder;
     private String attachmentSeparator;
+    private static final Logger logger = LoggerFactory.getLogger(RowPutGenerator.class);
 
 
     public RowPutGenerator(Schema schema) {
@@ -147,7 +150,7 @@ public class RowPutGenerator {
                             int intContent = Integer.parseInt(value);
                             put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(intContent));
                         } catch (NumberFormatException e) {
-                            e.printStackTrace();
+                            logger.error(e.toString());
                             return null;
                         }
                         break;
@@ -156,7 +159,7 @@ public class RowPutGenerator {
                             long longContent = Long.parseLong(value);
                             put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(longContent));
                         } catch (NumberFormatException e) {
-                            e.printStackTrace();
+                            logger.error(e.toString());
                             return null;
                         }
                         break;
@@ -165,7 +168,7 @@ public class RowPutGenerator {
                             double doubleContent = Double.parseDouble(value);
                             put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(doubleContent));
                         } catch (NumberFormatException e) {
-                            e.printStackTrace();
+                            logger.error(e.toString());
                             return null;
                         }
                         break;
@@ -174,7 +177,7 @@ public class RowPutGenerator {
                             float floatContent = Float.parseFloat(value);
                             put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(floatContent));
                         } catch (NumberFormatException e) {
-                            e.printStackTrace();
+                            logger.error(e.toString());
                             return null;
                         }
                         break;
@@ -186,9 +189,10 @@ public class RowPutGenerator {
                             }
                             put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(boolContent));
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            logger.error(e.toString());
                             return null;
                         }
+                        break;
                     default:
                         put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(value));
                 }
@@ -212,6 +216,7 @@ public class RowPutGenerator {
         return put;
     }
 
+    /** @deprecated */
     @Deprecated
     public Put generatePut(Schema schema,Map<String,String> dataMap,byte[] rowkey) {
 

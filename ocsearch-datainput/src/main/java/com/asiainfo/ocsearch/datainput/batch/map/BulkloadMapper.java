@@ -17,6 +17,9 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -32,6 +35,7 @@ public class BulkloadMapper extends Mapper<LongWritable, Text, ImmutableBytesWri
     private Executor executor;
     private Map<String,ColumnField> columnFamilyMap;
     private Map<String,Integer> fieldSequenceMap;
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(BulkloadMapper.class);
 //    private Map<String,Object> dataMap;
 
 
@@ -55,8 +59,8 @@ public class BulkloadMapper extends Mapper<LongWritable, Text, ImmutableBytesWri
             ImmutableBytesWritable rowKey = new ImmutableBytesWritable(rowKeyBytes);
             Put put = dataPutfromValues(rowKeyBytes,values);
             if(put == null) {
-                //Todo
-
+                //log error data to hdfs log
+                logger.error("Error Data","Error data : "+values.toString());
             }
             else {
                 context.write(rowKey, put);
@@ -104,50 +108,55 @@ public class BulkloadMapper extends Mapper<LongWritable, Text, ImmutableBytesWri
                 String value = values[entry.getValue().getSequence().get(0)-1];
                 switch (type){
                     case INT:
-                        if(FieldTypeChecker.isInteger(value))
-                        {
-                            try {
-                                int intContent = Integer.parseInt(value);
-                                put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(intContent));
-                            }catch(NumberFormatException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        else {
+                        try {
+                            int intValue = Integer.parseInt(value);
+                            put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(intValue));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
                             return null;
                         }
                         break;
-                    case DOUBLE:
-                        if(FieldTypeChecker.isDouble(value))
-                        {
-                            try {
-                                double doubleContent = Double.parseDouble(value);
-                                put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(doubleContent));
-                            }catch (NumberFormatException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        else {
+                    case LONG:
+                        try {
+                            long longValue = Long.parseLong(value);
+                            put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(longValue));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
                             return null;
                         }
                         break;
                     case FLOAT:
-                        if(FieldTypeChecker.isDouble(value))
-                        {
-                            try {
-                                float floatContent = Float.parseFloat(value);
-                                put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(floatContent));
-                            }catch (NumberFormatException e) {
-                                e.printStackTrace();
-                            }
+                        try {
+                            float floatValue = Float.parseFloat(value);
+                            put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(floatValue));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                            return null;
                         }
-                        else {
+                        break;
+                    case DOUBLE:
+                        try {
+                            double doubleValue = Double.parseDouble(value);
+                            put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(doubleValue));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                        break;
+                    case BOOLEAN:
+                        try {
+                            boolean boolValue = Boolean.parseBoolean(value);
+                            if((!value.equals("false"))&&(!boolValue)) {
+                                return null;
+                            }
+                            put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(boolValue));
+                        } catch (Exception e) {
+                            e.printStackTrace();
                             return null;
                         }
                         break;
                     default:
-                        put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(value));
-
+                        put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(value));
                 }
 //                content = values[entry.getValue().getSequence().get(0)];
             }

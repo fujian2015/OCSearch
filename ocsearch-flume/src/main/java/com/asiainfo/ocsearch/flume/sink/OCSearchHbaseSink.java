@@ -92,8 +92,6 @@ public class OCSearchHbaseSink extends AbstractSink implements Configurable {
     }
 
     public void start() {
-//        Preconditions.checkArgument(this.table == null, "Please call stop before calling start on an old instance.");
-
         try {
             if(HBaseSinkSecurityManager.isSecurityEnabled(this.config)) {
                 this.hbaseUser = HBaseSinkSecurityManager.login(this.config, (String)null, this.kerberosPrincipal, this.kerberosKeytab);
@@ -117,17 +115,7 @@ public class OCSearchHbaseSink extends AbstractSink implements Configurable {
             throw new FlumeException("Could not get connection from HBase", var2);
         }
 
-//        try {
-//            this.schema = getSchema();
-//            this.tableExpression = this.schema.getTableExpression();
-//        } catch (Exception e) {
-//            this.sinkCounter.incrementConnectionFailedCount();
-//            logger.error("Could not get schema from ocsearch server", e);
-//            throw new FlumeException("Could not get schema from ocsearch server", e);
-//        }
-//        executor = expressionEngine.createExecutor(tableExpression);
-
-        //// TODO: 17/6/29 验证cf是否存在,需要从schema中获取cf值,并验证.
+        //// TODO: 17/6/29 验证cf是否存在,需要从schema中获取cf值,并验证.ß
 
 
         super.start();
@@ -155,25 +143,16 @@ public class OCSearchHbaseSink extends AbstractSink implements Configurable {
     }
 
     public void configure(Context context) {
-//        this.schemaName = context.getString("schema");
-//        this.baseUrl = context.getString("OCSearchServer");
-//        this.targetUrl = this.baseUrl + "/schema/get?type=schema&name=" + this.schemaName;
-//        this.tableName = context.getString("table");
-//        String cf = context.getString("columnFamily");
+
         this.batchSize = context.getLong("batchSize", new Long(100L)).longValue();
         this.serializerContext = new Context();
         this.eventSerializerType = context.getString("serializer");
-//        Preconditions.checkNotNull(this.tableName, "Table name cannot be empty, please specify in configuration file");
-//        Preconditions.checkNotNull(cf, "Column family cannot be empty, please specify in configuration file");
+
         if(this.eventSerializerType == null || this.eventSerializerType.isEmpty()) {
             this.eventSerializerType = "org.apache.flume.sink.hbase.SimpleHbaseEventSerializer";
             logger.info("No serializer defined, Will use default");
         }
-
         this.serializerContext.putAll(context.getSubProperties("serializer."));
-//        this.serializerContext.put("schema",this.schemaName);
-//        this.columnFamily = cf.getBytes(Charsets.UTF_8);
-
         try {
             Class zkQuorum = Class.forName(this.eventSerializerType);
             this.serializer = (OCHbaseEventSerializer)zkQuorum.newInstance();

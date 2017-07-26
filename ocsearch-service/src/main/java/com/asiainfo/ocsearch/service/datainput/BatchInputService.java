@@ -1,5 +1,6 @@
 package com.asiainfo.ocsearch.service.datainput;
 
+import com.asiainfo.ocsearch.constants.Constants;
 import com.asiainfo.ocsearch.datainput.batch.BatchJobClient;
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
@@ -10,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 /**
@@ -38,16 +40,21 @@ public class BatchInputService extends OCSearchService {
                 throw new ServiceException("schema for table : " + tableName + " does not exist!", ErrorCode.PARSE_ERROR);
             }
 
-            boolean submitSuccess = BatchJobClient.submitJob
+            String jobId= BatchJobClient.submitJob
                     (inputPath,outputPath,tableName,dataSeparator,fieldSequence,schema);
+            boolean submitSuccess = !jobId.equals("-1");
             if(!submitSuccess) {
                 throw new ServiceException(String.format("submit job failure."), ErrorCode.RUNTIME_ERROR);
             }
+            successResult.put("JOBID",jobId);
+            return successResult.toString().getBytes(Constants.DEFUAT_CHARSET);
 
         }catch (ServiceException e){
             stateLog.warn(e);
             throw e;
-        }finally {
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } finally {
             stateLog.info("end request " + uuid + " at " + System.currentTimeMillis());
         }
         return success;

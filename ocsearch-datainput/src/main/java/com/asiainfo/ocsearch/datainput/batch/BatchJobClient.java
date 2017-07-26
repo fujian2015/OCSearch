@@ -17,12 +17,14 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.HFileOutputFormat2;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -33,8 +35,12 @@ public class BatchJobClient extends Configured implements Tool {
 //    private static String DATA_SEPERATOR = "";
     private static String TABLE_NAME = "";
 
+    private static String JOBID;
 
-    public static boolean submitJob(String inputPath,String outputPath,String tableName,String dataSeparator,Map<String,Integer> fieldSequence,Schema schema) {
+    private static String ERROR_CODE = "-1";
+
+
+    public static String submitJob(String inputPath,String outputPath,String tableName,String dataSeparator,Map<String,Integer> fieldSequence,Schema schema) {
 
         TABLE_NAME = tableName;
 
@@ -58,20 +64,20 @@ public class BatchJobClient extends Configured implements Tool {
 
     }
 
-    public static boolean submitJob(String[] args) {
+    public static String submitJob(String[] args) {
         try {
             int response = ToolRunner.run(HBaseConfiguration.create(), new BatchJobClient(), args);
             if(response == 0) {
                 System.out.println("Job is successfully completed...");
-                return true;
+                return JOBID;
             } else {
                 System.out.println("Job failed...");
-                return false;
+                return ERROR_CODE;
             }
         } catch(Exception exception) {
             exception.printStackTrace();
         }
-        return false;
+        return ERROR_CODE;
     }
 
     private Configuration confInit(String[] args) {
@@ -108,12 +114,40 @@ public class BatchJobClient extends Configured implements Tool {
         Connection connection = ConnectionFactory.createConnection(configuration);
         TableName tableName = TableName.valueOf(TABLE_NAME);
         HFileOutputFormat2.configureIncrementalLoad(job, connection.getTable(tableName), connection.getRegionLocator(tableName));
-        job.waitForCompletion(true);
-        if (job.isSuccessful()){
-            HFileLoader.doBulkLoad(outputPath, TABLE_NAME);//导入数据
-            return 0;
-        } else {
-            return 1;
+
+        job.submit();
+        JobID jobId = job.getJobID();
+        JOBID = jobId.toString();
+
+        new Thread(new BulkLoadThread(job,outputPath)).start();
+
+//        job.waitForCompletion(true);
+        return 0;
+    }
+    private class BulkLoadThread implements Runnable {
+
+        Job job;
+        String hfilePath;
+
+        public BulkLoadThread(Job job,String hfilePath) {
+            this.job = job;
+            this.hfilePath = hfilePath;
+        }
+
+        @Override
+        public void run() {
+            try {
+                job.monitorAndPrintJob();
+                if (job.isSuccessful()){
+                    HFileLoader.doBulkLoad(hfilePath, TABLE_NAME);//导入数据
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
         }
     }
+
 }
