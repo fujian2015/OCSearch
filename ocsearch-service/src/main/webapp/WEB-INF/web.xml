@@ -219,5 +219,15 @@
         <url-pattern>/expression/list</url-pattern>
     </servlet-mapping>
     <!--expression  service end-->
+    <!--data input  service begin-->
+    <servlet>
+        <servlet-name>GetJobStatus</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.datainput.JobStatusService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GetJobStatus</servlet-name>
+        <url-pattern>/status/job</url-pattern>
+    </servlet-mapping>
+    <!--data input  service end-->
 
 </web-app>

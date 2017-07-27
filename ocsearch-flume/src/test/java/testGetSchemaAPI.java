@@ -1,5 +1,5 @@
 import com.asiainfo.ocsearch.exception.ServiceException;
-import com.asiainfo.ocsearch.flume.util.HttpRestFulClient;
+import com.asiainfo.ocsearch.utils.HttpRestFulClient;
 import com.asiainfo.ocsearch.meta.Schema;
 import org.codehaus.jackson.JsonNode;
 import org.junit.Test;

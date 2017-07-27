@@ -1,12 +1,10 @@
 import com.asiainfo.ocsearch.exception.ServiceException;
-import com.asiainfo.ocsearch.flume.util.HttpRestFulClient;
+import com.asiainfo.ocsearch.utils.HttpRestFulClient;
 import com.asiainfo.ocsearch.flume.util.PayloadConverter;
 import com.asiainfo.ocsearch.flume.util.RowPutGenerator;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.hbase.Cell;
-import org.apache.hadoop.hbase.client.Durability;
-import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.util.Bytes;

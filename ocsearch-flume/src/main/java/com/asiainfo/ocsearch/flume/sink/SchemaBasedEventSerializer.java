@@ -3,7 +3,7 @@ package com.asiainfo.ocsearch.flume.sink;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.expression.Engine;
 import com.asiainfo.ocsearch.expression.Executor;
-import com.asiainfo.ocsearch.flume.util.HttpRestFulClient;
+import com.asiainfo.ocsearch.utils.HttpRestFulClient;
 import com.asiainfo.ocsearch.flume.util.PayloadConverter;
 import com.asiainfo.ocsearch.flume.util.RowPutGenerator;
 import com.asiainfo.ocsearch.meta.Schema;
@@ -17,7 +17,6 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;

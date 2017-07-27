@@ -10,6 +10,7 @@ import com.asiainfo.ocsearch.service.OCSearchService;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ObjectNode;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -46,6 +47,7 @@ public class BatchInputService extends OCSearchService {
             if(!submitSuccess) {
                 throw new ServiceException(String.format("submit job failure."), ErrorCode.RUNTIME_ERROR);
             }
+            ObjectNode successResult = getSuccessResult();
             successResult.put("JOBID",jobId);
             return successResult.toString().getBytes(Constants.DEFUAT_CHARSET);
 

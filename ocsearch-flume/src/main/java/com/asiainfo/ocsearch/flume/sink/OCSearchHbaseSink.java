@@ -1,10 +1,5 @@
 package com.asiainfo.ocsearch.flume.sink;
 
-import com.asiainfo.ocsearch.exception.ServiceException;
-import com.asiainfo.ocsearch.expression.Engine;
-import com.asiainfo.ocsearch.expression.Executor;
-import com.asiainfo.ocsearch.flume.util.HttpRestFulClient;
-import com.asiainfo.ocsearch.meta.Schema;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -35,7 +30,6 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.security.User;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

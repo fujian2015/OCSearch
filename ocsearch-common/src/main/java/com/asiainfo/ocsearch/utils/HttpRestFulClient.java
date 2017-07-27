@@ -1,4 +1,4 @@
-package com.asiainfo.ocsearch.flume.util;
+package com.asiainfo.ocsearch.utils;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -14,7 +14,7 @@ import java.net.URL;
  * Created by Aaron on 17/6/30.
  */
 public class HttpRestFulClient {
-    public static JsonNode getRequest(String targetURL) {
+    public static JsonNode getRequest(String targetURL){
 
         JsonNode jsonNode = null;
         if(!targetURL.startsWith("http://")) {
@@ -46,12 +46,11 @@ public class HttpRestFulClient {
 
             httpConnection.disconnect();
 
-        } catch (IOException e) {
-
+        } catch (Exception e) {
             e.printStackTrace();
-
+        } finally {
+            return jsonNode;
         }
-        return jsonNode;
 
     }
 }
