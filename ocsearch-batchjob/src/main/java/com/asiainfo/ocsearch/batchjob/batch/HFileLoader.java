@@ -1,4 +1,4 @@
-package com.asiainfo.ocsearch.datainput.batch;
+package com.asiainfo.ocsearch.batchjob.batch;
 
 /**
  * Created by Aaron on 17/5/26.

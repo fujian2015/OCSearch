@@ -1,8 +1,8 @@
-package com.asiainfo.ocsearch.datainput.batch;
+package com.asiainfo.ocsearch.batchjob.batch;
 
-import com.asiainfo.ocsearch.datainput.batch.map.BulkloadMapper;
-import com.asiainfo.ocsearch.datainput.util.ColumnField;
-import com.asiainfo.ocsearch.datainput.util.SchemaProvider;
+import com.asiainfo.ocsearch.batchjob.batch.map.BulkloadMapper;
+import com.asiainfo.ocsearch.batchjob.util.ColumnField;
+import com.asiainfo.ocsearch.batchjob.util.SchemaProvider;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.google.gson.Gson;
 import org.apache.hadoop.conf.Configuration;
@@ -23,6 +23,8 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
@@ -31,6 +33,8 @@ import java.util.Map;
  * Created by Aaron on 17/5/26.
  */
 public class BatchJobClient extends Configured implements Tool {
+
+    private static final Logger logger = LoggerFactory.getLogger(BatchJobClient.class);
 
 //    private static String DATA_SEPERATOR = "";
     private static String TABLE_NAME = "";
@@ -139,6 +143,15 @@ public class BatchJobClient extends Configured implements Tool {
             try {
                 job.monitorAndPrintJob();
                 if (job.isSuccessful()){
+                    Long everyJobInputLine = 0L;
+                    Long everyJobOutputLine = 0L;
+                    Long everyJobBadLine = 0L;
+                    everyJobBadLine = job.getCounters().findCounter(BulkloadMapper.COUNTERS.BAD).getValue();
+                    everyJobInputLine = job.getCounters().findCounter(BulkloadMapper.COUNTERS.TOTAL).getValue();
+                    everyJobOutputLine = everyJobInputLine - everyJobBadLine;
+                    logger.info("BulkLoad Job Bad Lines Number is "+everyJobBadLine);
+                    logger.info("BulkLoad Job Input Lines Number is "+everyJobInputLine);
+                    logger.info("BulkLoad Job Output Lines Number is "+everyJobOutputLine);
                     HFileLoader.doBulkLoad(hfilePath, TABLE_NAME);//导入数据
                 }
             } catch (IOException e) {

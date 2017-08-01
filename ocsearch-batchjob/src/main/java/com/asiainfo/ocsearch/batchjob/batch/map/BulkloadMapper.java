@@ -1,25 +1,30 @@
-package com.asiainfo.ocsearch.datainput.batch.map;
+package com.asiainfo.ocsearch.batchjob.batch.map;
 
 /**
  * Created by Aaron on 17/5/26.
  */
-import com.asiainfo.ocsearch.datainput.util.ColumnField;
-import com.asiainfo.ocsearch.meta.FieldTypeChecker;
+import com.asiainfo.ocsearch.batchjob.util.ColumnField;
 import com.asiainfo.ocsearch.expression.Engine;
 import com.asiainfo.ocsearch.expression.Executor;
 import com.asiainfo.ocsearch.meta.FieldType;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.log4j.Logger;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -37,9 +42,20 @@ public class BulkloadMapper extends Mapper<LongWritable, Text, ImmutableBytesWri
     private Map<String,Integer> fieldSequenceMap;
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(BulkloadMapper.class);
 //    private Map<String,Object> dataMap;
+    public enum COUNTERS {
+        TOTAL,
+        BAD
+    }
+    private Counter totalRowsCounter, badRowsCounter;
+    private String baseOutputPath;
+    private FileSystem fs = null;
+    private FSDataOutputStream errorOutput = null;
+    private String errorFilePath;
+    private FileSplit split;
 
 
     public void setup(Context context) {
+        Configuration conf = context.getConfiguration();
         Gson gson = new Gson();
         Configuration configuration = context.getConfiguration();//获取作业参数
         hbaseTable = configuration.get("hbase.table.name");
@@ -50,6 +66,18 @@ public class BulkloadMapper extends Mapper<LongWritable, Text, ImmutableBytesWri
         columnFamilyMap = gson.fromJson(columnMapStr,new TypeToken<Map<String,ColumnField>>(){}.getType());
         fieldSequenceMap = gson.fromJson(fieldSequenceStr,new TypeToken<Map<String,Integer>>(){}.getType());
         executor = expressionEngine.createExecutor(rowKeyExpression);
+        badRowsCounter = context.getCounter(COUNTERS.BAD);
+        totalRowsCounter = context.getCounter(COUNTERS.TOTAL);
+
+        split = (FileSplit) context.getInputSplit();
+        try {
+            fs = FileSystem.get(conf);
+        } catch (IOException e) {
+            throw new RuntimeException("get fileSystem error", e);
+        }
+        baseOutputPath = conf.get(FileOutputFormat.OUTDIR);
+        errorFilePath = baseOutputPath + "/_ERROR/" +
+        split.getPath().getName() + "-" + split.getStart() + "-" + split.getLength();
     }
     public void map(LongWritable key, Text value, Context context){
         try {
@@ -61,12 +89,18 @@ public class BulkloadMapper extends Mapper<LongWritable, Text, ImmutableBytesWri
             if(put == null) {
                 //log error data to hdfs log
                 logger.error("Error Data","Error data : "+values.toString());
+                if (errorOutput == null)
+                    errorOutput = fs.create(new Path(errorFilePath), true);
+                errorOutput.write((value.toString() + "\n").getBytes());
+                badRowsCounter.increment(1);
             }
             else {
                 context.write(rowKey, put);
             }
         } catch(Exception exception) {
             exception.printStackTrace();
+        } finally {
+            totalRowsCounter.increment(1);
         }
     }
 
@@ -164,6 +198,13 @@ public class BulkloadMapper extends Mapper<LongWritable, Text, ImmutableBytesWri
 //            put.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(column),Bytes.toBytes(content));
         }
         return put;
+    }
+    @Override
+    protected void cleanup(Context context) throws IOException, InterruptedException {
+        super.cleanup(context);
+        if(errorOutput != null) {
+            errorOutput.close();
+        }
     }
 
 

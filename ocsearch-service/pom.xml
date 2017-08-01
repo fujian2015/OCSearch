@@ -41,7 +41,12 @@
         </dependency>
         <dependency>
             <groupId>com.asiainfo</groupId>
-            <artifactId>ocsearch-datainput</artifactId>
+            <artifactId>ocsearch-batchjob</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>groupId</groupId>
+            <artifactId>ocsearch-cache</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

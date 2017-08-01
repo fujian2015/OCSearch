@@ -1,5 +1,5 @@
-import com.asiainfo.ocsearch.datainput.util.ColumnField;
-import com.asiainfo.ocsearch.datainput.util.ColumnMapConverter;
+import com.asiainfo.ocsearch.batchjob.util.ColumnField;
+import com.asiainfo.ocsearch.batchjob.util.ColumnMapConverter;
 import com.asiainfo.ocsearch.expression.Engine;
 import com.asiainfo.ocsearch.expression.Executor;
 import com.asiainfo.ocsearch.meta.FieldType;

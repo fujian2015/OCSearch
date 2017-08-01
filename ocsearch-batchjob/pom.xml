@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ocsearch-datainput</artifactId>
+    <artifactId>ocsearch-batchjob</artifactId>
     <packaging>jar</packaging>
     <dependencies>
 
@@ -22,6 +22,11 @@
             <groupId>com.asiainfo</groupId>
             <artifactId>ocsearch-expression</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>groupId</groupId>
+            <artifactId>ocsearch-cache</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

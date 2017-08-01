@@ -9,10 +9,11 @@
     <modules>
         <module>ocsearch-common</module>
         <module>ocsearch-datasource</module>
-        <module>ocsearch-datainput</module>
+        <module>ocsearch-batchjob</module>
         <module>ocsearch-service</module>
         <module>ocsearch-expression</module>
         <module>ocsearch-flume</module>
+        <module>ocsearch-cache</module>
     </modules>
 
     <properties>

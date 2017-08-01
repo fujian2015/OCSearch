@@ -1,4 +1,4 @@
-package com.asiainfo.ocsearch.datainput.util;
+package com.asiainfo.ocsearch.batchjob.util;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.JavaType;

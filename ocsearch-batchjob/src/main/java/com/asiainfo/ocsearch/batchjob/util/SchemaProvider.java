@@ -1,4 +1,4 @@
-package com.asiainfo.ocsearch.datainput.util;
+package com.asiainfo.ocsearch.batchjob.util;
 
 
 import com.asiainfo.ocsearch.meta.*;

@@ -1,7 +1,7 @@
 package com.asiainfo.ocsearch.service.datainput;
 
 import com.asiainfo.ocsearch.constants.Constants;
-import com.asiainfo.ocsearch.datainput.batch.BatchJobClient;
+import com.asiainfo.ocsearch.batchjob.batch.BatchJobClient;
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.meta.Schema;

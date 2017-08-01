@@ -19,7 +19,7 @@ public class JobStatusService extends OCSearchService {
     Logger stateLog = Logger.getLogger("state");
 
     @Override
-    protected byte[] doService(JsonNode request) throws ServiceException {
+    public byte[] doService(JsonNode request) throws ServiceException {
 
         String uuid = getRequestId();
         stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());

@@ -1,4 +1,4 @@
-package com.asiainfo.ocsearch.datainput.batch;
+package com.asiainfo.ocsearch.batchjob.batch;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
