@@ -17,7 +17,7 @@ import java.util.Set;
  */
 public class ListTableService extends OCSearchService {
     @Override
-    protected byte[] doService(JsonNode request) throws ServiceException {
+    public byte[] doService(JsonNode request) throws ServiceException {
         try {
 
             Set<String> tables = MetaDataHelperManager.getInstance().getTables();

@@ -15,7 +15,7 @@ import org.codehaus.jackson.node.ObjectNode;
  */
 public class GetSchemaService extends OCSearchService {
     @Override
-    protected byte[] doService(JsonNode request) throws ServiceException {
+    public byte[] doService(JsonNode request) throws ServiceException {
         try {
             String type = request.get("type").asText();
             String name = request.get("name").asText();

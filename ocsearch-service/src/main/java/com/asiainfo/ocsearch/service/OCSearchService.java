@@ -95,8 +95,6 @@ public abstract class OCSearchService extends HttpServlet {
                 re = serviceException.getErrorResponse();
             }
 
-            log.info("result:" + new ObjectMapper().readTree(re).toString());
-
             response.setCharacterEncoding("utf-8");
             ServletOutputStream so = response.getOutputStream();
             so.write(re);
@@ -109,7 +107,7 @@ public abstract class OCSearchService extends HttpServlet {
         }
     }
 
-    protected abstract byte[] doService(JsonNode request) throws ServiceException;
+    public abstract byte[] doService(JsonNode request) throws ServiceException;
 
     protected String getRequestId() {
         return UUID.randomUUID().toString();

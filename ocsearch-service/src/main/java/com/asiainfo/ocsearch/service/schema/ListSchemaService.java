@@ -18,7 +18,7 @@ import java.util.Collection;
  */
 public class ListSchemaService extends OCSearchService {
     @Override
-    protected byte[] doService(JsonNode request) throws ServiceException {
+    public byte[] doService(JsonNode request) throws ServiceException {
         try {
 
             Collection<Schema> schemas = MetaDataHelperManager.getInstance().getSchemas();

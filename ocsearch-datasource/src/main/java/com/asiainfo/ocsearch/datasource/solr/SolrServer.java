@@ -207,4 +207,13 @@ public class SolrServer {
     }
 
 
+    public void optimize() {
+        try {
+            solrServer.optimize("SITE",false,false);
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

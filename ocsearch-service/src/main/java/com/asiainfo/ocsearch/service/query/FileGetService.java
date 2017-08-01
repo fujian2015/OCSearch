@@ -21,7 +21,7 @@ import java.util.concurrent.CountDownLatch;
 public class FileGetService extends OCSearchService {
 
     @Override
-    protected byte[] doService(JsonNode request) throws ServiceException {
+    public byte[] doService(JsonNode request) throws ServiceException {
 
         try {
             if (false == request.has("id")) {

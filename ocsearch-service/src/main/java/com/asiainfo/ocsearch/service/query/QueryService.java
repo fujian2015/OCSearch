@@ -58,7 +58,7 @@ public abstract class QueryService extends OCSearchService {
     }
 
     @Override
-    protected byte[] doService(JsonNode request) throws ServiceException {
+    public byte[] doService(JsonNode request) throws ServiceException {
         try {
             ObjectNode successResult = getSuccessResult();
             successResult.put("data", query(request));
@@ -76,7 +76,7 @@ public abstract class QueryService extends OCSearchService {
         return new StringBuilder(rowKey).append("|").append(condition).append("|").append(StringUtils.join(tables, ",")).toString();
     }
 
-    protected abstract JsonNode query(JsonNode request) throws ServiceException;
+    public abstract JsonNode query(JsonNode request) throws ServiceException;
 
     protected void assertTables(Set<String> tableSet) throws ServiceException {
         if (tableSet == null || tableSet.size() == 0) {

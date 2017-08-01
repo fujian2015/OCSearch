@@ -91,6 +91,15 @@
         <servlet-name>ListTable</servlet-name>
         <url-pattern>/table/list</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>GetTable</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.table.GetTableService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GetTable</servlet-name>
+        <url-pattern>/table/get</url-pattern>
+    </servlet-mapping>
     <!--table service end-->
 
     <!--query service begin -->

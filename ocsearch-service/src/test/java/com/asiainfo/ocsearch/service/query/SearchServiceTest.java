@@ -15,7 +15,7 @@ public class SearchServiceTest {
         new SystemListener().initAll();
 
         String request = "{\n" +
-                "    \"query\": \"\",\n" +
+                "    \"query\": \"美女\",\n" +
                 "    \"start\": 0,\n" +
                 "    \"rows\": 20,\n" +
                 "    \"sort\": \"\",\n" +

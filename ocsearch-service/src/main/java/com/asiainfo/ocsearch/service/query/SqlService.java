@@ -15,7 +15,7 @@ import java.sql.SQLException;
  */
 public class SqlService extends QueryService {
     @Override
-    protected JsonNode query(JsonNode request) throws ServiceException {
+    public JsonNode query(JsonNode request) throws ServiceException {
 
         HbaseJdbcHelper jdbcHelper = null;
         JsonNodeFactory factory = JsonNodeFactory.instance;

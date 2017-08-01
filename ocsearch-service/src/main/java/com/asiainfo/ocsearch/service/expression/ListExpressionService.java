@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public class ListExpressionService extends OCSearchService {
     @Override
-    protected byte[] doService(JsonNode request) throws ServiceException {
+    public byte[] doService(JsonNode request) throws ServiceException {
         try {
             Map<String, List<DynamicProperty>> dynamicPropertyMap = NameSpaceManager.getDynamicPropertyMap();
 

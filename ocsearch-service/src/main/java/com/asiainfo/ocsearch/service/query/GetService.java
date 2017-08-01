@@ -24,13 +24,14 @@ import java.util.concurrent.CountDownLatch;
 public class GetService extends QueryService {
 
     @Override
-    protected JsonNode query(JsonNode request) throws ServiceException {
+    public JsonNode query(JsonNode request) throws ServiceException {
 
         try {
-            if (false == (request.has("table") && request.has("ids"))) {
+            if (false == (request.has("tables") && request.has("ids"))) {
                 throw new ServiceException("the get service request must have 'table' and 'ids' param keys!", ErrorCode.PARSE_ERROR);
             }
-            String table = request.get("table").asText();
+            ArrayNode tables = (ArrayNode) request.get("tables");
+            String table = tables.get(0).asText();
 
             Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(table);
 

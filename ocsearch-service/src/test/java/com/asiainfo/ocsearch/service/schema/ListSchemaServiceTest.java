@@ -1,8 +1,7 @@
 package com.asiainfo.ocsearch.service.schema;
 
+import com.asiainfo.ocsearch.datasource.solr.SolrServerManager;
 import com.asiainfo.ocsearch.listener.SystemListener;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.JsonNodeFactory;
 import org.testng.annotations.Test;
 
 /**
@@ -12,7 +11,8 @@ public class ListSchemaServiceTest {
     @Test
     public void testDoService() throws Exception {
         new SystemListener().initAll();
-       System.out.println(new ObjectMapper().readTree( new ListSchemaService().doService(JsonNodeFactory.instance.objectNode())));
+        SolrServerManager.getInstance().optimize();
+//       System.out.println(new ObjectMapper().readTree( new ListSchemaService().doService(JsonNodeFactory.instance.objectNode())));
     }
 
 }

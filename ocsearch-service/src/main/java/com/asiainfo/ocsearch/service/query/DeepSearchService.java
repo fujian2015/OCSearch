@@ -27,7 +27,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public class DeepSearchService extends QueryService {
     @Override
-    protected JsonNode query(JsonNode request) throws ServiceException {
+    public JsonNode query(JsonNode request) throws ServiceException {
 
         ObjectNode returnData = JsonNodeFactory.instance.objectNode();
 

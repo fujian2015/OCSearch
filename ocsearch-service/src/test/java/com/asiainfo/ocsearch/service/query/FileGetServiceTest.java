@@ -29,7 +29,7 @@ public class FileGetServiceTest {
 //        FileID fileID = new FileID("file__table", "picture:picture", "test1");
 //        System.out.println(fileID);
         ObjectNode o = JsonNodeFactory.instance.objectNode();
-        o.put("id", "eyJ0IjoiRklMRV9fMjAxNzA3IiwiZiI6InBpYyIsImUiOiJGSUxFUyIsInIiOiI4NWU0NDViZS1kOTgwLTQ1M2MtOTg0OS0xNGQ5ZjUxYzA2MzUifQ==");
+        o.put("id", "eyJ0IjoiRklMRV9fMjAxNzA3IiwiZiI6InBpYyIsImUiOiJwaWMiLCJyIjoiMjkzYmY1MmUtMjY0ZS00N2JhLWEzMzctNWIzZWExOGQ0MWQzIn0=");
 
         FileUtils.writeByteArrayToFile(new File("/Users/mac/Documents/timg.jpg"), new FileGetService().doService(o));
     }

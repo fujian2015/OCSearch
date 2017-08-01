@@ -16,7 +16,7 @@ public class CompactTableService extends OCSearchService {
     Logger stateLog = Logger.getLogger("state");
 
     @Override
-    protected byte[] doService(JsonNode request) throws ServiceException {
+    public byte[] doService(JsonNode request) throws ServiceException {
 
         try {
             String name = request.get("name").asText();
