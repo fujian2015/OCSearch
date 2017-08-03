@@ -1,5 +1,7 @@
 package com.asiainfo.ocsearch.batchjob.status;
 
+import java.util.Map;
+
 public class JobStatusResult {
 
     public static final String PREPARE = "PREPARE";
@@ -13,7 +15,7 @@ public class JobStatusResult {
     private long badlines = 0L;
     private long totallines = 0L;
 
-    JobStatusListener jobStatusListener;
+    JobStatusListener jobStatusListener = null;
 
     public JobStatusResult(String jobId) {
         this.jobId = jobId;
@@ -84,6 +86,11 @@ public class JobStatusResult {
         this.status = FAILED;
         this.jobStatusListener.doPutCallback(this);
     }
+
+    public Map<String,String> getJobStatus() {
+        return this.jobStatusListener.doGetCallback(jobId);
+    }
+
 
 
 }

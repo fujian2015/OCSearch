@@ -16,9 +16,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <packaging>jar</packaging>
-    <groupId>groupId</groupId>
     <artifactId>ocsearch-cache</artifactId>
-    <version>1.0-SNAPSHOT</version>
 
     
 </project>

@@ -7,7 +7,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>ocsearch-service</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <name>ocsearch-service Maven Webapp</name>
     <url>http://maven.apache.org</url>
     <dependencies>
@@ -45,7 +45,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>groupId</groupId>
+            <groupId>com.asiainfo</groupId>
             <artifactId>ocsearch-cache</artifactId>
             <version>${project.version}</version>
         </dependency>
