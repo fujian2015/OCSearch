@@ -24,6 +24,7 @@ ocsearch-service/target
 ocsearch-common/target
 ocsearch-expression/target
 ocsearch-datasource/target
-ocsearch-datainput/target
+ocsearch-batchjob/target
+ocsearch-cache/target
 ocsearch-flume/target
 

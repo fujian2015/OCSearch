@@ -249,6 +249,7 @@ public class HbaseQuery {
     public Map extractResult2Map(Result result) {
         Map<String, Object> map = new HashMap<>();
         Map<String, Field> fields = schema.getFields();
+        String id = Bytes.toString(result.getRow());
         columns.forEach(pair -> {
             byte[] valueArray = result.getValue(pair.getFirst(), pair.getSecond());
 
@@ -282,7 +283,11 @@ public class HbaseQuery {
                             break;
                     }
                 }
-            } else { //inner field
+            }
+            else if (StringUtils.equals(Constants.FILE_NAMES_COLUMN, name)) {
+               return;
+            }
+            else { //inner field
                 String innerValue = Bytes.toString(valueArray);
 
                 InnerField inf = schema.getInnerFields().get(name);

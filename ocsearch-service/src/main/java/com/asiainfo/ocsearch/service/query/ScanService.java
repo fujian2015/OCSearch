@@ -168,70 +168,73 @@ public class ScanService extends QueryService {
 
                 int offset = 0;
                 if (total <= start) {
-                    throw new ServiceException("start param is larger than total number!", ErrorCode.PARSE_ERROR);
+//                    throw new ServiceException("start param is larger than total number!", ErrorCode.PARSE_ERROR);
                 }
-                boolean isFirst = true;
-                List<HbaseQuery> queries = new ArrayList<>();
-                for (String table : tableSet) {
+                else{
+                    boolean isFirst = true;
+                    List<HbaseQuery> queries = new ArrayList<>();
+                    for (String table : tableSet) {
 
-                    int size = totalNode.get(table).asInt();
+                        int size = totalNode.get(table).asInt();
 
-                    if (offset + size <= start) {
-                        offset = offset + size;
-                    } else if (isFirst) {
-                        isFirst = false;
-                        String startKey = null;
-                        int skip = 0;
-                        if (cacheValue.containsKey("" + start)) {
-                            startKey = cacheValue.get("" + start);
+                        if (offset + size <= start) {
+                            offset = offset + size;
+                        } else if (isFirst) {
+                            isFirst = false;
+                            String startKey = null;
+                            int skip = 0;
+                            if (cacheValue.containsKey("" + start)) {
+                                startKey = cacheValue.get("" + start);
+                            } else {
+                                startKey = rowKey;
+                                skip = start - offset;
+                            }
+                            HbaseQuery hbaseQuery = new HbaseQuery(schema, table, startKey, stopKey, rows, condition, returnFields);
+                            hbaseQuery.setSkip(skip);
+                            queries.add(hbaseQuery);
+                        } else if (offset + size <= start + rows) {
+
+                            queries.add(new HbaseQuery(schema, table, rowKey, stopKey, rows, condition, returnFields));
                         } else {
-                            startKey = rowKey;
-                            skip = start - offset;
+                            int limit = start + rows - offset;
+                            queries.add(new HbaseQuery(schema, table, rowKey, stopKey, limit, condition, returnFields));
+                            break;
                         }
-                        HbaseQuery hbaseQuery = new HbaseQuery(schema, table, startKey, stopKey, rows, condition, returnFields);
-                        hbaseQuery.setSkip(skip);
-                        queries.add(hbaseQuery);
-                    } else if (offset + size <= start + rows) {
-
-                        queries.add(new HbaseQuery(schema, table, rowKey, stopKey, rows, condition, returnFields));
-                    } else {
-                        int limit = start + rows - offset;
-                        queries.add(new HbaseQuery(schema, table, rowKey, stopKey, limit, condition, returnFields));
-                        break;
+                        offset = offset + size;
                     }
-                    offset = offset + size;
-                }
 
-                CountDownLatch countDownLatch = new CountDownLatch(queries.size());
+                    CountDownLatch countDownLatch = new CountDownLatch(queries.size());
 
-                ExecutorService executor = ThreadPoolManager.getExecutor("scanQuery");
+                    ExecutorService executor = ThreadPoolManager.getExecutor("scanQuery");
 
-                Map<String, QueryActor> actors = new TreeMap<>();
-                queries.forEach(query -> {
-                    QueryActor actor = new ScanQueryActor(query, countDownLatch);
-                    executor.submit(actor);
-                    actors.put(query.getTable(), actor);
+                    Map<String, QueryActor> actors = new TreeMap<>();
+                    queries.forEach(query -> {
+                        QueryActor actor = new ScanQueryActor(query, countDownLatch);
+                        executor.submit(actor);
+                        actors.put(query.getTable(), actor);
 
-                });
-                countDownLatch.await();
+                    });
+                    countDownLatch.await();
 
-                for (Map.Entry<String, QueryActor> entry : actors.entrySet()) {
+                    for (Map.Entry<String, QueryActor> entry : actors.entrySet()) {
 
-                    QueryResult qr = entry.getValue().getQueryResult();
+                        QueryResult qr = entry.getValue().getQueryResult();
 
-                    for (ObjectNode data : qr.getData()) {
-                        if (firstKey == null)
-                            firstKey = data.get("id").asText();
-                        if (withTable == true)
-                            data.put("_table_", entry.getKey());
-                        if (withId == false)
-                            data.remove("id");
-                        results.add(data);
-                    }
-                    if (qr.getLastRowkey() != null) {
-                        nextRowKey = qr.getLastRowkey();
+                        for (ObjectNode data : qr.getData()) {
+                            if (firstKey == null)
+                                firstKey = data.get("id").asText();
+                            if (withTable == true)
+                                data.put("_table_", entry.getKey());
+                            if (withId == false)
+                                data.remove("id");
+                            results.add(data);
+                        }
+                        if (qr.getLastRowkey() != null) {
+                            nextRowKey = qr.getLastRowkey();
+                        }
                     }
                 }
+
             }
 
             //cache put

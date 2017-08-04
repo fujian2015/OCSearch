@@ -33,7 +33,7 @@ public class DeepScanService extends QueryService {
         int total = 0;
         try {
             if (false == (request.has("rowkey_prefix") && request.has("cursor_mark") && request.has("rows") && request.has("tables"))) {
-                throw new ServiceException("the search service request must have 'rowkey_prefix','cursor_mark'," +
+                throw new ServiceException("the deep scan service request must have 'rowkey_prefix','cursor_mark'," +
                         "'rows','tables' param keys!", ErrorCode.PARSE_ERROR);
             }
 
@@ -50,7 +50,7 @@ public class DeepScanService extends QueryService {
             ArrayNode tables = (ArrayNode) request.get("tables");
 
             if (tables.size() > 1)
-                throw new ServiceException("the search service request must have only one 'table'", ErrorCode.PARSE_ERROR);
+                throw new ServiceException("the deep scan service request must have only one 'table'", ErrorCode.PARSE_ERROR);
 
 
             ArrayNode returnNode = (ArrayNode) request.get("return_fields");

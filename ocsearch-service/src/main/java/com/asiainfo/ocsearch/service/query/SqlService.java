@@ -65,7 +65,6 @@ public class SqlService extends QueryService {
 
     private ValueNode toValueNode(Object value) {
 
-        System.out.println(value);
         if (value instanceof Integer) {
             return new IntNode((Integer) value);
         } else if (value instanceof Double || value instanceof Float) {
