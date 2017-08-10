@@ -40,7 +40,7 @@ public class AddIndexerService extends OCSearchService {
 
             IndexType indexType = schema.getIndexType();
 
-            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_BATCH) {
+            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_PHOENIX) {
 
                 transaction.add(new CreateIndexerTable(name, schema));
             } else {

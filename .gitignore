@@ -19,6 +19,8 @@ hs_err_pid*
 /.idea
 
 logs/
+server/
+build/
 
 ocsearch-service/target
 ocsearch-common/target

@@ -5,6 +5,7 @@ import com.asiainfo.ocsearch.datasource.hbase.HbaseServiceManager;
 import com.asiainfo.ocsearch.transaction.atomic.AtomicOperation;
 import org.apache.log4j.Logger;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -16,10 +17,10 @@ public class CreateHbaseTable implements AtomicOperation {
 
     int regions;
     String table;
-    Set<String> columnFamilies;
+    Map<String,Integer> columnFamilies;
     Set<String> regionSplits;
 
-    public CreateHbaseTable(String table, int regions, Set<String> regionSplits, Set<String> columnFamilies) {
+    public CreateHbaseTable(String table, int regions, Set<String> regionSplits, Map<String,Integer> columnFamilies) {
 
         this.regions = regions;
         this.table = table;

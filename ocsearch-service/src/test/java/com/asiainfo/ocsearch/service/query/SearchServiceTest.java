@@ -15,13 +15,13 @@ public class SearchServiceTest {
         new SystemListener().initAll();
 
         String request = "{\n" +
-                "    \"query\": \"美女\",\n" +
+                "    \"query\": \"\",\n" +
                 "    \"start\": 0,\n" +
                 "    \"rows\": 20,\n" +
                 "    \"sort\": \"\",\n" +
                 "    \"condition\": \"*:*\",\n" +
-                "    \"tables\": [\"FILE__201707\"],\n" +
-                "    \"return_fields\": [\"id\",\"name\",\"pic\"]\n" +
+                "    \"tables\": [\"TEST2\"],\n" +
+                "    \"return_fields\": [\"id\",\"LAC\",\"CELL\"]\n" +
                 "}";
 
         ObjectNode q=(ObjectNode)new ObjectMapper().readTree(request);

@@ -13,6 +13,7 @@ import com.asiainfo.ocsearch.transaction.internal.TransactionUtil;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 
+
 /**
  * Created by mac on 2017/5/4.
  */
@@ -40,10 +41,11 @@ public class DeleteTableService extends OCSearchService {
 
             IndexType indexType = schema.getIndexType();
 
-            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_BATCH) {
+            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_PHOENIX) {
                 transaction.add(new DeleteIndexerTable(name));
                 transaction.add(new DeleteSolrCollection(name));
-            } else if (indexType == IndexType.PHOENIX) {
+            }
+            if (indexType == IndexType.PHOENIX||indexType==IndexType.HBASE_SOLR_PHOENIX) {
                 transaction.add(new DeletePhoenixView(name));
             }
             if (false == request.has("hbase_exist") || false == request.get("hbase_exist").asBoolean())

@@ -14,6 +14,12 @@ public class SolrConfig {
     private final int zkConnectTimeout;
     private final int replicas;
 
+    private boolean useHA ;
+    private final String hdfsHome;
+    private final String hdfsConfdir ;
+    private final boolean useHa = false;
+
+
     public int getMaxShardsPerNode() {
         return maxShardsPerNode;
     }
@@ -28,27 +34,35 @@ public class SolrConfig {
 
     public SolrConfig(Properties prop) {
 
-        zk=prop.getProperty("solr.zookeeper",null);
-        soTimeout=Integer.parseInt(prop.getProperty("solr.soTimeout","60000"));
-        zkClientTimeout=Integer.parseInt(prop.getProperty("solr.zkClientTimeout","60000"));
-        zkConnectTimeout=Integer.parseInt(prop.getProperty("solr.zkConnectTimeout","60000"));
-        replicas = Integer.parseInt(prop.getProperty("solr.replicas","1"));
-        maxShardsPerNode = Integer.parseInt(prop.getProperty("solr.maxShardsPerNode","2"));
-        autoAddReplicas =Boolean.parseBoolean(prop.getProperty("solr.autoAddReplicas","true"));
+        zk = prop.getProperty("solr.zookeeper", null);
+        soTimeout = Integer.parseInt(prop.getProperty("solr.soTimeout", "60000"));
+        zkClientTimeout = Integer.parseInt(prop.getProperty("solr.zkClientTimeout", "60000"));
+        zkConnectTimeout = Integer.parseInt(prop.getProperty("solr.zkConnectTimeout", "60000"));
+        replicas = Integer.parseInt(prop.getProperty("solr.replicas", "1"));
+        maxShardsPerNode = Integer.parseInt(prop.getProperty("solr.maxShardsPerNode", "2"));
+        autoAddReplicas = Boolean.parseBoolean(prop.getProperty("solr.autoAddReplicas", "true"));
+
+        useHA = Boolean.valueOf(prop.getProperty("solr.useHA", "true"));
+
+        hdfsHome = prop.getProperty("solr.hdfs.home");
+
+        hdfsConfdir = prop.getProperty("solr.hdfs.confdir","");
 
     }
 
-    public String getZookeeper(){
+    public String getZookeeper() {
         return zk;
     }
 
-    public int getZkClientTimeout(){
+    public int getZkClientTimeout() {
         return zkClientTimeout;
     }
-    public int getZkConnectTimeout(){
+
+    public int getZkConnectTimeout() {
         return zkConnectTimeout;
     }
-    public int getSoTimeout(){
+
+    public int getSoTimeout() {
         return soTimeout;
     }
 
@@ -56,4 +70,14 @@ public class SolrConfig {
         return replicas;
     }
 
+    public String getHdfsHome() {
+        return hdfsHome;
+    }
+    public  boolean useHA(){
+        return useHA;
+    }
+
+    public String getHdfsConfdir() {
+        return hdfsConfdir;
+    }
 }

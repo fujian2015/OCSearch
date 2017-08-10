@@ -44,7 +44,7 @@ public class AddSchemaService extends OCSearchService {
             Transaction transaction = new TransactionImpl();
 
             if (tableSchema.getIndexType() == IndexType.HBASE_SOLR_INDEXER ||
-                    tableSchema.getIndexType() == IndexType.HBASE_SOLR_BATCH) {
+                    tableSchema.getIndexType() == IndexType.HBASE_SOLR_PHOENIX) {
                 transaction.add(new CreateSolrConfig(tableSchema));
 //                transaction.add(new CreateIndexerConfig(tableSchema));
             }

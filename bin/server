@@ -1,0 +1,121 @@
+#!/bin/bash
+
+#***********************************************************************
+# Script  : server
+# Version : 2.0.1
+# ocsearch
+#***********************************************************************
+
+SERVER_HOME=$(cd `dirname $0`/..; pwd)
+. ${SERVER_HOME}/bin/Utilities.sh
+
+function print_usage(){
+  echo "Usage: server [COMMAND]"
+  echo "  where COMMAND is one of:"
+  echo "  start                          run the server application"
+  echo "  start -m 【4】g                 run the server application"
+  echo "  stop                           shutdown the server application"
+  echo "  restart                        restart the server application"
+  echo "  restart -m 【4】g               restart the server application"
+}
+
+function startServer(){
+
+    if [ ! -f "${SERVER_HOME}/logs/server.pid" ]; then
+       touch "${SERVER_HOME}/logs/server.pid"
+    fi
+
+    proc_id=`cat ${SERVER_HOME}/logs/server.pid`
+    if [[ -z ${proc_id} ]];then
+
+
+        out "Starting the server..."
+
+        \cp ${SERVER_HOME}/conf/*.*  ${SERVER_HOME}/server/webapps/ROOT/WEB-INF/classes/
+
+        export JAVA_OPTS="-Xms${HEAP_SIZE} -Xmx${HEAP_SIZE}"
+        cd ${SERVER_HOME}/server/bin
+        sh startup.sh
+        pid=`ps -ef|grep $0|grep Dcatalina.base|grep -v grep|awk '{print $2}'`
+
+        sleep 1
+
+        ps -p ${pid} > /dev/null 2>&1
+
+        if [ $? -eq 0 ]; then
+            echo ${pid} > ${SERVER_HOME}/logs/server.pid
+            success "Start the server successfully."
+        else
+            error "Start the server failed!"
+            error "Please check log ${SERVER_HOME}/server/logs/catalina.out for error messages."
+        fi
+    else
+         out "The server is running ! "
+    fi
+}
+
+function stopServer(){
+    proc_id=`cat ${SERVER_HOME}/logs/server.pid`
+    if [[ -z ${proc_id} ]];then
+        out "The server is not running ! "
+    else
+         out "Stopping the server..."
+         for id in ${proc_id[*]}
+         do
+           ps -ef|grep ${id}|grep -v grep
+
+           if [ $? -eq 0 ];then
+               cd ${SERVER_HOME}/server/bin
+               sh shutdown.sh
+               sleep 1
+               ps -ef|grep ${id}|grep -v grep
+               if [ $? -eq 0 ];then
+                    out "shutdown server failed,killed the process which id ${id} "
+                    kill -9 ${id}
+               fi
+                 success "Stop the server successfully."
+           else
+                out "The server which process id ${id} is not running ! "
+           fi
+         done
+         echo > ${SERVER_HOME}/logs/server.pid
+    fi
+}
+
+
+function print_version(){
+    echo "1.0"
+}
+HEAP_SIZE=1g
+
+if [ "$2" = "-m" ]; then
+     if [ ! -z "$3" ]; then
+          HEAP_SIZE=$3
+     else
+          print_usage;
+          exit 0
+     fi
+fi
+
+if [ $# -eq 0 ]; then
+    print_usage;
+else
+    case $1 in
+    start)
+        startServer;;
+    stop)
+        stopServer;;
+    restart)
+        stopServer
+        startServer;;
+    version)
+        print_version;;
+    --help|-help|-h)
+        print_usage;;
+    *)
+        error "Invalid argument, please refer to: "
+        print_usage;;
+    esac
+fi
+
+exit 0;

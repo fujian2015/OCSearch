@@ -34,7 +34,7 @@ public class DeleteIndexerService extends OCSearchService {
 
             IndexType indexType = schema.getIndexType();
 
-            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_BATCH) {
+            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_PHOENIX) {
                 transaction.add(new DeleteIndexerTable(name));
             } else {
                 throw new ServiceException("indexer " + name + " does not exist!", ErrorCode.TABLE_NOT_EXIST);

@@ -1,7 +1,6 @@
 package com.asiainfo.ocsearch.service.schema;
 
 import com.asiainfo.ocsearch.listener.SystemListener;
-import com.asiainfo.ocsearch.meta.Schema;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.Test;
@@ -56,8 +55,8 @@ public class AddSchemaServiceTest {
                 "    ]\n" +
                 "}");
 
-        System.out.println(new Schema(jsonNode));
-//        new AddSchemaService().doService(jsonNode);
+//        System.out.println(new Schema(jsonNode));
+        new AddSchemaService().doService(jsonNode);
 
     }
 

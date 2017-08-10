@@ -1,6 +1,8 @@
 package com.asiainfo.ocsearch.transaction.atomic.schema;
 
 import com.asiainfo.ocsearch.constants.Constants;
+import com.asiainfo.ocsearch.datasource.solr.SolrConfig;
+import com.asiainfo.ocsearch.datasource.solr.SolrServer;
 import com.asiainfo.ocsearch.datasource.solr.SolrServerManager;
 import com.asiainfo.ocsearch.meta.ContentField;
 import com.asiainfo.ocsearch.meta.Field;
@@ -54,11 +56,14 @@ public class CreateSolrConfig implements AtomicOperation {
         }
 
         try {
+           SolrServer server= SolrServerManager.getInstance();
             FileUtils.copyDirectory(new File(PropertiesLoadUtil.loadFile("example_config")), config);
 
             generateSchema(new File(path, "managed-schema"));
 
-            SolrServerManager.getInstance().uploadConfig(Paths.get(path), schema);
+            generateSolrConfig(new File(path, "solrconfig.xml"),server.getSolrConfig());
+
+            server.uploadConfig(Paths.get(path), schema);
 
         } catch (Exception e) {
             log.error(e);
@@ -70,6 +75,43 @@ public class CreateSolrConfig implements AtomicOperation {
         log.info("upload  solr config " + schema + " success!");
 
         return true;
+    }
+
+    private void generateSolrConfig(File config, SolrConfig solrConfig) {
+        try {
+
+            SAXReader sr = new SAXReader();
+
+            Document configDoc = sr.read(config);
+
+            Element root = configDoc.getRootElement();
+
+            Element factory = root.element("directoryFactory");
+
+            factory.addText("\n");
+
+            Element hdfsHome = factory.addElement("str");
+
+            hdfsHome.addAttribute("name","solr.hdfs.home");
+
+            hdfsHome.setText(solrConfig.getHdfsHome());
+            if(solrConfig.useHA()){
+                factory.addText("\n");
+                Element hdfsConf = factory.addElement("str");
+
+                hdfsConf.addAttribute("name","solr.hdfs.confdir");
+                hdfsConf.setData(solrConfig.getHdfsConfdir());
+            }
+
+            XMLWriter xmlWriter = new XMLWriter(new OutputStreamWriter(new FileOutputStream(config), Constants.DEFUAT_CHARSET));
+
+            xmlWriter.write(configDoc);
+            xmlWriter.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("generate solr config file failure", e);
+        }
     }
 
     private void generateSchema(File managed_schema) {
@@ -162,7 +204,7 @@ public class CreateSolrConfig implements AtomicOperation {
 
         Map<String, Field> fields = tableSchema.getFields();
 
-        fields.values().stream().filter(field -> field.isIndexStored() || field.isIndexed() || field.isIndexContented()).forEach(field -> {
+        fields.values().stream().filter(field -> field.withSolr()).forEach(field -> {
             solrFields.add(asSolrField(field));
         });
 

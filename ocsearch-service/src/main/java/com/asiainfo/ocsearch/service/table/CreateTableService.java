@@ -16,8 +16,8 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,37 +43,31 @@ public class CreateTableService extends OCSearchService {
             Table table = parseRequest(request);
 
 //            Schema schema = SchemaManager.getSchemaBySchema(table.getSchema());
-            MetaDataHelper metaDataHelper=MetaDataHelperManager.getInstance();
+            MetaDataHelper metaDataHelper = MetaDataHelperManager.getInstance();
             Schema schema = metaDataHelper.getSchemaBySchema(table.getSchema());
 
             if (schema == null) {
                 throw new ServiceException("schema : " + table.getSchema() + " does not exist!", ErrorCode.SCHEMA_NOT_EXIST);
             }
             String name = table.getName();
-            if(metaDataHelper.hasTable(name))
+            if (metaDataHelper.hasTable(name))
                 throw new ServiceException("table : " + name + " exists!", ErrorCode.TABLE_EXIST);
 
             Transaction transaction = new TransactionImpl();
 
-            Set<String> families = new HashSet<>();
-
-            schema.getFields().values().stream()
-                    .filter(field -> field.getInnerField() == null)
-                    .forEach(field -> families.add(field.getHbaseFamily()));
-            schema.getInnerFields().values().stream().forEach(innerField -> families.add(innerField.getHbaseFamily()));
-
-            if (!request.get("hbase").has("exist")||!request.get("hbase").get("exist").asBoolean()) //hbase table does not exist
-                transaction.add(new CreateHbaseTable(name, table.getHbaseRegions(), table.getRegionSplits(), families));
+            if (!request.get("hbase").has("exist") || !request.get("hbase").get("exist").asBoolean()) //hbase table does not exist
+                transaction.add(new CreateHbaseTable(name, table.getHbaseRegions(), table.getRegionSplits(), getHbaseFamilies(schema)));
 
             IndexType indexType = schema.getIndexType();
 
-            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_BATCH) {
+            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_PHOENIX) {
 
                 transaction.add(new CreateSolrCollection(name, schema.getName(), table.getSolrShards(), table.getSolrReplicas()));
 
                 transaction.add(new CreateIndexerTable(name, schema));
 
-            } else if (indexType == IndexType.PHOENIX) {
+            }
+            if (indexType == IndexType.PHOENIX || indexType == IndexType.HBASE_SOLR_PHOENIX) {
                 transaction.add(new CreatePhoenixView(name, schema));
             }
 
@@ -109,6 +103,28 @@ public class CreateTableService extends OCSearchService {
             stateLog.info("end request " + uuid + " at " + System.currentTimeMillis());
         }
 
+    }
+
+    private Map<String, Integer> getHbaseFamilies(Schema schema) {
+        Map<String, Integer> families = new HashMap<>();
+
+        schema.getFields().values().forEach(field -> {
+            String family;
+            int scope = 0;
+            if (field.getInnerField() != null)
+                family = schema.getInnerFields().get(field.getInnerField()).getHbaseFamily();
+            else
+                family = field.getHbaseFamily();
+
+            if (field.withSolr()) {
+                scope = 1;
+            } else if (families.containsKey(family)) {
+                scope = families.get(family);
+            }
+            families.put(family, scope);
+
+        });
+        return families;
     }
 
     /**

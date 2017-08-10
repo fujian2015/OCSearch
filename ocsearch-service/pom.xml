@@ -52,29 +52,8 @@
     </dependencies>
 
     <build>
-
+        <!--<finalName>ocsearch-service</finalName> -->
         <plugins>
-            <!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.3</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/main/assembly/equery.xml</descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
--->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -114,7 +93,6 @@
                 </executions>
             </plugin>
         </plugins>
-
 
     </build>
 </project>

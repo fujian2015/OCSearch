@@ -6,6 +6,7 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import java.util.Map;
 import java.util.Set;
 
 
@@ -15,7 +16,7 @@ public class AdminService extends AbstractService {
         super(hbaseServiceManager);
     }
 
-    public void createTable(String tableName, Set<String> columnFamilies, int regions) {
+    public void createTable(String tableName, Map<String, Integer> columnFamilies, int regions) {
 
         if (regions == -1) {
             createTable(tableName, columnFamilies, (byte[][]) null);
@@ -24,7 +25,7 @@ public class AdminService extends AbstractService {
         }
     }
 
-    public void createTable(String tableName, Set<String> columnFamilies, Set<String> regionSplits) {
+    public void createTable(String tableName, Map<String, Integer> columnFamilies, Set<String> regionSplits) {
 
         byte splits[][] = new byte[regionSplits.size()][];
         int i = 0;
@@ -35,7 +36,7 @@ public class AdminService extends AbstractService {
         createTable(tableName, columnFamilies, splits);
     }
 
-    private boolean createTable(String tableName, Set<String> columnFamilies, byte[][] regionSplits) {
+    private boolean createTable(String tableName, Map<String, Integer> columnFamilies, byte[][] regionSplits) {
 
         return execute(admin -> {
 
@@ -47,11 +48,10 @@ public class AdminService extends AbstractService {
             //setBloomFilterType
             //setBlockCacheEnabled
 //            tableDesc.setConfiguration("REPLICATION_SCOPE","1");
-            for (String columnFamily : columnFamilies) {
+            for (String columnFamily : columnFamilies.keySet()) {
 
                 HColumnDescriptor cd = new HColumnDescriptor(columnFamily);
-                if (columnFamily.equals("B"))
-                    cd.setScope(1);
+                cd.setScope(columnFamilies.get(columnFamily));
                 tableDesc.addFamily(cd);
             }
 

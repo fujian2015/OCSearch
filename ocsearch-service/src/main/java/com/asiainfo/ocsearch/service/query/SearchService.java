@@ -1,6 +1,5 @@
 package com.asiainfo.ocsearch.service.query;
 
-import com.asiainfo.ocsearch.cache.CacheManager;
 import com.asiainfo.ocsearch.datasource.solr.SolrServerManager;
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
@@ -15,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrDocumentList;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
@@ -70,16 +68,6 @@ public class SearchService extends QueryService {
 
     private void searchMultiTable(String qs, String condition, int start, int rows, String sort, Set<String> tableSet, ArrayNode returnNode, ObjectNode returnData) throws Exception {
         int total = 0;
-        String cacheKey = generateCacheKey(qs, condition, tableSet);
-
-        String cacheStartKey = start + "|" + rows;
-        Map<String, String> cacheValue;
-        try {
-            cacheValue = CacheManager.getCache().get(cacheKey, Arrays.asList("total", cacheStartKey));
-        } catch (Exception e) {
-            log.error("get cache error,called by:", e);
-            cacheValue = new HashMap<>();
-        }
 
         List<OCRowKey> rowKeys = new ArrayList<>(rows);
 
@@ -87,34 +75,22 @@ public class SearchService extends QueryService {
         String tableFirst = tableSet.iterator().next();
         Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(tableFirst);
 
-        if (cacheValue.containsKey("total") && cacheValue.containsKey(cacheStartKey)) {
-            //get ids from cache
-            ArrayNode keyNode = (ArrayNode) new ObjectMapper().readTree(cacheValue.get(cacheStartKey));
-            keyNode.forEach(node -> {
-                String rs[] = StringUtils.split(node.asText(), "||");
-                rowKeys.add(new OCRowKey(rs[0], rs[1]));
-                if (!rowKeyMap.containsKey(rs[0]))
-                    rowKeyMap.put(rs[0], new ArrayList<>());
-                rowKeyMap.get(rs[0]).add(rs[1]);
-            });
-            total = Integer.parseInt(cacheValue.get("total"));
-        } else {
-            //get ids from solr
-            SolrQuery solrQuery = constructQuery(start, rows, qs, condition, sort, tableSet, schema.getQueryFields());
-            System.err.println("solr query is:" + solrQuery.toString());
-            SolrDocumentList solrResults = SolrServerManager.getInstance().query(tableFirst, solrQuery);
+        //get ids from solr
+        SolrQuery solrQuery = constructQuery(start, rows, qs, condition, sort, tableSet, schema.getQueryFields());
+        log.info("solr query is:" + solrQuery.toString());
+        SolrDocumentList solrResults = SolrServerManager.getInstance().query(tableFirst, solrQuery);
 
-            total = (int) solrResults.getNumFound();
+        total = (int) solrResults.getNumFound();
 
-            solrResults.forEach(doc -> {
-                String table = (String) doc.get("_table_");
-                String id = (String) doc.get("id");
-                if (!rowKeyMap.containsKey(table))
-                    rowKeyMap.put(table, new ArrayList<>());
-                rowKeyMap.get(table).add(id);
-                rowKeys.add(new OCRowKey(table, id));
-            });
-        }
+        solrResults.forEach(doc -> {
+            String table = (String) doc.get("_table_");
+            String id = (String) doc.get("id");
+            if (!rowKeyMap.containsKey(table))
+                rowKeyMap.put(table, new ArrayList<>());
+            rowKeyMap.get(table).add(id);
+            rowKeys.add(new OCRowKey(table, id));
+        });
+
 
         Set<String> returnFields = generateReturnFields(schema, returnNode);
 
@@ -159,17 +135,6 @@ public class SearchService extends QueryService {
                 arrayNode.add(data);
             }
         }
-
-        //cache put
-        Map<String, String> caches = new HashMap<>();
-        if (!cacheValue.containsKey("total")) {
-            caches.put("total", String.valueOf(total));
-        }
-        if (!cacheValue.containsKey(cacheStartKey))
-            caches.put(cacheStartKey, generateMultiCacheValue(rowKeys));
-
-        if (!caches.isEmpty())
-            CacheManager.getCache().put(cacheKey, caches);
         //return data
         returnData.put("total", total);
         returnData.put("docs", arrayNode);
@@ -179,50 +144,28 @@ public class SearchService extends QueryService {
     private void searchSingleTable(String qs, String condition, int start, int rows, String sort, Set<String> tableSet, ArrayNode returnNode, ObjectNode returnData) throws Exception {
         int total = 0;
         long startTime = System.currentTimeMillis();
-        String cacheKey = generateCacheKey(qs, condition, tableSet);
-
-        String cacheStartKey = start + "|" + rows;
-        Map<String, String> cacheValue;
-        try {
-            cacheValue = CacheManager.getCache().get(cacheKey, Arrays.asList("total", cacheStartKey));
-        } catch (Exception e) {
-            log.error("get cache error,called by:", e);
-            cacheValue = new HashMap<>();
-        }
-        long cacheTime = System.currentTimeMillis();
-//        if (log.isDebugEnabled())
-        log.info("[ocsearch]get cache use :" + (cacheTime - startTime) + "ms");
 
         List<String> rowKeys = new ArrayList<>(rows);
 
         String table = tableSet.iterator().next();
         Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(table);
 
-        if (cacheValue.containsKey("total") && cacheValue.containsKey(cacheStartKey)) {
-            //get ids from cache
-            ArrayNode keyNode = (ArrayNode) new ObjectMapper().readTree(cacheValue.get(cacheStartKey));
-            keyNode.forEach(node -> {
-                rowKeys.add(node.asText());
-            });
-            total = Integer.parseInt(cacheValue.get("total"));
-        } else {
-            //get ids from solr
-            SolrQuery solrQuery = constructQuery(start, rows, qs, condition, sort, tableSet, schema.getQueryFields());
+        //get ids from solr
+        SolrQuery solrQuery = constructQuery(start, rows, qs, condition, sort, tableSet, schema.getQueryFields());
 
-            log.warn("query sql is:" + solrQuery.toString());
+        log.info("solr query is:" + solrQuery.toString());
 
-            SolrDocumentList solrResults = SolrServerManager.getInstance().query(table, solrQuery);
+        SolrDocumentList solrResults = SolrServerManager.getInstance().query(table, solrQuery);
 
-            total = (int) solrResults.getNumFound();
+        total = (int) solrResults.getNumFound();
 
-            solrResults.forEach(doc -> {
-                rowKeys.add((String) doc.get("id"));
-            });
-        }
+        solrResults.forEach(doc -> {
+            rowKeys.add((String) doc.get("id"));
+        });
+
         long getIdsTime = System.currentTimeMillis();
 
-//        if (log.isDebugEnabled())
-        log.info("[ocsearch]get ids use :" + (getIdsTime - cacheTime) + "ms");
+        log.info("[ocsearch]get ids use :" + (getIdsTime - startTime) + "ms");
 
         Set<String> returnFields = generateReturnFields(schema, returnNode);
 
@@ -256,25 +199,13 @@ public class SearchService extends QueryService {
         }
         long getDataTime = System.currentTimeMillis();
 
-//        if (log.isDebugEnabled())
         log.info("[ocsearch]get hbase data use :" + (getDataTime - getIdsTime) + "ms");
-        //cache put
-        Map<String, String> caches = new HashMap<>();
-        if (!cacheValue.containsKey("total")) {
-            caches.put("total", String.valueOf(total));
-        }
-        if (!cacheValue.containsKey(cacheStartKey))
-            caches.put(cacheStartKey, generateSingleCacheValue(rowKeys));
 
-        if (!caches.isEmpty())
-            CacheManager.getCache().put(cacheKey, caches);
         //return data
         returnData.put("total", total);
+        arrayNode.toString();
         returnData.put("docs", arrayNode);
-        long putCahceTime = System.currentTimeMillis();
 
-//        if (log.isDebugEnabled())
-        log.info("[ocsearch]put cache data use :" + (putCahceTime - getDataTime) + "ms");
     }
 
     private String generateSingleCacheValue(List<String> rows) {

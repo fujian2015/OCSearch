@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public enum IndexType  implements Serializable {
 
-    HBASE_ONLY(-1),HBASE_SOLR_INDEXER(0),HBASE_SOLR_BATCH(1), PHOENIX(2);
+    HBASE_ONLY(-1),HBASE_SOLR_INDEXER(0),HBASE_SOLR_PHOENIX(1), PHOENIX(2);
 
     int value;
     IndexType(int value) {
@@ -23,7 +23,7 @@ public enum IndexType  implements Serializable {
             case 0:
                 return HBASE_SOLR_INDEXER;
             case 1:
-                return HBASE_SOLR_BATCH;
+                return HBASE_SOLR_PHOENIX;
             case 2:
                 return PHOENIX;
             default:

@@ -216,4 +216,9 @@ public class SolrServer {
             e.printStackTrace();
         }
     }
+
+
+    public SolrConfig getSolrConfig() {
+        return solrConfig;
+    }
 }
