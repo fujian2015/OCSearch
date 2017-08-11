@@ -1,0 +1,43 @@
+// bower:scss
+// endbower
+@import "searchbox";
+
+.browsehappy {
+  margin: 0.2em 0;
+  background: #ccc;
+  color: #000;
+  padding: 0.2em 0;
+}
+
+.brand {
+  padding-top: 10px;
+}
+
+.col-centered {
+  float: none;
+  margin: 0 auto;
+}
+
+.footer {
+  border-top: solid 1px #e7e7e7;
+  background-color: #f8f8f8;
+  position: absolute;
+  bottom: 0;
+  height: 50px;
+}
+
+body{
+  padding-bottom: 50px;
+}
+
+.box{
+  -webkit-box-shadow: 4px 4px 8px #d5d5d5;
+  -moz-box-shadow: 4px 4px 8px #d5d5d5;
+  box-shadow: 4px 4px 8px #d5d5d5;
+}
+
+.box:hover{
+  -webkit-box-shadow: 5px 5px 8px #d5d5d5;
+  -moz-box-shadow: 5px 5px 8px #d5d5d5;
+  box-shadow: 5px 5px 8px #d5d5d5;
+}

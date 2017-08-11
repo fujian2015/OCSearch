@@ -1,0 +1,29 @@
+<div ng-include="'views/ui/header.html'"></div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-10 col-lg-offset-1 wrap">
+      <div class="container-fluid" style="padding-top: 15%">
+        <div class="row">
+          <div class="col-lg-2 col-centered">
+            <img src="images/yeoman.png" alt="I'm Yeoman"><br>
+          </div>
+        </div>
+        <div class="row" style="padding-top: 3%">
+          <div class="col-lg-8 col-centered">
+            <div id="custom-search-input">
+              <div class="input-group">
+                <input type="text" class="form-control input-lg" ng-model="content" ng-model-options="{updateOn: 'default blur'}"/>
+                <span class="input-group-btn">
+                  <button class="btn btn-info btn-lg" type="button" ng-click="search()">
+                    <i class="glyphicon glyphicon-search"></i>
+                  </button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
