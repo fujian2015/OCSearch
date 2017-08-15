@@ -1,12 +1,74 @@
 'use strict';
 
-angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$q', function ($scope, $http, GLOBAL, $uibModal, $q) {
+angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm) {
 
   $scope.page = {
     schema: {},
     schemasActive: []
   };
 
+  $scope._clear = function() {
+    //$scope.schemas.splice($scope.page.schemasActive.indexOf(true), 1);
+    if($scope.schemas.length > 0) {
+      $scope.page.schema = $scope.schemas[0];
+      $scope.page.schemasActive = [];
+      $scope.page.schemasActive.push(true);
+      for (let i = 1; i < $scope.schemas.length; i++) {
+        $scope.page.schemasActive.push(false);
+      }
+    } else {
+      $scope.page = {
+        schema: {},
+        schemasActive: []
+      };
+    }
+  };
+
+  // Tool functions
+  $scope.queryWeight = function(field, query_fields) {
+    for (let qfield of query_fields) {
+      if (field === qfield.name) {
+        return qfield.weight;
+      }
+    }
+    return null;
+  };
+  // schema index type
+  $scope.index_type = [
+    { val: 0, display: "hbase+indexer+solr" },
+    { val: -1, display: "hbase only" },
+    { val: 1, display: "solr" }
+  ];
+  $scope.schemaIndexType = function(index) {
+    for (let item of $scope.index_type) {
+      if (item.val === index) {
+        return item.display;
+      }
+    }
+    return null;
+  };
+  $scope.joinFields = function(fields) {
+    if (angular.isDefined(fields)) {
+      let farr = [];
+      for (let f of fields) {
+        if (!f.hasOwnProperty("name")) { continue; }
+        let fstr = [];
+        fstr.push(f.name);
+        fstr.push("(");
+        for (let k in f) {
+          if (k === "name") { continue; }
+          fstr.push(k+":"+f[k]);
+        }
+        fstr.push(")");
+        farr.push(fstr.join(''));
+      }
+      return farr.join(',');
+    } else {
+      return null;
+    }
+  };
+
+  // When click schema item
   $scope.selectSchema = function(schema, index) {
     $scope.page.schema = schema;
     $scope.page.schemasActive = [];
@@ -18,7 +80,26 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
       }
     }
   };
-
+  // When click delete schema icon
+  $scope.deleteSchema = function() {
+    $ngConfirm({
+      title: "Confirmation",
+      content: "Are you sure to delete the schema selected?",
+      scope: $scope,
+      buttons: {
+        Yes: {
+          text: "Yes",
+          action: function(scope) {
+            scope._clear();
+          }
+        },
+        No: {
+          text: "No"
+        }
+      }
+    });
+  };
+  // When click Add button
   $scope.addSchema = function() {
     let modealInstance = $uibModal.open({
       animation: true,
@@ -38,12 +119,6 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
           query_fields: [],
           fields: []
         };
-        // schema index type
-        $scope.index_type = [
-          { val: 0, display: "hbase+indexer+solr" },
-          { val: -1, display: "hbase only" },
-          { val: 1, display: "solr" }
-        ];
         // field store type
         $scope.field_type = [ 
           "int", "long", "float", "double", "string", "Boolean", "File", "Attachment"
@@ -125,7 +200,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
         $scope.ok = function() {
           $ngConfirm({
             title: "Confirmation",
-            Content: "Are you sure?",
+            content: "Add new schema now?",
             scope: $scope,
             buttons: {
               Yes: {

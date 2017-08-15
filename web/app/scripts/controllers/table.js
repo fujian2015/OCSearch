@@ -2,7 +2,7 @@
 
 angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$q', function ($scope, $http, GLOBAL, $uibModal, $q) {
   $scope.page = {
-    table: {},
+    table: "",
     tablesActive: []
   };
   $scope.selectTable = function(table, index){

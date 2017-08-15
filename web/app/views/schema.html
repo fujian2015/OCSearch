@@ -155,9 +155,9 @@
                 <td>{{$index + 1}}</td>
                 <td>{{field.name}}</td>
                 <td>{{field.store_type}}</td>
-                <td>{{field.index_type}}</td>
-                <td>{{field.content_field}}</td>
-                <td>{{field.inner_field}}</td>
+                <td>{{field.index_type || "(not indexed)"}}</td>
+                <td>{{field.content_field || "(empty)"}}</td>
+                <td>{{field.inner_field || "(empty)"}}</td>
                 <td><a href="" ng-click="removeField()">Delete</a></td>
               </tr>
             </table>
@@ -220,20 +220,58 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-lg-2 col-lg-offset-1">
-      <ul class="list-group">
+      <div class="list-group box">
         <div class="list-group-item">
           <button class="btn btn-default btn-block" style="outline: 0" ng-click="addSchema()">Add</button>
         </div>
-        <a href="" class="list-group-item" ng-repeat="schema in schemas" ng-class="{active: page.schemasActive[$index]}">
+        <a href="" class="list-group-item" ng-repeat="schema in schemas" ng-class="{active: page.schemasActive[$index]}" ng-click="selectSchema(schema,$index)">
           {{schema.name}}
         </a>
-      </ul>
+      </div>
     </div>
     <div class="col-lg-8">
-      <div class="panel panel-default">
-        <div class="panel-heading">This</div>
+      <div class="panel panel-default" ng-show="page.schema.name">
+        <div class="panel-heading">
+          <div class="container-fluid">
+            <button class="btn btn-danger btn-sm pull-right glyphicon glyphicon-trash" aria-hidden="true" ng-click="deleteSchema($index)"></button>
+            <button class="btn btn-default btn-sm pull-right glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 10px;"></button>
+          </div>
+        </div>
         <div class="panel-body">
-          That
+          <h4>Basic info</h4><hr>
+          <div class="row" style="margin-bottom: 10px;">
+            <div class="col-md-2"><b>Name:</b></div>
+            <div class="col-md-4">{{page.schema.name}}</div>
+            <div class="col-md-2"><b>Index Type:</b></div>
+            <div class="col-md-4">{{schemaIndexType(page.schema.index_type) || "(unknown)"}}</div>
+          </div>
+          <div class="row" style="margin-bottom: 10px;">
+            <div class="col-md-2"><b>Rowkey Expression:</b></div>
+            <div class="col-md-4">{{page.schema.rowkey_expression || "(undefined)"}}</div>
+            <div class="col-md-2"><b>Table Expression:</b></div>
+            <div class="col-md-4">{{page.schema.table_expression || "(undefined)"}}</div>
+          </div>
+          <div class="row" style="margin-bottom: 10px;">
+            <div class="col-md-2"><b>Content Field:</b></div>
+            <div class="col-md-10">{{joinFields(page.schema.content_fields) || "(undefined)"}}</div>
+          </div>
+          <div class="row" style="margin-bottom: 10px;">
+            <div class="col-md-2"><b>Inner Field:</b></div>
+            <div class="col-md-10">{{joinFields(page.schema.inner_fields) || "(undefined)"}}</div>
+          </div>
+          <h4 style="margin-top: 20px;">Field info</h4><hr>
+          <table class="table">
+            <tr><th>#</th><th>name</th><th>store type</th><th>content field</th><th>inner field</th><th>index type</th><th>query weight</th></tr>
+            <tr ng-repeat="field in page.schema.fields">
+              <td>{{$index+1}}</td>
+              <td>{{field.name}}</td>
+              <td>{{field.store_type}}</td>
+              <td>{{field.content_field || "(empty)"}}</td>
+              <td>{{field.inner_field || "(empty)"}}</td>
+              <td>{{field.index_type || "(not indexed)"}}</td>
+              <td>{{queryWeight(field.name, page.schema.query_fields) || "(not queried)"}}</td>
+            </tr>
+          </table>
         </div>
       </div>
     </div>
