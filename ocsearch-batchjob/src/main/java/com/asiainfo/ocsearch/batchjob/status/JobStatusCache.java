@@ -35,7 +35,7 @@ public class JobStatusCache implements ICache{
                 tableDesc.setDurability(Durability.SKIP_WAL);
                 HColumnDescriptor cd = new HColumnDescriptor(family);
                 cd.setBlockCacheEnabled(true);
-                cd.setTimeToLive(ttl);
+//                cd.setTimeToLive(ttl);
 
                 tableDesc.addFamily(cd);
 

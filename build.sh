@@ -22,20 +22,23 @@ rm -fr build
 mkdir -p build/ocsearch/conf
 mkdir -p build/ocsearch/logs
 mkdir -p build/ocsearch/flume
+mkdir -p build/ocsearch/expression
 
 cp -r server build/ocsearch
 cp -r bin build/ocsearch
 
 
-cp -r ocsearch-service/target/ocsearch-service-${version} build/ocsearch/server/webapps/ROOT
+cp -r ocsearch-service/target/ocsearch-service-${version} build/ocsearch/server/webapps/ocsearch-service
 
 cp ocsearch-service/target/ocsearch-service-${version}/WEB-INF/classes/*.* build/ocsearch/conf
 
 cp ocsearch-flume/target/ocsearch-flume-${version}.jar build/ocsearch/flume/
 
+cp ocsearch-expression/target/ocsearch-expression-${version}.jar build/ocsearch/expression/
+
 
 cd build
 
-tar -czf ocsearch_${version}.tar.gz ocsearch
+tar -czf ocsearch-${version}.tar.gz ocsearch
 
 exit 0

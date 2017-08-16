@@ -1,7 +1,6 @@
-package com.asiainfo.ocsearch.service.datainput;
+package com.asiainfo.ocsearch.service.batch;
 
 import com.asiainfo.ocsearch.exception.ServiceException;
-import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 import org.testng.annotations.Test;
@@ -10,7 +9,7 @@ import org.testng.annotations.Test;
 /**
  * Created by Aaron on 17/7/26.
  */
-public class testJobStatusService {
+public class TestJobStatusService {
 
     @Test
     public void testDoService() {

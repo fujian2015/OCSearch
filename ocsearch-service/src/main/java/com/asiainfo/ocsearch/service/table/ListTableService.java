@@ -19,8 +19,12 @@ public class ListTableService extends OCSearchService {
     @Override
     public byte[] doService(JsonNode request) throws ServiceException {
         try {
+            Set<String> tables;
 
-            Set<String> tables = MetaDataHelperManager.getInstance().getTables();
+            if(request.has("schema"))
+                tables=MetaDataHelperManager.getInstance().getTablesBySchema(request.get("schema").asText());
+            else
+                tables = MetaDataHelperManager.getInstance().getTables();
 
             ArrayNode tableNodes = JsonNodeFactory.instance.arrayNode();
 

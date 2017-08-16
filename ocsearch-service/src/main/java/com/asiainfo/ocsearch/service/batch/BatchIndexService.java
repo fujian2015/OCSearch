@@ -1,5 +1,8 @@
-package com.asiainfo.ocsearch.service.index;
+package com.asiainfo.ocsearch.service.batch;
 
+import com.asiainfo.ocsearch.batchjob.status.BulkLoadJobListener;
+import com.asiainfo.ocsearch.batchjob.status.JobStatusResult;
+import com.asiainfo.ocsearch.constants.Constants;
 import com.asiainfo.ocsearch.datasource.indexer.IndexerServiceManager;
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
@@ -10,6 +13,7 @@ import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ObjectNode;
 
 import java.util.concurrent.ExecutorService;
 
@@ -46,23 +50,38 @@ public class BatchIndexService extends OCSearchService {
             long beginTime = request.has("begin_time") ? request.get("begin_time").asLong() : -1;
             long endTime = request.has("end_time") ? request.get("end_time").asLong() : -1;
 
+            final String jobID = uuid;
+
             ExecutorService executor = ThreadPoolManager.getExecutor("batchIndex");
             executor.submit(new Runnable() {
                 @Override
                 public void run() {
+                    JobStatusResult jobStatusResult = new JobStatusResult(jobID);
                     try {
+                        jobStatusResult.setJobStatusListener(new BulkLoadJobListener());
+
+                        jobStatusResult.startJob(System.currentTimeMillis());
+
                         int res = IndexerServiceManager.getIndexerService().batchIndex(table, beginTime, endTime);
+
                         log.info("return code:" + res);
-                        if (res != 0)
+                        if (res != 0) {
+                            jobStatusResult.failJob(System.currentTimeMillis());
                             log.error("execute batch index error!");
-                        else
+                        } else {
+                            jobStatusResult.finishJob(System.currentTimeMillis());
                             log.info("execute batch index success!");
+                        }
                     } catch (Exception e) {
-                        log.error(e);
+                        log.error("start job error:",e);
+                        jobStatusResult.failJob(System.currentTimeMillis());
                     }
                 }
             });
-//            int res = IndexerServiceManager.getIndexerService().batchIndex(table,startTime,endTime);
+
+            ObjectNode successResult = getSuccessResult();
+            successResult.put("JOBID", jobID);
+            return successResult.toString().getBytes(Constants.DEFUAT_CHARSET);
 
         } catch (Exception e) {
             log.error(e);
@@ -70,6 +89,5 @@ public class BatchIndexService extends OCSearchService {
         } finally {
             stateLog.info("end batch index request " + uuid + " at " + System.currentTimeMillis());
         }
-        return success;
     }
 }

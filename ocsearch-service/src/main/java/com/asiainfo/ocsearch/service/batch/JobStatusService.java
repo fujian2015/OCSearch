@@ -1,4 +1,4 @@
-package com.asiainfo.ocsearch.service.datainput;
+package com.asiainfo.ocsearch.service.batch;
 
 import com.asiainfo.ocsearch.batchjob.status.BulkLoadJobListener;
 import com.asiainfo.ocsearch.batchjob.status.JobStatusResult;
@@ -6,7 +6,6 @@ import com.asiainfo.ocsearch.constants.Constants;
 import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.service.OCSearchService;
-import com.asiainfo.ocsearch.utils.HttpRestFulClient;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;

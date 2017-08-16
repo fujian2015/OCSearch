@@ -169,26 +169,8 @@
 
     <!--query service end-->
 
-    <!--data input  service begin-->
-    <servlet>
-        <servlet-name>BatchInput</servlet-name>
-        <servlet-class>com.asiainfo.ocsearch.service.datainput.BatchInputService</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>BatchInput</servlet-name>
-        <url-pattern>/datainput/batch</url-pattern>
-    </servlet-mapping>
-    <!--data input  service end-->
-
     <!--index  service begin-->
-    <servlet>
-        <servlet-name>BatchIndex</servlet-name>
-        <servlet-class>com.asiainfo.ocsearch.service.index.BatchIndexService</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>BatchIndex</servlet-name>
-        <url-pattern>/index/batch</url-pattern>
-    </servlet-mapping>
+
 
     <servlet>
         <servlet-name>AddIndexer</servlet-name>
@@ -231,12 +213,31 @@
     <!--data input  service begin-->
     <servlet>
         <servlet-name>GetJobStatus</servlet-name>
-        <servlet-class>com.asiainfo.ocsearch.service.datainput.JobStatusService</servlet-class>
+        <servlet-class>com.asiainfo.ocsearch.service.batch.JobStatusService</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>GetJobStatus</servlet-name>
-        <url-pattern>/status/job</url-pattern>
+        <url-pattern>/batch/status</url-pattern>
     </servlet-mapping>
-    <!--data input  service end-->
+
+    <servlet>
+        <servlet-name>BatchIndex</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.batch.BatchIndexService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BatchIndex</servlet-name>
+        <url-pattern>/batch/index</url-pattern>
+    </servlet-mapping>
+
+    <!--data input  service begin-->
+    <servlet>
+        <servlet-name>BatchInput</servlet-name>
+        <servlet-class>com.asiainfo.ocsearch.service.batch.BatchInputService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BatchInput</servlet-name>
+        <url-pattern>/batch/input</url-pattern>
+    </servlet-mapping>
+
 
 </web-app>

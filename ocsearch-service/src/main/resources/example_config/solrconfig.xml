@@ -1182,7 +1182,10 @@
          http://wiki.apache.org/solr/UpdateRequestProcessor
 
       -->
-
+    <schemaFactory class="ManagedIndexSchemaFactory">
+        <bool name="mutable">true</bool>
+        <str name="managedSchemaResourceName">managed-schema</str>
+    </schemaFactory>
     <!-- Add unknown fields to the schema
 
          An example field type guessing update processor that will

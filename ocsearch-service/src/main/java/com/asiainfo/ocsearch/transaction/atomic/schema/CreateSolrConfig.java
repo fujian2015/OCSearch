@@ -100,7 +100,7 @@ public class CreateSolrConfig implements AtomicOperation {
                 Element hdfsConf = factory.addElement("str");
 
                 hdfsConf.addAttribute("name","solr.hdfs.confdir");
-                hdfsConf.setData(solrConfig.getHdfsConfdir());
+                hdfsConf.setText(solrConfig.getHdfsConfdir());
             }
 
             XMLWriter xmlWriter = new XMLWriter(new OutputStreamWriter(new FileOutputStream(config), Constants.DEFUAT_CHARSET));

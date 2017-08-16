@@ -139,7 +139,14 @@ public class HbaseQuery {
 
         ObjectNode data = JsonNodeFactory.instance.objectNode();
 
-        String id = Bytes.toString(result.getRow());
+        String id ;
+
+        if(RowkeyUtils.ENCRYPT_KEY){
+            id=RowkeyUtils.encodeKey(result.getRow());
+        }
+        else {
+            id= Bytes.toString(result.getRow());
+        }
 
         data.put("id", id);
 

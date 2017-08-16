@@ -171,6 +171,8 @@ public class SystemListener implements ServletContextListener {
 
         OCSearchEnv.setUp(properties);
 
+        System.setProperty("hdp.version",OCSearchEnv.getEnvValue("hdp.version","2.5.0.0-1245"));
+
         ThreadPoolManager.setUp();
 
         HbaseServiceManager.setup("hbase-site.xml");

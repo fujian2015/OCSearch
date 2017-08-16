@@ -1,4 +1,4 @@
-package com.asiainfo.ocsearch.service.index;
+package com.asiainfo.ocsearch.service.batch;
 
 import com.asiainfo.ocsearch.listener.SystemListener;
 import org.codehaus.jackson.map.ObjectMapper;

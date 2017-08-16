@@ -5,10 +5,7 @@ import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.listener.ThreadPoolManager;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
-import com.asiainfo.ocsearch.query.GetQueryActor;
-import com.asiainfo.ocsearch.query.HbaseQuery;
-import com.asiainfo.ocsearch.query.QueryActor;
-import com.asiainfo.ocsearch.query.QueryResult;
+import com.asiainfo.ocsearch.query.*;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
@@ -38,8 +35,10 @@ public class GetService extends QueryService {
             ArrayNode idsNode = (ArrayNode) request.get("ids");
 
             List<String> ids = new ArrayList<>();
-
-            idsNode.forEach(jsonNode -> ids.add(jsonNode.asText()));
+            if(RowkeyUtils.ENCRYPT_KEY)
+                idsNode.forEach(jsonNode -> ids.add(RowkeyUtils.decodeKey(jsonNode.asText())));
+            else
+                idsNode.forEach(jsonNode -> ids.add(jsonNode.asText()));
 
             if (schema == null)
                 throw new ServiceException("the table does not exist!", ErrorCode.TABLE_NOT_EXIST);

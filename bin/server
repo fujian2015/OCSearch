@@ -31,7 +31,7 @@ function startServer(){
 
         out "Starting the server..."
 
-        \cp ${SERVER_HOME}/conf/*.*  ${SERVER_HOME}/server/webapps/ROOT/WEB-INF/classes/
+        \cp ${SERVER_HOME}/conf/*.*  ${SERVER_HOME}/server/webapps/ocsearch-service/WEB-INF/classes/
 
         export JAVA_OPTS="-Xms${HEAP_SIZE} -Xmx${HEAP_SIZE}"
         cd ${SERVER_HOME}/server/bin

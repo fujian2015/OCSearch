@@ -21,12 +21,12 @@ public class GetServiceTest {
 //        getService.execute("GPRS__20170510",t->t.put());
 
         String request="{\n" +
-                "    \"table\": \"GPRS__20170510\",\n" +
+                "    \"tables\": [\"TEST2\"],\n" +
                 "    \"ids\": [\n" +
-                "        \"hahed3\",\n" +
-                "        \"hahed2\"\n" +
+                "        \"DzQ2MDAwMDAwMDAy\",\n" +
+                "        \"DjQ2MDAwMDAwMDAx\"\n" +
                 "    ],\n" +
-                "    \"return_fields\": [\"id\",\"length\"]\n" +
+                "    \"return_fields\": [\"id\",\"LAC\"]\n" +
                 "}";
         System.out.println(request);
         System.out.println(new GetService().query(new ObjectMapper().readTree(request)));

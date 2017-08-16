@@ -1,4 +1,4 @@
-package com.asiainfo.ocsearch.service.datainput;
+package com.asiainfo.ocsearch.service.batch;
 
 import com.asiainfo.ocsearch.constants.Constants;
 import com.asiainfo.ocsearch.batchjob.batch.BatchJobClient;
@@ -47,6 +47,7 @@ public class BatchInputService extends OCSearchService {
             if(!submitSuccess) {
                 throw new ServiceException(String.format("submit job failure."), ErrorCode.RUNTIME_ERROR);
             }
+
             ObjectNode successResult = getSuccessResult();
             successResult.put("JOBID",jobId);
             return successResult.toString().getBytes(Constants.DEFUAT_CHARSET);
