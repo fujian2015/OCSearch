@@ -2,34 +2,12 @@
 
 angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm) {
 
-  $scope.page = {
-    schema: {},
-    schemasActive: []
-  };
-
-  $scope._deleteSchema = function() {
-    let schema_deleted = {name:$scope.page.schema.name};
-    $http.post(GLOBAL.host+"/schema/delete", schema_deleted).then(function() {
-      $scope.schemas.splice($scope.page.schemasActive.indexOf(true), 1);
-      $scope.page.schemasActive.splice($scope.page.schemasActive.length-1, 1);
-      if($scope.schemas.length > 0) { // change to first schema in list after selected schema deleted
-        $scope.page.schema = $scope.schemas[0];
-        $scope.page.schemasActive = [];
-        $scope.page.schemasActive.push(true);
-        for (let i = 1; i < $scope.schemas.length; i++) {
-          $scope.page.schemasActive.push(false);
-        }
-      } else { // if schema list is empty
-        $scope.page = {
-          schema: {},
-          schemasActive: []
-        };
-      }
-    });
-  };
-
-  // Tool functions
-  // if queried
+  //---------- Tool functions ----------
+  // 1, queryWeight
+  // 2, schemaIndexType
+  // 3, joinFields
+  // 4, modalAction
+  // Get weight if queried
   $scope.queryWeight = function(field, query_fields) {
     for (let qfield of query_fields) {
       if (field === qfield.name) {
@@ -44,6 +22,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
     { val: -1, display: "hbase only" },
     { val: 1, display: "solr" }
   ];
+  // get index display info by index val
   $scope.schemaIndexType = function(index) {
     for (let item of $scope.index_type) {
       if (item.val === index) {
@@ -73,7 +52,6 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
       return null;
     }
   };
-
   // Template modal factory
   $scope.modalAction = function(title, initval, okfunc) {
     let returnfunc = function(title, initval, okfunc) {
@@ -201,32 +179,57 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
     }; // END of return function
     return returnfunc(title, initval, okfunc);
   }; // END of template function
+
+  //---------- Basic operation of schema ----------
+  // 1, addSchema
+  // 2, editSchema
+  // 3, selectSchema
+  // 4, deleteSchema
+  // 5, initialSchema
   // Add schema
   $scope.addSchema = function() {
     $scope.modalAction(
       "Add New Schema", 
       {name:"", rowkey_expression:"", table_expression:"", index_type:"", content_fields:[], inner_fields:[], fields:[], query_fields:[]},
       function() {
-        //console.log(this.newschema);
-        $http.post(GLOBAL.host+'/schema/add', this.newschema).then(function(data){
-          $scope.schemas.push(this.newschema);
-          $scope.page.schemasActive.push(false);
-          $scope.selectSchema($scope.schemas.slice(-1)[0], $scope.schemas.length-1);
+        $http.post(GLOBAL.host+'/schema/add', this.newschema).then(function(){
+          $scope.initial();
         });
       }
     );
   };
   // Edit schema
   $scope.editSchema = function() {
-    $scope.modalAction(
-      "Edit Existed Schema", 
-      angular.copy($scope.page.schema),
-      function() {
-        $scope.page.schema = angular.copy(this.newschema);
+    if (angular.isDefined($scope.page.tables)) {
+      if ($scope.page.tables.length > 0) {
+        $ngConfirm({
+          title:"Warning", 
+          content:'There are tables belong to the schema. You can just edit fields of schema in "Table" panel.',
+          closeIcon: true,
+          buttons: {
+            OK: {
+              text: "OK"
+            }
+          }
+        });
+      } else {
+        $scope.modalAction(
+          "Edit Existed Schema", 
+          angular.copy($scope.page.schema),
+          function() {
+            let schema_deleted = {name:$scope.page.schema.name};
+            let schema_added = angular.copy(this.newschema);
+            $http.post(GLOBAL.host + "/schema/delete", schema_deleted).then(function() {
+              $http.post(GLOBAL.host + "/schema/add", schema_added).then(function() {
+                $scope.initial();
+              });
+            });
+          }
+        );
       }
-    );
+    }
   };
-  // When click schema item
+  // Select schema item
   $scope.selectSchema = function(schema, index) {
     $scope.page.schema = schema;
     $scope.page.schemasActive = [];
@@ -237,39 +240,68 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
         $scope.page.schemasActive.push(false);
       }
     }
+    let schema_tables = {schema: $scope.page.schema.name};
+    $http.post(GLOBAL.host + "/table/list", schema_tables).then(function(data) {
+      $scope.page.tables = data.data.tables;
+      console.log($scope.page.tables);
+    });
   };
-  // When click delete schema icon
+  // Delete schema
   $scope.deleteSchema = function() {
-    $ngConfirm({
-      title: "Confirmation",
-      content: "Are you sure to delete the schema selected?",
-      closeIcon: true,
-      scope: $scope,
-      buttons: {
-        Yes: {
-          text: "Yes",
-          action: function(scope) {
-            scope._deleteSchema();
-            scope.$apply();//force refresh ng-modal
+    if (angular.isDefined($scope.page.tables)) {
+      if ($scope.page.tables.length > 0) {
+        $ngConfirm({
+          title:"Warning", 
+          content:"There are tables belong to the schema. Delete all related tables first of all!",
+          closeIcon: true,
+          buttons: {
+            OK: {
+              text: "OK"
+            }
           }
-        },
-        No: {
-          text: "No"
-        }
+        });
+      } else { // There are not any tables belong to the schema
+        $ngConfirm({
+          title: "Confirmation",
+          content: "Are you sure to delete the schema selected?",
+          closeIcon: true,
+          scope: $scope,
+          buttons: {
+            Yes: {
+              text: "Yes",
+              action: function(scope) {
+                scope._deleteSchema();
+                //scope.$apply(); //force refresh ng-modal
+              }
+            },
+            No: {
+              text: "No"
+            }
+          }
+        });
       }
+    }
+  };
+  // Delete schema ajax
+  $scope._deleteSchema = function() {
+    let schema_deleted = {name:$scope.page.schema.name};
+    $http.post(GLOBAL.host+"/schema/delete", schema_deleted).then(function() {
+      $scope.initial();
+    });
+  };
+  //Initial load function
+  $scope.initial = function() {
+    $scope.page = {
+      schema: {},
+      schemasActive: []
+    };
+    $http.get(GLOBAL.host + "/schema/list").then(function(data) {
+      $scope.schemas = data.data.schemas;
+      $scope.selectSchema($scope.schemas[0],0);
     });
   };
 
-  //Initial load function
-  $http.get(GLOBAL.host + "/schema/list").then(function(data) {
-    $scope.schemas = data.data.schemas;
-    if($scope.schemas.length > 0) {
-      $scope.page.schema = $scope.schemas[0];
-      $scope.page.schemasActive.push(true);
-      for (let i = 1; i < $scope.schemas.length; i++) {
-        $scope.page.schemasActive.push(false);
-      }
-    }
-  });
+  // Initial work
+  $scope.initial();
 
 }]);

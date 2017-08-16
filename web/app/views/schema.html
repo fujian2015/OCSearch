@@ -158,7 +158,7 @@
                 <td>{{field.index_type || "(not indexed)"}}</td>
                 <td>{{field.content_field || "(empty)"}}</td>
                 <td>{{field.inner_field || "(empty)"}}</td>
-                <td><a href="" ng-click="removeField()">Delete</a></td>
+                <td><a href="" ng-click="removeField()" style="text-decoration: none;">Delete</a></td>
               </tr>
             </table>
           </div>
@@ -202,7 +202,7 @@
                 <td>{{$index + 1}}</td>
                 <td>{{qfield.name}}</td>
                 <td>{{qfield.weight}}</td>
-                <td><a href="" ng-click="removeQueryField($index)">Delete</a></td>
+                <td><a href="" ng-click="removeQueryField($index)" style="text-decoration: none;">Delete</a></td>
               </tr>
             </table>
           </div>
@@ -259,7 +259,7 @@
             <div class="col-md-2"><b>Inner Field:</b></div>
             <div class="col-md-10">{{joinFields(page.schema.inner_fields) || "(undefined)"}}</div>
           </div>
-          <h4 style="margin-top: 20px;">Field info</h4><hr>
+          <h4 style="margin-top: 50px;">Field info</h4><hr>
           <table class="table">
             <tr><th>#</th><th>name</th><th>store type</th><th>content field</th><th>inner field</th><th>index type</th><th>query weight</th></tr>
             <tr ng-repeat="field in page.schema.fields">
