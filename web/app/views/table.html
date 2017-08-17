@@ -63,15 +63,35 @@
       </div>
     </div>
     <div class="col-lg-8">
-      <div class="panel panel-default box" ng-show="page.table">
+      <div class="panel panel-default box" ng-show="page.table.name">
         <div class="panel-heading">
           <div class="container-fluid">
             <button class="btn btn-danger btn-sm pull-right glyphicon glyphicon-trash" aria-hidden="true"></button>
+            <button class="btn btn-default btn-sm pull-right glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 10px;"></button>
             </button>
           </div>
         </div>
         <div class="panel-body">
-          {{page.table}}
+          <h4>Basic info</h4><hr>
+          <div class="row" style="margin-bottom: 10px;">
+            <div class="col-md-2"><b>Name:</b></div>
+            <div class="col-md-4">{{page.table.name}}</div>
+            <div class="col-md-2"><b>Schema:</b></div>
+            <div class="col-md-4">{{page.table.schema}}</div>
+          </div>
+          <h4 style="margin-top: 50px;">Fields</h4><hr>
+          <table class="table">
+            <tr><th>#</th><th>name</th><th>store type</th><th>content field</th><th>inner field</th><th>index type</th><th>query weight</th></tr>
+            <tr ng-repeat="field in page.table.fields">
+              <td>{{$index+1}}</td>
+              <td>{{field.name}}</td>
+              <td>{{field.store_type}}</td>
+              <td>{{field.content_field || "(empty)"}}</td>
+              <td>{{field.inner_field || "(empty)"}}</td>
+              <td>{{field.index_type || "(not indexed)"}}</td>
+              <td>{{queryWeight(field.name, page.table.query_fields) || "(not queried)"}}</td>
+            </tr>
+          </table>
         </div>
       </div>
     </div>

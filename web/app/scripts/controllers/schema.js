@@ -243,7 +243,6 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
     let schema_tables = {schema: $scope.page.schema.name};
     $http.post(GLOBAL.host + "/table/list", schema_tables).then(function(data) {
       $scope.page.tables = data.data.tables;
-      console.log($scope.page.tables);
     });
   };
   // Delete schema

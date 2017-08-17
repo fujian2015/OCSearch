@@ -1,21 +1,21 @@
 'use strict';
 
-angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$q', function ($scope, $http, GLOBAL, $uibModal, $q) {
-  $scope.page = {
-    table: "",
-    tablesActive: []
-  };
-  $scope.selectTable = function(table, index){
-    $scope.page.table = table;
-    $scope.page.tablesActive = [];
-    for(let i = 0 ; i < $scope.tables.length; i++){
-      if(i === index){
-        $scope.page.tablesActive.push(true);
-      }else {
-        $scope.page.tablesActive.push(false);
+angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', function ($scope, $http, GLOBAL, $uibModal) {
+  // Tool funcs
+  // Check weight val of queried fields
+  $scope.queryWeight = function(field, query_fields) {
+    for (let qfield of query_fields) {
+      if (field === qfield.name) {
+        return qfield.weight;
       }
     }
+    return null;
   };
+
+  // Table operations
+  // 1, addTable
+  // 2, selectTable
+  // Add table
   $scope.addTable = function(){
     let modalInstance = $uibModal.open({
       animation: true,
@@ -44,8 +44,9 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
         $scope.ok = function(){
           $ngConfirm({
             title: 'Confirmation',
-            Content: 'Are you sure?',
+            Content: 'Create table now?',
             scope: $scope,
+            closeIcon: true,
             buttons: {
               Yes:{
                 text: 'Yes',
@@ -65,15 +66,35 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
       }]
     });
   };
-  $q.all([$http.get(GLOBAL.host + "/table/list"), $http.get(GLOBAL.host + "/schema/list")]).then(function(data){
-    $scope.tables = data[0].data.tables;
-    if($scope.tables.length > 0){
-      $scope.page.table = $scope.tables[0];
-      $scope.page.tablesActive.push(true);
-      for (let i = 1; i < $scope.tables.length; i++) {
-        $scope.page.tablesActive.push(false);
+  // Select table
+  $scope.selectTable = function(table, index){
+    $http.get(GLOBAL.host+"/schema/get", {params:{type:"table",name:table}}).then(function(data) {
+      $scope.page.table.name = table;
+      $scope.page.table.schema = data.data.schema.name;
+      $scope.page.table.fields = data.data.schema.fields;
+      $scope.page.table.query_fields = data.data.schema.query_fields;
+      $scope.page.tablesActive = [];
+      for(let i = 0 ; i < $scope.tables.length; i++){
+        if(i === index){
+          $scope.page.tablesActive.push(true);
+        }else {
+          $scope.page.tablesActive.push(false);
+        }
       }
-    }
-    $scope.schemas = data[1].data.schemas;
-  });
+    });
+  };
+  // Refresh tables
+  $scope.initial = function() {
+    $scope.page = {
+      table: {},
+      tablesActive: []
+    };
+    $http.get(GLOBAL.host+"/table/list").then(function(data) {
+      $scope.tables = data.data.tables;
+      $scope.selectTable($scope.tables[0], 0);
+    });
+  };
+
+  // initial steps
+  $scope.initial();
 }]);
