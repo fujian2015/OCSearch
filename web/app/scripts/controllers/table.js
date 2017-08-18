@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', function ($scope, $http, GLOBAL, $uibModal) {
+angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm) {
   // Tool funcs
   // Check weight val of queried fields
   $scope.queryWeight = function(field, query_fields) {
@@ -16,54 +16,96 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
   // 1, addTable
   // 2, selectTable
   // Add table
-  $scope.addTable = function(){
+  $scope.addTable = function() {
+    $http.get(GLOBAL.host+"/schema/list").then(function(data) {
+      $scope.schemas = data.data.schemas;
+      let modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: 'addTable.html',
+        backdrop: 'static',
+        scope: $scope,
+        size: 'lg',
+        controller: ['$scope', '$http', '$ngConfirm', function($scope, $http, $ngConfirm) {
+          $scope.name = 'top';
+          $scope.newtable = {
+            name:"",
+            schema:"",
+            hbase:{},
+            solr:{}
+          };
+          $scope._ok = function(){
+            //console.log($scope.newtable);
+            $http.post(GLOBAL.host+"/table/create", $scope.newtable).then(function() {
+              modalInstance.close();
+            });
+          };
+          $scope.ok = function(){
+            $ngConfirm({
+              title: 'Confirmation',
+              content: 'Create table now?',
+              scope: $scope,
+              closeIcon: true,
+              buttons: {
+                Yes:{
+                  text: 'Yes',
+                  action: function(scope){
+                    scope._ok();
+                    scope.initial();
+                  }
+                },
+                No:{
+                  text: "No"
+                }
+              }
+            });
+          };
+          $scope.cancel = function(){
+            modalInstance.close();
+          };
+        }]
+      });
+    });
+  };
+  // Edit table
+  $scope.editTable = function() {
     let modalInstance = $uibModal.open({
       animation: true,
-      templateUrl: 'addTable.html',
+      templateUrl: 'editTable.html',
       backdrop: 'static',
       scope: $scope,
-      size: 'md',
+      size: 'lg',
       controller: ['$scope', '$http', '$ngConfirm', function($scope, $http, $ngConfirm) {
-        $scope.name = 'top';
-        $scope.item = {
-          hbase:{},
-          solr:{}
-        };
-        $scope._ok = function(){
-          if($scope.item.schemaModel) {
-            $scope.item.schema = $scope.item.schemaModel.name;
-          }
-          $http.post(GLOBAL.host + '/table/create', $scope.item).then(function(){
-            $scope.item = {
-              hbase:{},
-              solr:{}
-            };
-            modalInstance.close();
-          });
-        };
-        $scope.ok = function(){
+        $scope.ok = function() {
           $ngConfirm({
-            title: 'Confirmation',
-            Content: 'Create table now?',
-            scope: $scope,
-            closeIcon: true,
-            buttons: {
-              Yes:{
-                text: 'Yes',
-                action: function(scope){
-                  scope._ok();
-                }
-              },
-              No:{
-                text: "No"
-              }
-            }
+            title: "Confirmation",
+            content: "",
           });
         };
-        $scope.cancel = function(){
+        $scope.cancel = function() {
           modalInstance.close();
         };
       }]
+    });
+  };
+  // Delete table
+  $scope.deleteTable = function() {
+    $ngConfirm({
+      title: "Confirmation",
+      content: "Want to delete the table selected? All data related will be lost.",
+      closeIcon: true,
+      buttons: {
+        Yes: {
+          text: "Yes",
+          action: function() {
+            $http.post(GLOBAL.host+"", {name:$scope.page.table.name}).then(function() {
+              $scope.initial();
+            });
+          }
+        },
+        No: {
+          text: "No"
+        }
+      }
     });
   };
   // Select table

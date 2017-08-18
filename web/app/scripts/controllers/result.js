@@ -42,6 +42,16 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
         tables.push($scope.page.tables[i]);
       }
     }
+    if (!$scope.content) { $scope.content=""; }
+    console.log({
+      "query": $scope.content,
+      "condition": $scope.condition,
+      "start": ($scope.page.pagination.current-1) * $scope.page.rows,
+      "rows": $scope.page.rows,
+      "sort": "",
+      "tables": tables,
+      "return_fields": $scope.page.fields
+    });
     $http.post(GLOBAL.host + '/query/search', {
       "query": $scope.content,
       "condition": $scope.condition,

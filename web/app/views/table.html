@@ -1,48 +1,67 @@
 <div ng-include="'views/ui/header.html'"></div>
 <script type="text/ng-template" id="addTable.html">
   <div class="modal-header">
-    <h3 class="modal-title" id="modal-title">Add New Table</h3>
+    <h3 class="modal-title">Add New Table</h3>
   </div>
-  <div class="modal-body" id="modal-body">
+  <div class="modal-body">
     <div class="container-fluid">
     <form class="form-horizontal">
       <div class="form-group">
-        <label class="control-label col-md-2">Name:</label>
+        <label class="control-label col-md-2" style="text-align: left;">Name:</label>
         <div class="col-md-10">
-          <input class="form-control" ng-model="item.name">
+          <input class="form-control" ng-model="newtable.name">
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-md-2">Region Num:</label>
+        <label class="control-label col-md-2" style="text-align: left;">Schema:</label>
         <div class="col-md-10">
-          <input class="form-control" type="number" ng-model="item.hbase.region_num">
+          <select class="form-control" ng-model="newtable.schemaModel" ng-options="schema.name for schema in schemas">
+            <option value="">(Select schema)</option>
+          </select>
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-md-2">Region Split:</label>
-        <div class="col-md-10">
-          <input class="form-control" type="number" ng-model="item.hbase.region_split">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="control-label col-md-2">Shards:</label>
-        <div class="col-md-10">
-          <input class="form-control" type="number" ng-model="item.solr.shards">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="control-label col-md-2">Replicas:</label>
-        <div class="col-md-10">
-          <input class="form-control" type="number" ng-model="item.solr.replicas">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="control-label col-md-2">Schema:</label>
+        <label class="control-label col-md-2" style="text-align: left;">Region Num:</label>
         <div class="col-md-4">
-          <select class="form-control" ng-model="item.schemaModel" ng-options="schema.name for schema in schemas"></select>
+          <input class="form-control" type="number" ng-model="newtable.hbase.region_num">
+        </div>
+        <label class="control-label col-md-2" style="text-align: left;">Region Split:</label>
+        <div class="col-md-4">
+          <input class="form-control" type="text" ng-model="newtable.hbase.region_split">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-2" style="text-align: left;">Solr Shards:</label>
+        <div class="col-md-4">
+          <input class="form-control" type="number" ng-model="newtable.solr.shards">
+        </div>
+        <label class="control-label col-md-2" style="text-align: left;">Solr Replicas:</label>
+        <div class="col-md-4">
+          <input class="form-control" type="number" ng-model="newtable.solr.replicas">
         </div>
       </div>
     </form>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+    <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+  </div>
+</script>
+<script type="text/ng-template" id="editTable.html">
+  <div class="modal-header">
+    <h3 class="modal-title">Edit table fields</h3>
+  </div>
+  <div class="modal-body">
+    <div class="container-fluid">
+      <form class="form-horizontal">
+        <div class="form-group">
+          <label class="control-label col-md-2" style="text-align: left;">Fields</label>
+          <div class="col-md-4">
+            <input class="form-control">
+          </div>
+        </div>
+      </form>
     </div>
   </div>
   <div class="modal-footer">
@@ -66,8 +85,8 @@
       <div class="panel panel-default box" ng-show="page.table.name">
         <div class="panel-heading">
           <div class="container-fluid">
-            <button class="btn btn-danger btn-sm pull-right glyphicon glyphicon-trash" aria-hidden="true"></button>
-            <button class="btn btn-default btn-sm pull-right glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 10px;"></button>
+            <button class="btn btn-danger btn-sm pull-right glyphicon glyphicon-trash" aria-hidden="true" ng-click="deleteTable()"></button>
+            <button class="btn btn-default btn-sm pull-right glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 10px;" ng-click="editTable()"></button>
             </button>
           </div>
         </div>
