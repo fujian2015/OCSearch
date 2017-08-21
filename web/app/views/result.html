@@ -79,7 +79,7 @@
           <span class="badge">{{$index+1}}</span>
           <div ng-repeat="field in page.schema.fields">
             <h3 ng-if="field.name === 'name'">
-              {{item[field.name]}}
+              {{item.name]}}
             </h3>
             <span ng-if="field.name !=='name'">
               <strong>{{field.name}}</strong>
@@ -93,7 +93,10 @@
   </div>
   <div class="row" ng-if="data.docs && page.pagination.total > 0">
     <div class="col-lg-10 col-lg-offset-1">
-      <ul uib-pagination items-per-page="page.rows" ng-change="pageChanged()" total-items="page.pagination.total" ng-model="page.pagination.current" previous-text="&lsaquo;" next-text="&rsaquo;"></ul>
+      <ul uib-pagination items-per-page="page.rows" ng-change="pageChanged()" max-size="page.pagination.maxsize" total-items="page.pagination.total" ng-model="page.pagination.current" previous-text="&lsaquo;" next-text="&rsaquo;"></ul>
+    </div>
+    <div class="col-lg-10 col-lg-offset-1">
+      <h5 style="margin-bottom: 10px">Total: {{page.pagination.total}} items</h5>
     </div>
   </div>
 </div>

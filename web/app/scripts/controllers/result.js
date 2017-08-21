@@ -19,7 +19,8 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
     rows: 5,
     rowOptions:[5,10,20,50],
     pagination:{
-      current : 1
+      current : 1,
+      maxsize : 10
     },
   };
 
@@ -43,7 +44,7 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
       }
     }
     if (!$scope.content) { $scope.content=""; }
-    console.log({
+    let query_condition = {
       "query": $scope.content,
       "condition": $scope.condition,
       "start": ($scope.page.pagination.current-1) * $scope.page.rows,
@@ -51,16 +52,8 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
       "sort": "",
       "tables": tables,
       "return_fields": $scope.page.fields
-    });
-    $http.post(GLOBAL.host + '/query/search', {
-      "query": $scope.content,
-      "condition": $scope.condition,
-      "start": ($scope.page.pagination.current-1) * $scope.page.rows,
-      "rows": $scope.page.rows,
-      "sort": "",
-      "tables": tables,
-      "return_fields": $scope.page.fields
-    }).then(function(data){
+    };
+    $http.post(GLOBAL.host + '/query/search', query_condition).then(function(data){
       $scope.data = data.data.data;
       if($scope.data) {
         $scope.page.pagination.total = $scope.data.total;
