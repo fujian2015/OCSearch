@@ -61,13 +61,14 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
         backdrop: 'static',
         scope: $scope,
         size: 'lg',
-        controller: ['$scope', '$http', '$ngConfirm', function($scope, $http, $ngConfirm) {
+        controller: ['$scope', '$http', '$ngConfirm', '$sce', function($scope, $http, $ngConfirm, $sce) {
+          $scope.helpExpressionHtml = $sce.trustAsHtml('<h5>Help to build a expression</h5>Want to learn <a target="_blank" href="expression.html">more</a>?');
           $scope.titleStr = title;
           // Temp new schema
           $scope.newschema = initval;
           // field store type
           $scope.field_type = [ 
-            "int", "long", "float", "double", "string", "Boolean", "File", "Attachment"
+            "INT", "LONG", "FLOAT", "DOUBLE", "STRING", "BOOLEAN", "FILE", "ATTACHMENT"
           ];
           // field index type
           $scope.field_index_type = [
@@ -161,15 +162,15 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
           };
           // Functions of filter
           $scope.typeFilter = {
-            content: function(item) { return /^text/.test(item); },
-            int: function(item) { return /int/.test(item); },
-            float: function(item) { return /float/.test(item); },
-            double: function(item) { return /double/.test(item); },
-            long: function(item) { return /long/.test(item); },
-            string: function(item) { return /(string|date|text|lowercase)/.test(item); },
-            Boolean: function() { return false; },
-            File: function() { return false; },
-            Attachment: function() { return false; }
+            CONTENT: function(item) { return /^text/.test(item); },
+            INT: function(item) { return /int/.test(item); },
+            FLOAT: function(item) { return /float/.test(item); },
+            DOUBLE: function(item) { return /double/.test(item); },
+            LONG: function(item) { return /long/.test(item); },
+            STRING: function(item) { return /(string|date|text|lowercase)/.test(item); },
+            BOOLEAN: function() { return false; },
+            FILE: function() { return false; },
+            ATTACHMENT: function() { return false; }
           };
           $scope.queryFilter = function(item) {
             return item.index_type;

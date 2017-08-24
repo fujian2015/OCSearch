@@ -15,7 +15,7 @@
       <div class="form-group">
         <label class="control-label col-md-2" style="text-align: left;">Schema:</label>
         <div class="col-md-10">
-          <select class="form-control" ng-model="newtable.schemaModel" ng-options="schema.name for schema in schemas">
+          <select class="form-control" ng-model="newtable.schema" ng-options="schema.name as schema.name for schema in schemas">
             <option value="">(Select schema)</option>
           </select>
         </div>
@@ -56,12 +56,72 @@
     <div class="container-fluid">
       <form class="form-horizontal">
         <div class="form-group">
-          <label class="control-label col-md-2" style="text-align: left;">Fields</label>
-          <div class="col-md-4">
-            <input class="form-control">
+          <label class="control-label col-md-2" style="text-align: left;">Field name:</label>
+          <div class="col-md-10">
+            <input class="form-control" ng-model="curfield.name" ng-disabled="editModeFlag">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-md-2" style="text-align: left;">Store type:</label>
+          <div class="col-md-10">
+            <select class="form-control" ng-model="curfield.store_type" ng-options="ftp for ftp in field_type">
+              <option value="">(Select field store type)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-md-2" style="text-align: left;">Content field:</label>
+          <div class="col-md-10">
+            <select class="form-control" ng-model="curfield.content_field" ng-options="cf.name as cf.name for cf in page.table.schema.content_fields" ng-change="checkIndexType()">
+              <option value="">(Select existed content field)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-md-2" style="text-align: left;">Field index:</label>
+          <div class="col-md-2">
+              <div class="checkbox"><label><input type="checkbox" value="" ng-model="curfield.indexed" ng-click="checkIndexType()">Indexed</label></div>
+          </div>
+          <div class="col-md-8">
+            <select class="form-control" ng-model="curfield.index_type" ng-options="tp for tp in field_index_type |filter: typeFilter[curfield.store_type]" ng-disabled="!((curfield.indexed || curfield.content_field) && curfield.store_type)">
+              <option value="">(Select index type)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-md-2" style="text-align: left;">Inner field:</label>
+          <div class="col-md-10">
+            <select class="form-control" ng-model="curfield.inner_field" ng-options="if.name as if.name for if in page.table.schema.inner_fields">
+              <option value="">(Select existed inner field)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-md-2 col-md-offset-10" ng-if="!editModeFlag">
+            <a class="btn btn-success center-block" ng-click="addField()"><i class="glyphicon glyphicon-plus"></i></a>
+          </div>
+          <div class="col-md-2 col-md-offset-8" ng-if="editModeFlag">
+            <a class="btn btn-default center-block" ng-click="saveField()" ng-disabled="ifsame()"><i class="glyphicon glyphicon-floppy-disk"></i></a>
+          </div>
+          <div class="col-md-2" ng-if="editModeFlag">
+            <a class="btn btn-danger center-block" ng-click="cancelEdit()"><i class="glyphicon glyphicon-remove"></i></a>
           </div>
         </div>
       </form>
+      <table class="table">
+        <tr><th>#</th><th>name</th><th>store type</th><th>index type</th><th>content field</th><th>inner field</th><th>query weight</th><th>operation</th></tr>
+        <tr ng-repeat="field in curschema.fields">
+          <td>{{$index+1}}</td>
+          <td>{{field.name}}</td>
+          <td>{{field.store_type}}</td>
+          <td>{{field.index_type || "(not indexed)"}}</td>
+          <td>{{field.content_field || "(empty)"}}</td>
+          <td>{{field.inner_field || "(empty)"}}</td>
+          <td>{{queryWeight(curschema, $index) || "(not queried)"}}</td>
+          <td ng-if="!queryWeight(curschema, $index)"><a href="" ng-click="deleteField($index)">Delete</a>&nbsp;/&nbsp;<a href="" ng-click="editField($index)">Edit</a></td>
+          <td ng-if="queryWeight(curschema, $index)">Unavailable</td>
+        </tr>
+      </table>
     </div>
   </div>
   <div class="modal-footer">
@@ -96,19 +156,19 @@
             <div class="col-md-2"><b>Name:</b></div>
             <div class="col-md-4">{{page.table.name}}</div>
             <div class="col-md-2"><b>Schema:</b></div>
-            <div class="col-md-4">{{page.table.schema}}</div>
+            <div class="col-md-4">{{page.table.schema.name}}</div>
           </div>
           <h4 style="margin-top: 50px;">Fields</h4><hr>
           <table class="table">
             <tr><th>#</th><th>name</th><th>store type</th><th>content field</th><th>inner field</th><th>index type</th><th>query weight</th></tr>
-            <tr ng-repeat="field in page.table.fields">
+            <tr ng-repeat="field in page.table.schema.fields">
               <td>{{$index+1}}</td>
               <td>{{field.name}}</td>
               <td>{{field.store_type}}</td>
               <td>{{field.content_field || "(empty)"}}</td>
               <td>{{field.inner_field || "(empty)"}}</td>
               <td>{{field.index_type || "(not indexed)"}}</td>
-              <td>{{queryWeight(field.name, page.table.query_fields) || "(not queried)"}}</td>
+              <td>{{queryWeight(page.table.schema, $index) || "(not queried)"}}</td>
             </tr>
           </table>
         </div>

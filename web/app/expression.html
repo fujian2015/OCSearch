@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html ng-app="helpapp">
+<head>
+  <title>Document of Expression</title>
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+  <style type="text/css">
+  body {
+    margin-top: 50px;
+    margin-bottom: 150px;
+  }
+  p {
+    font-size: 18px;
+  }
+  li {
+    font-size: 16px;
+  }
+  .exptitle {
+    margin-bottom: 50px;
+  }
+  .expobj {
+    margin-left: 50px;
+  }
+  .expobjtitle {
+    color:brown;
+  }
+  .expfun {
+    margin-left: 30px;
+  }
+  .expfuntitle {
+    color:red;
+  }
+  </style>
+</head>
+<body ng-controller="expressionCtrl">
+  <div class="col-md-9 col-md-offset-1">
+    <h1 class="exptitle">{{helpTitle}}</h1>
+    <div ng-repeat="obj in expobjs" class="expobj">
+      <h2 class="expobjtitle">Object:&nbsp;{{obj}}</h2>
+      <div ng-repeat="fun in expressions[obj]" class="expfun">
+        <h3 class="expfuntitle">Function:&nbsp;{{fun.name}}</h3>
+        <p><b>Description:&nbsp;</b>{{fun.description}}</p>
+        <p>
+          <b>Args: &nbsp;</b>
+          <ul>
+            <li ng-repeat="arg in fun.args"><i>{{arg.name}}&nbsp;(&nbsp;{{arg.type}}&nbsp;type&nbsp;)</i>:&nbsp;&nbsp;{{arg.description}}</li>
+          </ul>
+        </p>
+        <p><b>Return: &nbsp;</b>{{fun.return_type}}</p>
+      </div>
+    </div>
+  </div>
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="build-scripts/controllers/expression.js"></script>
+</body>
+</html>

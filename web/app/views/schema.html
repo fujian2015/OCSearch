@@ -24,20 +24,14 @@
           </div>
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">Rowkey Expression</label>
-            <div class="col-md-9">
-              <input class="form-control" ng-model="newschema.rowkey_expression">
-            </div>
-            <div class="col-md-1">
-              <a href="" class="glyphicon glyphicon-question-sign" aria-hidden="true" style="color: black; font-size: 20px; padding-top: 6px; text-decoration: none;"></a>
+            <div class="col-md-10">
+              <input class="form-control" ng-model="newschema.rowkey_expression" uib-popover-html="helpExpressionHtml" popover-trigger="'focus'" popover-animation="true">
             </div>
           </div>
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">Table Expresstion</label>
-            <div class="col-md-9">
-              <input class="form-control" ng-model="newschema.table_expression">
-            </div>
-            <div class="col-md-1">
-              <a href="" class="glyphicon glyphicon-question-sign" aria-hidden="true" style="color: black; font-size: 20px; padding-top: 6px; text-decoration: none;"></a>
+            <div class="col-md-10">
+              <input class="form-control" ng-model="newschema.table_expression" uib-popover-html="helpExpressionHtml" popover-trigger="'focus'" popover-animation="true">
             </div>
           </div>
           <div class="form-group">
@@ -53,7 +47,7 @@
             </div>
             <div class="col-md-10 col-md-offset-2" style="margin-top: 24px;">
               <table class="table">
-              <tr><th>#</th><th>name</th><th>type</th><th>option</th></tr>
+              <tr><th>#</th><th>name</th><th>type</th><th>operation</th></tr>
               <tr ng-repeat="cfield in newschema.content_fields">
                 <td>{{$index+1}}</td>
                 <td>{{cfield.name}}</td>
@@ -74,7 +68,7 @@
             </div>
             <div class="col-md-10 col-md-offset-2" style="margin-top: 24px;">
               <table class="table">
-              <tr><th>#</th><th>name</th><th>separator</th><th>option</th></tr>
+              <tr><th>#</th><th>name</th><th>separator</th><th>operation</th></tr>
               <tr ng-repeat="ifield in newschema.inner_fields">
                 <td>{{$index+1}}</td>
                 <td>{{ifield.name}}</td>
@@ -150,7 +144,7 @@
           </div>
           <div class="col-md-12" style="margin-top: 10px;">
             <table class="table">
-              <tr><th>#</th><th>name</th><th>store type</th><th>index</th><th>content field</th><th>inner field</th><th>option</th></tr>
+              <tr><th>#</th><th>name</th><th>store type</th><th>index</th><th>content field</th><th>inner field</th><th>operation</th></tr>
               <tr ng-repeat="field in newschema.fields">
                 <td>{{$index + 1}}</td>
                 <td>{{field.name}}</td>
@@ -197,7 +191,7 @@
           </div>
           <div class="col-md-10 col-md-offset-2">
             <table class="table">
-              <tr><th>#</th><th>name</th><th>weight</th><th>option</th></tr>
+              <tr><th>#</th><th>name</th><th>weight</th><th>operation</th></tr>
               <tr ng-repeat="qfield in newschema.query_fields">
                 <td>{{$index + 1}}</td>
                 <td>{{qfield.name}}</td>
