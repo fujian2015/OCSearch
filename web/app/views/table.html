@@ -7,13 +7,13 @@
     <div class="container-fluid">
     <form class="form-horizontal">
       <div class="form-group">
-        <label class="control-label col-md-2" style="text-align: left;">Name:</label>
+        <label class="control-label col-md-2" style="text-align: left;">Name *</label>
         <div class="col-md-10">
           <input class="form-control" ng-model="newtable.name">
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-md-2" style="text-align: left;">Schema:</label>
+        <label class="control-label col-md-2" style="text-align: left;">Schema *</label>
         <div class="col-md-10">
           <select class="form-control" ng-model="newtable.schema" ng-options="schema.name as schema.name for schema in schemas">
             <option value="">(Select schema)</option>
@@ -44,7 +44,8 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+    <b class="pull-left" style="color: red;">{{modalmsg}}</b>
+    <button class="btn btn-primary" type="button" ng-click="ok()" ng-disabled="!checkAddTable()">OK</button>
     <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
   </div>
 </script>
@@ -98,10 +99,10 @@
         </div>
         <div class="form-group">
           <div class="col-md-2 col-md-offset-10" ng-if="!editModeFlag">
-            <a class="btn btn-success center-block" ng-click="addField()"><i class="glyphicon glyphicon-plus"></i></a>
+            <a class="btn btn-success center-block" ng-click="addField()" ng-disabled="!(curfield.name && curfield.store_type && (((curfield.indexed || curfield.content_field) && curfield.index_type) || !(curfield.indexed || curfield.content_field)))"><i class="glyphicon glyphicon-plus"></i></a>
           </div>
           <div class="col-md-2 col-md-offset-8" ng-if="editModeFlag">
-            <a class="btn btn-default center-block" ng-click="saveField()" ng-disabled="ifsame()"><i class="glyphicon glyphicon-floppy-disk"></i></a>
+            <a class="btn btn-default center-block" ng-click="saveField()" ng-disabled="ifsame() || !(curfield.name && curfield.store_type && (((curfield.indexed || curfield.content_field) && curfield.index_type) || !(curfield.indexed || curfield.content_field)))"><i class="glyphicon glyphicon-floppy-disk"></i></a>
           </div>
           <div class="col-md-2" ng-if="editModeFlag">
             <a class="btn btn-danger center-block" ng-click="cancelEdit()"><i class="glyphicon glyphicon-remove"></i></a>
@@ -125,7 +126,8 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+    <b class="pull-left" style="color: red;">{{modalmsg}}</b>
+    <button class="btn btn-primary" type="button" ng-click="ok()" ng-disabled="!checkEditTable()">OK</button>
     <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
   </div>
 </script>

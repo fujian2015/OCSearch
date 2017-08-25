@@ -95,13 +95,13 @@
       <div class="modal-body" id="modal-body">
         <div class="container-fluid">
           <div class="form-group">
-            <label class="control-label col-md-2" style="text-align: left;">Name</label>
+            <label class="control-label col-md-2" style="text-align: left;">Name *</label>
             <div class="col-md-10">
               <input type="text" class="form-control" ng-model="new_field.name">
             </div>
           </div>
           <div class="form-group">
-            <label class="control-label col-md-2" style="text-align: left;">Store type</label>
+            <label class="control-label col-md-2" style="text-align: left;">Store type *</label>
             <div class="col-md-10">
               <select class="form-control" ng-model="new_field.store_type" ng-options="ftp for ftp in field_type">
                 <option value="">(Pick one)</option>
@@ -140,7 +140,7 @@
           </div>
           <div class="form-group">
             <div class="col-md-2 col-md-offset-10">
-              <a class="btn btn-success center-block" ng-click="addField()" ng-disabled="!new_field.name || !new_field.store_type"><i class="glyphicon glyphicon-plus"></i></a>
+              <a class="btn btn-success center-block" ng-click="addField()" ng-disabled="!(new_field.name && new_field.store_type && (((new_field.indexed || new_field.content_field) && new_field.index_type) || !(new_field.indexed || new_field.content_field)))"><i class="glyphicon glyphicon-plus"></i></a>
             </div>
           </div>
           <div class="col-md-12" style="margin-top: 10px;">

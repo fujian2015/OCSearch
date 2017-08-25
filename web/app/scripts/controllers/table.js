@@ -40,6 +40,15 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
               replicas: 0
             }
           };
+          $scope.checkAddTable = function() {
+            if ($scope.newtable.name === "" || $scope.newtable.schema === "") {
+              $scope.modalmsg = "Please fill in all inputs marked as *";
+              return false;
+            } else {
+              $scope.modalmsg = "";
+              return true;
+            }
+          };
           $scope._ok = function(){
             if ($scope.newtable.hbase.region_split === "" || $scope.newtable.hbase.region_split === null) { $scope.newtable.hbase.region_split = []; }
             //console.log($scope.newtable);
@@ -184,6 +193,16 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
             if(!existed_flag) {
               $scope.request_list.delete_field.push({command:"delete_field", table: $scope.page.table.name, field: {name: rfield.name}});
             }
+          }
+        };
+        // Check inputs for edit-save button
+        $scope.checkEditTable = function() {
+          if ($scope.curschema.fields === null || $scope.curschema.fields.length === 0) {
+            $scope.modalmsg = "No fields of schema defined!";
+            return false;
+          } else {
+            $scope.modalmsg = "";
+            return true;
           }
         };
         $scope.ok = function() {
