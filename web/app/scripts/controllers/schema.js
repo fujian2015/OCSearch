@@ -160,6 +160,25 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
           $scope.cancel = function() {
             modalInstance.close();
           };
+          // Check input parameters
+          $scope.checkStep1 = function() {
+            if ($scope.newschema.name==="" || ($scope.newschema.index_type !== 1 && $scope.newschema.index_type !== 0 && $scope.newschema.index_type !== -1)) {
+              $scope.modalmsg = "Please fill in all inputs marked as *";
+              return false;
+            } else {
+              $scope.modalmsg = "";
+              return true;
+            }
+          };
+          $scope.checkStep2 = function() {
+            if ($scope.newschema.fields === null || $scope.newschema.fields.length === 0) {
+              $scope.modalmsg = "No fields of schema defined!";
+              return false;
+            } else {
+              $scope.modalmsg = "";
+              return true;
+            }
+          }
           // Functions of filter
           $scope.typeFilter = {
             CONTENT: function(item) { return /^text/.test(item); },

@@ -9,16 +9,16 @@
       <div class="modal-body" id="modal-body">
         <div class="container-fluid">
           <div class="form-group">
-            <label class="control-label col-md-2" style="text-align: left;">Name</label>
+            <label class="control-label col-md-2" style="text-align: left;">Name *</label>
             <div class="col-md-10">
               <input class="form-control" ng-model="newschema.name">
             </div>
           </div>
           <div class="form-group">
-            <label class="control-label col-md-2" style="text-align: left;">Index Type</label>
+            <label class="control-label col-md-2" style="text-align: left;">Index Type *</label>
             <div class="col-md-10">
               <select class="form-control" ng-model="newschema.index_type" ng-options="index.val as index.display for index in index_type">
-                <option value="">(Pick one)</option>
+                <option value="999">(Select index type)</option>
               </select>
             </div>
           </div>
@@ -38,12 +38,12 @@
             <label class="control-label col-md-2" style="text-align: left;">Content Fields</label>
             <div class="col-md-4"><input type="text" class="form-control" placeholder="name" ng-model="new_content_field.name"></div>
             <div class="col-md-4">
-              <select class="form-control" ng-model="new_content_field.type" ng-options="tp for tp in field_index_type | filter: typeFilter.content">
+              <select class="form-control" ng-model="new_content_field.type" ng-options="tp for tp in field_index_type | filter: typeFilter.CONTENT">
                 <option value="">(Pick type)</option>
               </select>
             </div>
             <div class="col-md-2">
-              <a class="btn btn-success center-block" ng-click="addContentField()"><i class="glyphicon glyphicon-plus"></i></a>
+              <a class="btn btn-success center-block" ng-click="addContentField()" ng-disabled="!new_content_field.name || !new_content_field.type"><i class="glyphicon glyphicon-plus"></i></a>
             </div>
             <div class="col-md-10 col-md-offset-2" style="margin-top: 24px;">
               <table class="table">
@@ -64,7 +64,7 @@
             <div class="col-md-4"><input type="text" class="form-control" placeholder="name" ng-model="new_inner_field.name"></div>
             <div class="col-md-4"><input type="text" class="form-control" placeholder="separator" ng-model="new_inner_field.separator"></div>
             <div class="col-md-2">
-              <a class="btn btn-success center-block" ng-click="addInnerField()"><i class="glyphicon glyphicon-plus"></i></a>
+              <a class="btn btn-success center-block" ng-click="addInnerField()" ng-disabled="!new_inner_field.name || !new_inner_field.separator"><i class="glyphicon glyphicon-plus"></i></a>
             </div>
             <div class="col-md-10 col-md-offset-2" style="margin-top: 24px;">
               <table class="table">
@@ -83,7 +83,8 @@
         </div> <!-- END of container-fluid -->
       </div> <!-- END of modal-body -->
       <div class="modal-footer">
-        <button class="btn btn-primary" type="button" ng-click="next()">Next</button>
+        <b class="pull-left" style="color: red;">{{modalmsg}}</b>
+        <button class="btn btn-primary" type="button" ng-click="next()" ng-disabled="!checkStep1()">Next</button>
         <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
       </div> <!-- END of modal-footer -->
     </div> <!-- END of switch step1 -->
@@ -125,7 +126,7 @@
             </div>
             <div class="col-md-4">
               <select class="form-control" ng-model="new_field.index_type" ng-options="tp for tp in field_index_type | filter: typeFilter[new_field.store_type]" ng-disabled="!((new_field.indexed || new_field.content_field) && new_field.store_type)">
-                <option value="">(Index type)</option>
+                <option value="">(Select field index type)</option>
               </select>
             </div>
           </div>
@@ -139,7 +140,7 @@
           </div>
           <div class="form-group">
             <div class="col-md-2 col-md-offset-10">
-              <a class="btn btn-success center-block" ng-click="addField()"><i class="glyphicon glyphicon-plus"></i></a>
+              <a class="btn btn-success center-block" ng-click="addField()" ng-disabled="!new_field.name || !new_field.store_type"><i class="glyphicon glyphicon-plus"></i></a>
             </div>
           </div>
           <div class="col-md-12" style="margin-top: 10px;">
@@ -159,8 +160,9 @@
         </div> <!-- END of container-fluid -->
       </div> <!-- END of modal-body -->
       <div class="modal-footer">
+        <b class="pull-left" style="color: red;">{{modalmsg}}</b>
         <button class="btn btn-primary" type="button" ng-click="prev()">Previous</button>
-        <button class="btn btn-primary" type="button" ng-click="next()">Next</button>
+        <button class="btn btn-primary" type="button" ng-click="next()" ng-disabled="!checkStep2()">Next</button>
         <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
       </div> <!-- END of modal-footer -->
     </div> <!-- END of switch step2 -->
@@ -186,7 +188,7 @@
           </div>
           <div class="form-group">
             <div class="col-md-2 col-md-offset-10">
-              <a class="btn btn-success center-block" ng-click="addQueryField()"><i class="glyphicon glyphicon-plus"></i></a>
+              <a class="btn btn-success center-block" ng-click="addQueryField()" ng-disabled="!new_query_field.name || !new_query_field.weight"><i class="glyphicon glyphicon-plus"></i></a>
             </div>
           </div>
           <div class="col-md-10 col-md-offset-2">
