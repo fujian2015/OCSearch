@@ -1,6 +1,10 @@
 'use strict';
 
-angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm) {
+angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate) {
+
+  let yes_text = $translate.instant('YES');
+  let no_text = $translate.instant('NO');
+  let confirmation_text = $translate.instant('CONFIRMATION');
 
   //---------- Tool functions ----------
   // 1, queryWeight
@@ -139,20 +143,20 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
           $scope._ok = okfunc;
           $scope.ok = function() {
             $ngConfirm({
-              title: "Confirmation",
+              title: confirmation_text,
               content: "Are you sure?",
               scope: $scope,
               closeIcon: true,
               buttons: {
                 Yes: {
-                  text: "Yes",
+                  text: yes_text,
                   action: function(scope) {
                     scope._ok();
                     modalInstance.close();
                   }
                 },
                 No: {
-                  text: "No",
+                  text: no_text,
                 }
               }
             });
@@ -163,7 +167,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
           // Check input parameters
           $scope.checkStep1 = function() {
             if ($scope.newschema.name==="" || ($scope.newschema.index_type !== 1 && $scope.newschema.index_type !== 0 && $scope.newschema.index_type !== -1)) {
-              $scope.modalmsg = "Please fill in all inputs marked as *";
+              $scope.modalmsg = $translate.instant("MODALMSG_FILL_IN_ALL");
               return false;
             } else {
               $scope.modalmsg = "";
@@ -178,7 +182,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
               $scope.modalmsg = "";
               return true;
             }
-          }
+          };
           // Functions of filter
           $scope.typeFilter = {
             CONTENT: function(item) { return /^text/.test(item); },

@@ -9,7 +9,7 @@
       <div class="modal-body" id="modal-body">
         <div class="container-fluid">
           <div class="form-group">
-            <label class="control-label col-md-2" style="text-align: left;">Name *</label>
+            <label class="control-label col-md-2" style="text-align: left;">{{'NAME' | translate}} *</label>
             <div class="col-md-10">
               <input class="form-control" ng-model="newschema.name">
             </div>
@@ -47,13 +47,13 @@
             </div>
             <div class="col-md-10 col-md-offset-2" style="margin-top: 24px;">
               <table class="table">
-              <tr><th>#</th><th>name</th><th>type</th><th>operation</th></tr>
+              <tr><th>#</th><th>{{'INTABLE_NAME' | translate}}</th><th>{{'INTABLE_TYPE' | translate}}</th><th>{{'INTABLE_OPERATION' | translate}}</th></tr>
               <tr ng-repeat="cfield in newschema.content_fields">
                 <td>{{$index+1}}</td>
                 <td>{{cfield.name}}</td>
                 <td>{{cfield.type}}</td>
                 <td>
-                  <a href="" ng-click="removeContentField($index)">Delete</a>
+                  <a href="" ng-click="removeContentField($index)">{{'DELETE' | translate}}</a>
                 </td>
               </tr>
               </table>
@@ -68,13 +68,13 @@
             </div>
             <div class="col-md-10 col-md-offset-2" style="margin-top: 24px;">
               <table class="table">
-              <tr><th>#</th><th>name</th><th>separator</th><th>operation</th></tr>
+              <tr><th>#</th><th>{{'INTABLE_NAME' | translate}}</th><th>{{'INTABLE_SEPARATOR' | translate}}</th><th>{{'INTABLE_OPERATION' | translate}}</th></tr>
               <tr ng-repeat="ifield in newschema.inner_fields">
                 <td>{{$index+1}}</td>
                 <td>{{ifield.name}}</td>
                 <td>{{ifield.separator}}</td>
                 <td>
-                  <a href="" ng-click="removeInnerField($index)">Delete</a>
+                  <a href="" ng-click="removeInnerField($index)">{{'DELETE' | translate}}</a>
                 </td>
               </tr>
               </table>
@@ -84,8 +84,8 @@
       </div> <!-- END of modal-body -->
       <div class="modal-footer">
         <b class="pull-left" style="color: red;">{{modalmsg}}</b>
-        <button class="btn btn-primary" type="button" ng-click="next()" ng-disabled="!checkStep1()">Next</button>
-        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-primary" type="button" ng-click="next()" ng-disabled="!checkStep1()">{{'NEXT' | translate}}</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">{{'CANCEL' | translate}}</button>
       </div> <!-- END of modal-footer -->
     </div> <!-- END of switch step1 -->
     <div ng-switch-when="step2">
@@ -161,9 +161,9 @@
       </div> <!-- END of modal-body -->
       <div class="modal-footer">
         <b class="pull-left" style="color: red;">{{modalmsg}}</b>
-        <button class="btn btn-primary" type="button" ng-click="prev()">Previous</button>
-        <button class="btn btn-primary" type="button" ng-click="next()" ng-disabled="!checkStep2()">Next</button>
-        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-primary" type="button" ng-click="prev()">{{'PREV' | translate}}</button>
+        <button class="btn btn-primary" type="button" ng-click="next()" ng-disabled="!checkStep2()">{{'NEXT' | translate}}</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">{{'CANCEL' | translate}}</button>
       </div> <!-- END of modal-footer -->
     </div> <!-- END of switch step2 -->
     <div ng-switch-when="step3">
@@ -205,9 +205,9 @@
         </div> <!-- END of container-fluid -->
       </div> <!-- END of modal-body -->
       <div class="modal-footer">
-        <button class="btn btn-primary" type="button" ng-click="prev()">Previous</button>
-        <button class="btn btn-success" type="button" ng-click="ok()">OK</button>
-        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-primary" type="button" ng-click="prev()">{{'PREV' | translate}}</button>
+        <button class="btn btn-success" type="button" ng-click="ok()">{{'OK' | translate}}</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">{{'CANCEL' | translate}}</button>
       </div> <!-- END of modal-footer -->
     </div> <!-- END of switch step3 -->
   </div> <!-- END of ng-switch -->
@@ -218,7 +218,7 @@
     <div class="col-lg-2 col-lg-offset-1">
       <div class="list-group box">
         <div class="list-group-item">
-          <button class="btn btn-default btn-block" style="outline: 0" ng-click="addSchema()">Add</button>
+          <button class="btn btn-default btn-block" style="outline: 0" ng-click="addSchema()">{{'ADD' | translate}}</button>
         </div>
         <a href="" class="list-group-item" ng-repeat="schema in schemas" ng-class="{active: page.schemasActive[$index]}" ng-click="selectSchema(schema,$index)">
           {{schema.name}}
@@ -234,30 +234,38 @@
           </div>
         </div>
         <div class="panel-body">
-          <h4>Basic info</h4><hr>
+          <h4>{{'BASIC_INFO' | translate}}</h4><hr>
           <div class="row" style="margin-bottom: 10px;">
-            <div class="col-md-2"><b>Name:</b></div>
+            <div class="col-md-2"><b>{{'NAME' | translate}}:</b></div>
             <div class="col-md-4">{{page.schema.name}}</div>
-            <div class="col-md-2"><b>Index Type:</b></div>
+            <div class="col-md-2"><b>{{'INDEX_TYPE' | translate}}:</b></div>
             <div class="col-md-4">{{schemaIndexType(page.schema.index_type) || "(unknown)"}}</div>
           </div>
           <div class="row" style="margin-bottom: 10px;">
-            <div class="col-md-2"><b>Rowkey Expression:</b></div>
+            <div class="col-md-2"><b>{{'ROWKEY_EXPRESSION' | translate}}:</b></div>
             <div class="col-md-4">{{page.schema.rowkey_expression || "(undefined)"}}</div>
-            <div class="col-md-2"><b>Table Expression:</b></div>
+            <div class="col-md-2"><b>{{'TABLE_EXPRESSION' | translate}}:</b></div>
             <div class="col-md-4">{{page.schema.table_expression || "(undefined)"}}</div>
           </div>
           <div class="row" style="margin-bottom: 10px;">
-            <div class="col-md-2"><b>Content Field:</b></div>
+            <div class="col-md-2"><b>{{'CONTENT_FIELD' | translate}}:</b></div>
             <div class="col-md-10">{{joinFields(page.schema.content_fields) || "(undefined)"}}</div>
           </div>
           <div class="row" style="margin-bottom: 10px;">
-            <div class="col-md-2"><b>Inner Field:</b></div>
+            <div class="col-md-2"><b>{{'INNER_FIELD' | translate}}:</b></div>
             <div class="col-md-10">{{joinFields(page.schema.inner_fields) || "(undefined)"}}</div>
           </div>
-          <h4 style="margin-top: 50px;">Field info</h4><hr>
+          <h4 style="margin-top: 50px;">{{'FIELDS' | translate}}</h4><hr>
           <table class="table">
-            <tr><th>#</th><th>name</th><th>store type</th><th>content field</th><th>inner field</th><th>index type</th><th>query weight</th></tr>
+            <tr>
+              <th>#</th>
+              <th>{{'INTABLE_NAME' | translate}}</th>
+              <th>{{'INTABLE_STORE_TYPE' | translate}}</th>
+              <th>{{'INTABLE_CONTENT_FIELD' | translate}}</th>
+              <th>{{'INTABLE_INNER_FIELD' | translate}}</th>
+              <th>{{'INTABLE_INDEX_TYPE' | translate}}</th>
+              <th>{{'INTABLE_QUERY_WEIGHT' | translate}}</th>
+            </tr>
             <tr ng-repeat="field in page.schema.fields">
               <td>{{$index+1}}</td>
               <td>{{field.name}}</td>

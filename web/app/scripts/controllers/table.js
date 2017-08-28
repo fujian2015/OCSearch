@@ -1,6 +1,12 @@
 'use strict';
 
-angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm) {
+angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate) {
+  let yes_text = $translate.instant('YES');
+  let no_text = $translate.instant('NO');
+  let confirmation_text = $translate.instant('CONFIRMATION');
+  let create_table_text = $translate.instant('CONFIRM_ADD_TABLE');
+  let edit_table_text = $translate.instant('CONFIRM_EDIT_TABLE');
+  let delete_table_text = $translate.instant('CONFIRM_DELETE_TABLE');
   // Tool funcs
   // Check weight val of queried fields
   $scope.queryWeight = function(schema, index) {
@@ -42,7 +48,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
           };
           $scope.checkAddTable = function() {
             if ($scope.newtable.name === "" || $scope.newtable.schema === "") {
-              $scope.modalmsg = "Please fill in all inputs marked as *";
+              $scope.modalmsg = $translate.instant('MODALMSG_FILL_IN_ALL');
               return false;
             } else {
               $scope.modalmsg = "";
@@ -60,19 +66,19 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
           };
           $scope.ok = function(){
             $ngConfirm({
-              title: 'Confirmation',
-              content: 'Create table now?',
+              title: confirmation_text,
+              content: create_table_text,
               scope: $scope,
               closeIcon: true,
               buttons: {
                 Yes:{
-                  text: 'Yes',
+                  text: yes_text,
                   action: function(scope){
                     scope._ok();
                   }
                 },
                 No:{
-                  text: "No"
+                  text: no_text
                 }
               }
             });
@@ -198,7 +204,8 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
         // Check inputs for edit-save button
         $scope.checkEditTable = function() {
           if ($scope.curschema.fields === null || $scope.curschema.fields.length === 0) {
-            $scope.modalmsg = "No fields of schema defined!";
+            //$scope.modalmsg = "No fields of schema defined!";
+            $scope.modalmsg = $translate.instant('MODALMSG_NO_FIELDS');
             return false;
           } else {
             $scope.modalmsg = "";
@@ -207,20 +214,20 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
         };
         $scope.ok = function() {
           $ngConfirm({
-            title: "Confirmation",
-            content: "Change the schema of table now?",
+            title: confirmation_text,
+            content: edit_table_text,
             closeIcon: true,
             scope: $scope,
             buttons: {
               Yes: {
-                text: "Yes",
+                text: yes_text,
                 action: function(scope) {
                   scope._diffSchema();
                   console.log($scope.request_list);
                 }
               },
               No: {
-                text: "No",
+                text: no_text,
               }
             }
           });
@@ -234,21 +241,20 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
   // Delete table
   $scope.deleteTable = function() {
     $ngConfirm({
-      title: "Confirmation",
-      content: "Want to delete the table selected? All data related will be lost.",
+      title: confirmation_text,
+      content: delete_table_text,
       closeIcon: true,
       buttons: {
         Yes: {
-          text: "Yes",
+          text: yes_text,
           action: function() {
             $http.post(GLOBAL.host+"/table/delete", {name:$scope.page.table.name}).then(function() {
-              //console.log(data);
               $scope.initial();
             });
           }
         },
         No: {
-          text: "No"
+          text: no_text
         }
       }
     });

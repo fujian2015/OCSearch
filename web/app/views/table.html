@@ -1,41 +1,41 @@
 <div ng-include="'views/ui/header.html'"></div>
 <script type="text/ng-template" id="addTable.html">
   <div class="modal-header">
-    <h3 class="modal-title">Add New Table</h3>
+    <h3 class="modal-title">{{'ADD_NEW_TABLE' | translate}}</h3>
   </div>
   <div class="modal-body">
     <div class="container-fluid">
     <form class="form-horizontal">
       <div class="form-group">
-        <label class="control-label col-md-2" style="text-align: left;">Name *</label>
+        <label class="control-label col-md-2" style="text-align: left;">{{'NAME' | translate}} *</label>
         <div class="col-md-10">
           <input class="form-control" ng-model="newtable.name">
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-md-2" style="text-align: left;">Schema *</label>
+        <label class="control-label col-md-2" style="text-align: left;">{{'SCHEMA' | translate}} *</label>
         <div class="col-md-10">
           <select class="form-control" ng-model="newtable.schema" ng-options="schema.name as schema.name for schema in schemas">
-            <option value="">(Select schema)</option>
+            <option value=""><{{'SELECT_SCHEMA' | translate}}></option>
           </select>
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-md-2" style="text-align: left;">Region Num:</label>
+        <label class="control-label col-md-2" style="text-align: left;">{{'REGION_NUM' | translate}}</label>
         <div class="col-md-4">
           <input class="form-control" type="number" ng-model="newtable.hbase.region_num">
         </div>
-        <label class="control-label col-md-2" style="text-align: left;">Region Split:</label>
+        <label class="control-label col-md-2" style="text-align: left;">{{'REGION_SPLIT' | translate}}</label>
         <div class="col-md-4">
           <input class="form-control" type="text" ng-model="newtable.hbase.region_split">
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-md-2" style="text-align: left;">Solr Shards:</label>
+        <label class="control-label col-md-2" style="text-align: left;">{{'SOLR_SHARDS' | translate}}</label>
         <div class="col-md-4">
           <input class="form-control" type="number" ng-model="newtable.solr.shards">
         </div>
-        <label class="control-label col-md-2" style="text-align: left;">Solr Replicas:</label>
+        <label class="control-label col-md-2" style="text-align: left;">{{'SOLR_REPLICAS' | translate}}</label>
         <div class="col-md-4">
           <input class="form-control" type="number" ng-model="newtable.solr.replicas">
         </div>
@@ -45,55 +45,55 @@
   </div>
   <div class="modal-footer">
     <b class="pull-left" style="color: red;">{{modalmsg}}</b>
-    <button class="btn btn-primary" type="button" ng-click="ok()" ng-disabled="!checkAddTable()">OK</button>
-    <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-primary" type="button" ng-click="ok()" ng-disabled="!checkAddTable()">{{'OK' | translate}}</button>
+    <button class="btn btn-warning" type="button" ng-click="cancel()">{{'CANCEL' | translate}}</button>
   </div>
 </script>
 <script type="text/ng-template" id="editTable.html">
   <div class="modal-header">
-    <h3 class="modal-title">Edit table fields</h3>
+    <h3 class="modal-title">{{'EDIT_TABLE_FIELDS' | translate}}</h3>
   </div>
   <div class="modal-body">
     <div class="container-fluid">
       <form class="form-horizontal">
         <div class="form-group">
-          <label class="control-label col-md-2" style="text-align: left;">Field name:</label>
+          <label class="control-label col-md-2" style="text-align: left;">{{'FIELD_NAME' | translate}}</label>
           <div class="col-md-10">
             <input class="form-control" ng-model="curfield.name" ng-disabled="editModeFlag">
           </div>
         </div>
         <div class="form-group">
-          <label class="control-label col-md-2" style="text-align: left;">Store type:</label>
+          <label class="control-label col-md-2" style="text-align: left;">{{'STORE_TYPE' | translate}}</label>
           <div class="col-md-10">
             <select class="form-control" ng-model="curfield.store_type" ng-options="ftp for ftp in field_type">
-              <option value="">(Select field store type)</option>
+              <option value=""><{{'SELECT_FIELD_STORE_TYPE' | translate}}></option>
             </select>
           </div>
         </div>
         <div class="form-group">
-          <label class="control-label col-md-2" style="text-align: left;">Content field:</label>
+          <label class="control-label col-md-2" style="text-align: left;">{{'CONTENT_FIELD' | translate}}</label>
           <div class="col-md-10">
             <select class="form-control" ng-model="curfield.content_field" ng-options="cf.name as cf.name for cf in page.table.schema.content_fields" ng-change="checkIndexType()">
-              <option value="">(Select existed content field)</option>
+              <option value=""><{{'SELECT_FIELD_CONTENT_FIELD' | translate}}></option>
             </select>
           </div>
         </div>
         <div class="form-group">
-          <label class="control-label col-md-2" style="text-align: left;">Field index:</label>
+          <label class="control-label col-md-2" style="text-align: left;">{{'FIELD_INDEX' | translate}}</label>
           <div class="col-md-2">
-              <div class="checkbox"><label><input type="checkbox" value="" ng-model="curfield.indexed" ng-click="checkIndexType()">Indexed</label></div>
+              <div class="checkbox"><label><input type="checkbox" value="" ng-model="curfield.indexed" ng-click="checkIndexType()">{{'INDEXED' | translate}}</label></div>
           </div>
           <div class="col-md-8">
             <select class="form-control" ng-model="curfield.index_type" ng-options="tp for tp in field_index_type |filter: typeFilter[curfield.store_type]" ng-disabled="!((curfield.indexed || curfield.content_field) && curfield.store_type)">
-              <option value="">(Select index type)</option>
+              <option value=""><{{'SELECT_FIELD_INDEX_TYPE' | translate}}></option>
             </select>
           </div>
         </div>
         <div class="form-group">
-          <label class="control-label col-md-2" style="text-align: left;">Inner field:</label>
+          <label class="control-label col-md-2" style="text-align: left;">{{'INNER_FIELD' | translate}}</label>
           <div class="col-md-10">
             <select class="form-control" ng-model="curfield.inner_field" ng-options="if.name as if.name for if in page.table.schema.inner_fields">
-              <option value="">(Select existed inner field)</option>
+              <option value=""><{{'SELECT_FIELD_INNER_FIELD' | translate}}></option>
             </select>
           </div>
         </div>
@@ -110,7 +110,16 @@
         </div>
       </form>
       <table class="table">
-        <tr><th>#</th><th>name</th><th>store type</th><th>index type</th><th>content field</th><th>inner field</th><th>query weight</th><th>operation</th></tr>
+        <tr>
+          <th>#</th>
+          <th>{{'INTABLE_NAME' | translate}}</th>
+          <th>{{'INTABLE_STORE_TYPE' | translate}}</th>
+          <th>{{'INTABLE_INDEX_TYPE' | translate}}</th>
+          <th>{{'INTABLE_CONTENT_FIELD' | translate}}</th>
+          <th>{{'INTABLE_INNER_FIELD' | translate}}</th>
+          <th>{{'INTABLE_QUERY_WEIGHT' | translate}}</th>
+          <th>{{'INTABLE_OPERATION' | translate}}</th>
+        </tr>
         <tr ng-repeat="field in curschema.fields">
           <td>{{$index+1}}</td>
           <td>{{field.name}}</td>
@@ -119,16 +128,16 @@
           <td>{{field.content_field || "(empty)"}}</td>
           <td>{{field.inner_field || "(empty)"}}</td>
           <td>{{queryWeight(curschema, $index) || "(not queried)"}}</td>
-          <td ng-if="!queryWeight(curschema, $index)"><a href="" ng-click="deleteField($index)">Delete</a>&nbsp;/&nbsp;<a href="" ng-click="editField($index)">Edit</a></td>
-          <td ng-if="queryWeight(curschema, $index)">Unavailable</td>
+          <td ng-if="!queryWeight(curschema, $index)"><a href="" ng-click="deleteField($index)">{{'DELETE' | translate}}</a>&nbsp;/&nbsp;<a href="" ng-click="editField($index)">{{'EDIT' | translate}}</a></td>
+          <td ng-if="queryWeight(curschema, $index)">{{'UNAVAILABLE' | translate}}</td>
         </tr>
       </table>
     </div>
   </div>
   <div class="modal-footer">
-    <b class="pull-left" style="color: red;">{{modalmsg}}</b>
-    <button class="btn btn-primary" type="button" ng-click="ok()" ng-disabled="!checkEditTable()">OK</button>
-    <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    <b class="pull-left" style="color: red;">{{modalmsg | translate}}</b>
+    <button class="btn btn-primary" type="button" ng-click="ok()" ng-disabled="!checkEditTable()">{{'OK' | translate}}</button>
+    <button class="btn btn-warning" type="button" ng-click="cancel()">{{'CANCEL' | translate}}</button>
   </div>
 </script>
 <div class="container-fluid">
@@ -136,7 +145,7 @@
     <div class="col-lg-2 col-lg-offset-1">
       <div class="list-group box">
         <div class="list-group-item">
-          <button class="btn btn-default btn-block" style="outline: 0" ng-click="addTable()">Add</button>
+          <button class="btn btn-default btn-block" style="outline: 0" ng-click="addTable()">{{'ADD' | translate}}</button>
         </div>
         <a href="" class="list-group-item" ng-repeat="table in tables" ng-click="selectTable(table, $index)" ng-class="{active: page.tablesActive[$index]}">
           {{table}}
@@ -153,16 +162,24 @@
           </div>
         </div>
         <div class="panel-body">
-          <h4>Basic info</h4><hr>
+          <h4>{{'BASIC_INFO' | translate}}</h4><hr>
           <div class="row" style="margin-bottom: 10px;">
-            <div class="col-md-2"><b>Name:</b></div>
+            <div class="col-md-2"><b>{{'NAME' | translate}}:</b></div>
             <div class="col-md-4">{{page.table.name}}</div>
-            <div class="col-md-2"><b>Schema:</b></div>
+            <div class="col-md-2"><b>{{'SCHEMA' | translate}}:</b></div>
             <div class="col-md-4">{{page.table.schema.name}}</div>
           </div>
-          <h4 style="margin-top: 50px;">Fields</h4><hr>
+          <h4 style="margin-top: 50px;">{{'FIELDS' | translate}}</h4><hr>
           <table class="table">
-            <tr><th>#</th><th>name</th><th>store type</th><th>content field</th><th>inner field</th><th>index type</th><th>query weight</th></tr>
+            <tr>
+              <th>#</th>
+              <th>{{'INTABLE_NAME' | translate}}</th>
+              <th>{{'INTABLE_STORE_TYPE' | translate}}</th>
+              <th>{{'INTABLE_CONTENT_FIELD' | translate}}</th>
+              <th>{{'INTABLE_INNER_FIELD' | translate}}</th>
+              <th>{{'INTABLE_INDEX_TYPE' | translate}}</th>
+              <th>{{'INTABLE_QUERY_WEIGHT' | translate}}</th>
+            </tr>
             <tr ng-repeat="field in page.table.schema.fields">
               <td>{{$index+1}}</td>
               <td>{{field.name}}</td>
