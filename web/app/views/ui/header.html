@@ -13,19 +13,19 @@
             <li ng-class="{active: global.tab === 'schema'}">
               <a href="#/schema" ng-click="functions.click('schema')">
                 <span class="glyphicon glyphicon-book"></span>
-                <span>Schema</span>
+                <span>{{'SCHEMA' | translate}}</span>
               </a>
             </li>
             <li ng-class="{active: global.tab === 'table'}">
               <a href="#/table" ng-click="functions.click('table')">
                 <span class="glyphicon glyphicon-list"></span>
-                <span>Table</span>
+                <span>{{'TABLE' | translate}}</span>
               </a>
             </li>
             <li>
               <a href="#/search">
                 <span class="glyphicon glyphicon-search"></span>
-                <span>Search</span>
+                <span>{{'SEARCH' | translate}}</span>
               </a>
             </li>
           </ul>

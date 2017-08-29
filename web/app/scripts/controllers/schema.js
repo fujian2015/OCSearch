@@ -4,7 +4,10 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
 
   let yes_text = $translate.instant('YES');
   let no_text = $translate.instant('NO');
+  let ok_text = $translate.instant('OK');
+  let warn_text = $translate.instant('WARNING');
   let confirmation_text = $translate.instant('CONFIRMATION');
+  let confirm_confirmation_text = $translate.instant('CONFIRM_CONFIRMATION');
 
   //---------- Tool functions ----------
   // 1, queryWeight
@@ -66,7 +69,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
         scope: $scope,
         size: 'lg',
         controller: ['$scope', '$http', '$ngConfirm', '$sce', function($scope, $http, $ngConfirm, $sce) {
-          $scope.helpExpressionHtml = $sce.trustAsHtml('<h5>Help to build a expression</h5>Want to learn <a target="_blank" href="expression.html">more</a>?');
+          $scope.helpExpressionHtml = $sce.trustAsHtml('<h5>'+$translate.instant('HELP_EXPRESSION_TITLE')+'</h5>'+$translate.instant('HELP_EXPRESSION_CONTENT')+'<a target="_blank" href="expression.html">'+$translate.instant('HELP_EXPRESSION_LINK')+'</a>?');
           $scope.titleStr = title;
           // Temp new schema
           $scope.newschema = initval;
@@ -144,7 +147,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
           $scope.ok = function() {
             $ngConfirm({
               title: confirmation_text,
-              content: "Are you sure?",
+              content: confirm_confirmation_text,
               scope: $scope,
               closeIcon: true,
               buttons: {
@@ -176,7 +179,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
           };
           $scope.checkStep2 = function() {
             if ($scope.newschema.fields === null || $scope.newschema.fields.length === 0) {
-              $scope.modalmsg = "No fields of schema defined!";
+              $scope.modalmsg = $translate.instant('MODALMSG_NO_FIELDS');
               return false;
             } else {
               $scope.modalmsg = "";
@@ -213,7 +216,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
   // Add schema
   $scope.addSchema = function() {
     $scope.modalAction(
-      "Add New Schema", 
+      $translate.instant('ADD_NEW_SCHEMA'), 
       {name:"", rowkey_expression:"", table_expression:"", index_type:"", content_fields:[], inner_fields:[], fields:[], query_fields:[]},
       function() {
         $http.post(GLOBAL.host+'/schema/add', this.newschema).then(function(){
@@ -227,18 +230,18 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
     if (angular.isDefined($scope.page.tables)) {
       if ($scope.page.tables.length > 0) {
         $ngConfirm({
-          title:"Warning", 
-          content:'There are tables belong to the schema. You can just edit fields of schema in "Table" panel.',
+          title: warn_text, 
+          content: $translate.instant('CONFIRM_EDIT_SCHEMA_ERR'),
           closeIcon: true,
           buttons: {
             OK: {
-              text: "OK"
+              text: ok_text
             }
           }
         });
       } else {
         $scope.modalAction(
-          "Edit Existed Schema", 
+          $translate.instant('EDIT_SCHEMA'), 
           angular.copy($scope.page.schema),
           function() {
             let schema_deleted = {name:$scope.page.schema.name};
@@ -274,31 +277,31 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
     if (angular.isDefined($scope.page.tables)) {
       if ($scope.page.tables.length > 0) {
         $ngConfirm({
-          title:"Warning", 
-          content:"There are tables belong to the schema. Delete all related tables first of all!",
+          title: warn_text, 
+          content: $translate.instant('CONFIRM_DELETE_SCHEMA_ERR'),
           closeIcon: true,
           buttons: {
             OK: {
-              text: "OK"
+              text: ok_text
             }
           }
         });
       } else { // There are not any tables belong to the schema
         $ngConfirm({
-          title: "Confirmation",
-          content: "Are you sure to delete the schema selected?",
+          title: confirmation_text,
+          content: $translate.instant('CONFIRM_DELETE_SCHEMA'),
           closeIcon: true,
           scope: $scope,
           buttons: {
             Yes: {
-              text: "Yes",
+              text: yes_text,
               action: function(scope) {
                 scope._deleteSchema();
                 //scope.$apply(); //force refresh ng-modal
               }
             },
             No: {
-              text: "No"
+              text: no_text
             }
           }
         });

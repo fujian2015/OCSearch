@@ -27,7 +27,7 @@
     margin-left: 30px;
   }
   .expfuntitle {
-    color:red;
+    color: indianred;
   }
   </style>
 </head>
@@ -35,7 +35,7 @@
   <div class="col-md-9 col-md-offset-1">
     <h1 class="exptitle">{{helpTitle}}</h1>
     <div ng-repeat="obj in expobjs" class="expobj">
-      <h2 class="expobjtitle">Object:&nbsp;{{obj}}</h2>
+      <h2 class="expobjtitle">Namespace:&nbsp;{{obj}}</h2>
       <div ng-repeat="fun in expressions[obj]" class="expfun">
         <h3 class="expfuntitle">Function:&nbsp;{{fun.name}}</h3>
         <p><b>Description:&nbsp;</b>{{fun.description}}</p>

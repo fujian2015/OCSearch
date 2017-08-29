@@ -124,10 +124,10 @@
           <td>{{$index+1}}</td>
           <td>{{field.name}}</td>
           <td>{{field.store_type}}</td>
-          <td>{{field.index_type || "(not indexed)"}}</td>
-          <td>{{field.content_field || "(empty)"}}</td>
-          <td>{{field.inner_field || "(empty)"}}</td>
-          <td>{{queryWeight(curschema, $index) || "(not queried)"}}</td>
+          <td>{{field.index_type || ('UNDEFINED' | translate)}}</td>
+          <td>{{field.content_field || ('UNDEFINED' | translate)}}</td>
+          <td>{{field.inner_field || ('UNDEFINED' | translate)}}</td>
+          <td>{{queryWeight(curschema, $index) || ('UNDEFINED' | translate)}}</td>
           <td ng-if="!queryWeight(curschema, $index)"><a href="" ng-click="deleteField($index)">{{'DELETE' | translate}}</a>&nbsp;/&nbsp;<a href="" ng-click="editField($index)">{{'EDIT' | translate}}</a></td>
           <td ng-if="queryWeight(curschema, $index)">{{'UNAVAILABLE' | translate}}</td>
         </tr>
@@ -184,10 +184,10 @@
               <td>{{$index+1}}</td>
               <td>{{field.name}}</td>
               <td>{{field.store_type}}</td>
-              <td>{{field.content_field || "(empty)"}}</td>
-              <td>{{field.inner_field || "(empty)"}}</td>
-              <td>{{field.index_type || "(not indexed)"}}</td>
-              <td>{{queryWeight(page.table.schema, $index) || "(not queried)"}}</td>
+              <td>{{field.content_field || ('UNDEFINED' | translate)}}</td>
+              <td>{{field.inner_field || ('UNDEFINED' | translate)}}</td>
+              <td>{{field.index_type || ('UNDEFINED' | translate)}}</td>
+              <td>{{queryWeight(page.table.schema, $index) || ('UNDEFINED' | translate)}}</td>
             </tr>
           </table>
         </div>
