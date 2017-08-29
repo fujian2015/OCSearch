@@ -145,7 +145,7 @@ angular
       NAME: "名称",
       INDEX_TYPE: "索引类型",
       ROWKEY_EXPRESSION: "Rowkey表达式",
-      TABLE_EXPRESSION: "表表达式",
+      TABLE_EXPRESSION: "Table表达式",
       SCHEMA: "表结构",
       WEIGHT: "权重",
       FIELDS: "字段",
