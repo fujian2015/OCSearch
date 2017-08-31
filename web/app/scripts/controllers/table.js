@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate) {
+angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$stateParams', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate, $stateParams) {
   let yes_text = $translate.instant('YES');
   let no_text = $translate.instant('NO');
   let confirmation_text = $translate.instant('CONFIRMATION');
@@ -57,7 +57,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
           };
           $scope._ok = function(){
             if ($scope.newtable.hbase.region_split === "" || $scope.newtable.hbase.region_split === null) { $scope.newtable.hbase.region_split = []; }
-            //console.log($scope.newtable);
+            //console.log(JSON.stringify($scope.newtable));
             $http.post(GLOBAL.host+"/table/create", $scope.newtable).then(function() {
               //console.log(data);
               $scope.initial();
@@ -276,6 +276,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
   };
   // Refresh tables
   $scope.initial = function() {
+    //console.log($stateParams);
     $scope.page = {
       table: {},
       tablesActive: []

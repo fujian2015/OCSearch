@@ -27,7 +27,8 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
   $scope.index_type = [
     { val: 0, display: "hbase+indexer+solr" },
     { val: -1, display: "hbase only" },
-    { val: 1, display: "solr" }
+    { val: 1, display: "hbase+phoenix" },
+    { val: 2, display: "hbase+phoenix+solr" }
   ];
   // get index display info by index val
   $scope.schemaIndexType = function(index) {
@@ -199,7 +200,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
             ATTACHMENT: function() { return false; }
           };
           $scope.queryFilter = function(item) {
-            return item.index_type;
+            return /^text/.test(item.index_type);
           };
         }] // END of controller
       }); // END of modal instance

@@ -6,6 +6,7 @@ import config from './config';
 import path from 'path';
 import favicon from 'serve-favicon';
 import proxy from 'http-proxy-middleware';
+import fs from 'fs';
 
 let app = express();
 let env = config.env || 'dev';
@@ -25,6 +26,32 @@ app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
+
+app.get('/schema/config', function(req, res) {
+  res.setHeader('Content-type', 'application/json');
+  fs.readFile('./schema.config.json', function(err, data) {
+    if (err) {
+      if (err.code === "ENOENT") {
+        res.send({});
+      } else {
+        console.log(err);
+      }
+    } else {
+      res.send(data);
+    }
+  });
+});
+
+app.post('/schema/config/set', function(req, res) {
+  res.setHeader('Content-type', 'application/json');
+  fs.writeFile('./schema.config.json', JSON.stringify(req.body), function(err) {
+    if (err) {
+      res.send('{result:"error"}');
+      throw err;
+    }
+    res.send('{result:"success"}');
+  });
+});
 
 app.get('*', function(req, res) {
   res.sendFile(path.join(__dirname, '../',config[env].dist,'/404.html'));// load the single view file (angular will handle the page changes on the front-end)

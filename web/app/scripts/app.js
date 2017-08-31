@@ -214,7 +214,7 @@ angular
     host: './ocsearch-service',
   }).run(['$rootScope', function ($rootScope) {
     $rootScope.global = {
-      tab: null
+      tab: 'search'
     };
     $rootScope.functions = {};
     $rootScope.functions.click = function(item){

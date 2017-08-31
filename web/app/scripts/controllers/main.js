@@ -5,7 +5,7 @@
  */
 angular.module('basic').controller('MainCtrl', ['$scope', 'searchService', 'hotkeys', '$state', '$rootScope', function ($scope, searchService, hotkeys, $state, $rootScope) {
   $rootScope.global = {
-    tab: null
+    tab: 'search'
   };
   $scope.search = function(){
     searchService.search($scope.content, function(schemas){

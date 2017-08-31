@@ -28,7 +28,7 @@
     <div class="row" style="margin-bottom: 10px;">
       <div class="col-lg-1" style="margin-top: 10px;">
         <a href="#/" class="navbar-brand brand col-centered">
-          <img src="/images/yeoman.png" style="height: 50px;" alt="basic" title="basic">
+          <img src="/images/ocsearch.png" style="height: 43px;" alt="basic" title="basic">
         </a>
       </div>
       <div class="col-lg-5">
@@ -76,10 +76,11 @@
           </button>
         </div>
         <div class="row" ng-repeat="item in data.docs" style="margin-top: 10px;">
-          <span class="badge">{{$index+1}}</span>
+          <span class="badge">{{$index+1+(page.pagination.current-1)*page.rows}}</span>
+          <!--
           <div ng-repeat="field in page.schema.fields">
             <h3 ng-if="field.name === 'name'">
-              {{item.name]}}
+              {{item.name}}
             </h3>
             <span ng-if="field.name !=='name'">
               <strong>{{field.name}}</strong>
@@ -87,6 +88,10 @@
               <span ng-if="field.store_type === 'STRING'">{{item[field.name]}}</span>
             </span>
           </div>
+          -->
+          <span ng-repeat="(key, val) in item" style="font-size: 18px;">
+            <strong>{{key}}</strong>:{{val}}&nbsp;&nbsp;
+          </span>
         </div>
       </div>
     </div>
