@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$state', '$rootScope', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate, $state, $rootScope) {
+angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$rootScope', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate, $rootScope) {
 
   let yes_text = $translate.instant('YES');
   let no_text = $translate.instant('NO');
@@ -317,19 +317,15 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
       $scope.initial();
     });
   };
-  // Skip to table of schema
-  $scope.skipToTable = function(table) {
-    let paramtable = { linktable: table };
-    $state.go('table', paramtable);
-    $rootScope.global.tab = 'table';
-  };
   //Initial load function
   $scope.initial = function() {
     $scope.page = {
       schema: {},
       schemasActive: []
     };
+    $rootScope.global.tab = "schema";
     $http.get(GLOBAL.host + "/schema/list").then(function(data) {
+      //console.log(data.data.result);
       $scope.schemas = data.data.schemas;
       $scope.selectSchema($scope.schemas[0],0);
     });

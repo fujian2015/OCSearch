@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$stateParams', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate, $stateParams) {
+angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$stateParams', '$rootScope', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate, $stateParams, $rootScope) {
   let yes_text = $translate.instant('YES');
   let no_text = $translate.instant('NO');
   let confirmation_text = $translate.instant('CONFIRMATION');
@@ -280,6 +280,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
       table: {},
       tablesActive: []
     };
+    $rootScope.global.tab = "table";
     $http.get(GLOBAL.host+"/table/list").then(function(data) {
       $scope.tables = data.data.tables;
       if (!$stateParams.linktable || $stateParams.linktable === '') {

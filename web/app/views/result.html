@@ -77,21 +77,21 @@
         </div>
         <div class="row" ng-repeat="item in data.docs" style="margin-top: 10px;">
           <span class="badge">{{$index+1+(page.pagination.current-1)*page.rows}}</span>
-          <!--
           <div ng-repeat="field in page.schema.fields">
             <h3 ng-if="field.name === 'name'">
               {{item.name}}
             </h3>
             <span ng-if="field.name !=='name'">
               <strong>{{field.name}}</strong>
-              <a href="{{host}}/query/fileget?id={{item[field.name]}}" ng-if="field.store_type !== 'STRING'">link</a>
+              <a ng-href="{{host}}/query/fileget?id={{item[field.name]}}" ng-if="field.store_type !== 'STRING'" download="{{item.name}}">link</a>
               <span ng-if="field.store_type === 'STRING'">{{item[field.name]}}</span>
             </span>
           </div>
-          -->
+          <!--
           <span ng-repeat="(key, val) in item" style="font-size: 18px;">
             <strong>{{key}}</strong>:{{val}}&nbsp;&nbsp;
           </span>
+          -->
         </div>
       </div>
     </div>
