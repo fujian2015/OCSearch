@@ -183,8 +183,10 @@
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'NAME' | translate}}</label>
             <div class="col-md-10">
-              <select class="form-control" ng-model="new_query_field.name" ng-options="field.name as field.name for field in newschema.fields | filter: queryFilter">
+              <select class="form-control" ng-model="new_query_field.name">
                 <option value=""><{{'SELECT_QUERY_FIELD' | translate}}></option>
+                <option ng-repeat="cf in newschema.content_fields" value="{{cf.name}}">{{cf.name}}</option>
+                <option ng-repeat="fd in newschema.fields | filter: queryFilter" value="{{fd.name}}">{{fd.name}}</option>
               </select>
             </div>
           </div>
@@ -264,7 +266,7 @@
             <div class="col-md-10">{{joinFields(page.schema.inner_fields) || ('UNDEFINED' | translate)}}</div>
           </div>
           <h4 style="margin-top: 50px;">{{'TABLE' | translate}}</h4>
-          <i ng-repeat="table in page.tables" ng-if="page.tables.length > 0"><a ui-sref="table({linktable:table})" style="text-decoration: none;">{{table}}</a>&nbsp;&nbsp;</i>
+          <i ng-repeat="table in page.tables" ng-if="page.tables.length > 0"><a href="" ng-click="skipToTable(table)" style="text-decoration: none;">{{table}}</a>&nbsp;&nbsp;</i>
           <i ng-if="!page.tables.length || page.tables.length===0">{{'UNDEFINED' | translate}}</i>
           <h4 style="margin-top: 50px;">{{'FIELDS' | translate}}</h4><hr>
           <table class="table">

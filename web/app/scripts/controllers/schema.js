@@ -1,13 +1,12 @@
 'use strict';
 
-angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate) {
+angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$state', '$rootScope', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate, $state, $rootScope) {
 
   let yes_text = $translate.instant('YES');
   let no_text = $translate.instant('NO');
   let ok_text = $translate.instant('OK');
   let warn_text = $translate.instant('WARNING');
   let confirmation_text = $translate.instant('CONFIRMATION');
-  let confirm_confirmation_text = $translate.instant('CONFIRM_CONFIRMATION');
 
   //---------- Tool functions ----------
   // 1, queryWeight
@@ -61,8 +60,8 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
     }
   };
   // Template modal factory
-  $scope.modalAction = function(title, initval, okfunc) {
-    let returnfunc = function(title, initval, okfunc) {
+  $scope.modalAction = function(title, confirm_content, initval, okfunc) {
+    let returnfunc = function(title, confirm_content, initval, okfunc) {
       let modalInstance = $uibModal.open({
         animation: true,
         templateUrl: 'addSchema.html',
@@ -147,8 +146,8 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
           $scope._ok = okfunc;
           $scope.ok = function() {
             $ngConfirm({
-              title: confirmation_text,
-              content: confirm_confirmation_text,
+              title: title,
+              content: confirm_content,
               scope: $scope,
               closeIcon: true,
               buttons: {
@@ -205,7 +204,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
         }] // END of controller
       }); // END of modal instance
     }; // END of return function
-    return returnfunc(title, initval, okfunc);
+    return returnfunc(title, confirm_content, initval, okfunc);
   }; // END of template function
 
   //---------- Basic operation of schema ----------
@@ -218,6 +217,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
   $scope.addSchema = function() {
     $scope.modalAction(
       $translate.instant('ADD_NEW_SCHEMA'), 
+      $translate.instant('CONFIRM_ADD_SCHEMA'),
       {name:"", rowkey_expression:"", table_expression:"", index_type:"", content_fields:[], inner_fields:[], fields:[], query_fields:[]},
       function() {
         $http.post(GLOBAL.host+'/schema/add', this.newschema).then(function(){
@@ -243,6 +243,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
       } else {
         $scope.modalAction(
           $translate.instant('EDIT_SCHEMA'), 
+          $translate.instant('CONFIRM_EDIT_SCHEMA'),
           angular.copy($scope.page.schema),
           function() {
             let schema_deleted = {name:$scope.page.schema.name};
@@ -315,6 +316,12 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
     $http.post(GLOBAL.host+"/schema/delete", schema_deleted).then(function() {
       $scope.initial();
     });
+  };
+  // Skip to table of schema
+  $scope.skipToTable = function(table) {
+    let paramtable = { linktable: table };
+    $state.go('table', paramtable);
+    $rootScope.global.tab = 'table';
   };
   //Initial load function
   $scope.initial = function() {

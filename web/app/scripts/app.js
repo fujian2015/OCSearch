@@ -50,7 +50,10 @@ angular
       .state('table', {
         url:"/table",
         templateUrl: 'views/table.html',
-        controller: 'TableCtrl'
+        controller: 'TableCtrl',
+        params: {
+          'linktable' : ''
+        }
       })
       .state('result', {
         url:"/result",
@@ -129,8 +132,9 @@ angular
       CONFIRM_ADD_TABLE: "Create table now?",
       CONFIRM_EDIT_TABLE: "Change the schema of table now?",
       CONFIRM_DELETE_TABLE: "Want to delete the table selected? All data related will be lost!",
-      CONFIRM_CONFIRMATION: "Are you sure to do this?",
       CONFIRM_DELETE_SCHEMA: "Are you sure to delete the schema selected?",
+      CONFIRM_ADD_SCHEMA: "Create schema now?",
+      CONFIRM_EDIT_SCHEMA: "Recreate schema now?",
       CONFIRM_DELETE_SCHEMA_ERR: "There are tables belong to the schema. Delete all related tables first of all!",
       CONFIRM_EDIT_SCHEMA_ERR: 'There are tables belong to the schema. You can just edit fields of schema in "Table" panel.',
       EMPTY: "(empty)",
@@ -199,7 +203,8 @@ angular
       CONFIRM_ADD_TABLE: "新建表？",
       CONFIRM_EDIT_TABLE: "改变表结构？",
       CONFIRM_DELETE_TABLE: "删除选中表？表中所有数据将会丢失！",
-      CONFIRM_CONFIRMATION: "确定这样操作？",
+      CONFIRM_ADD_SCHEMA: "确定新建表结构？",
+      CONFIRM_EDIT_SCHEMA: "确定修改表结构？",
       CONFIRM_DELETE_SCHEMA: "确定删除选中的表结构？",
       CONFIRM_DELETE_SCHEMA_ERR: "无法删除表结构，请先删除所有相关的表！",
       CONFIRM_EDIT_SCHEMA_ERR: '无法编辑表结构，请在"表"面板里编辑表结构字段',

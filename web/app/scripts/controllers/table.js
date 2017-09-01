@@ -276,14 +276,22 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
   };
   // Refresh tables
   $scope.initial = function() {
-    //console.log($stateParams);
     $scope.page = {
       table: {},
       tablesActive: []
     };
     $http.get(GLOBAL.host+"/table/list").then(function(data) {
       $scope.tables = data.data.tables;
-      $scope.selectTable($scope.tables[0], 0);
+      if (!$stateParams.linktable || $stateParams.linktable === '') {
+        $scope.selectTable($scope.tables[0], 0);
+      } else {
+        let table_index = $scope.tables.indexOf($stateParams.linktable);
+        if (table_index >= 0 && table_index < $scope.tables.length) {
+          $scope.selectTable($scope.tables[table_index], table_index);
+        } else {
+          $scope.selectTable($scope.tables[0], 0);
+        }
+      }
     });
   };
 
