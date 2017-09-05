@@ -28,6 +28,10 @@ public class Schema implements Serializable, Cloneable {
 
     public final String name;
 
+    boolean withHbase = false;
+
+    String idFormatter = null;
+
     IndexType indexType;  //-1: hbase ,0 solr+hbase hbase-indexer
 
 
@@ -66,6 +70,9 @@ public class Schema implements Serializable, Cloneable {
         try {
             boolean isRequest = request.has("request") ? request.get("request").asBoolean() : false;
 
+            if (request.has("with_hbase") && request.get("with_hbase").asBoolean())
+                withHbase = true;
+
             this.name = request.get("name").getTextValue();
 
             this.indexType = IndexType.valueOf(request.get("index_type").asInt());
@@ -73,6 +80,8 @@ public class Schema implements Serializable, Cloneable {
             this.rowkeyExpression = request.get("rowkey_expression").asText();
             this.tableExpression = request.get("table_expression").asText();
 
+            if (request.has("id_formatter"))
+                idFormatter = request.get("id_formatter").asText();
 
             ArrayNode contentNodes = (ArrayNode) request.get("content_fields");
             contentNodes.forEach(contentNode -> contentFields.add(new ContentField(contentNode)));
@@ -128,7 +137,7 @@ public class Schema implements Serializable, Cloneable {
 
     private void fillBlanks() throws ServiceException {
         //use the origin name when using phoenix sql
-        if (indexType == IndexType.PHOENIX) {
+        if (indexType == IndexType.HBASE_PHOENIX || indexType == IndexType.HBASE_SOLR_PHOENIX) {
             for (Field field : this.fields.values()) {
                 field.setHbaseFamily(BASIC_FAMILY);
                 field.setHbaseColumn(field.name);
@@ -253,6 +262,11 @@ public class Schema implements Serializable, Cloneable {
         schemaNode.put("table_expression", tableExpression);
         schemaNode.put("index_type", indexType.getValue());
 
+        if (idFormatter != null)
+            schemaNode.put("id_formatter", idFormatter);
+
+        if (withHbase == true)
+            schemaNode.put("with_hbase", withHbase);
 
         ArrayNode contentNodes = factory.arrayNode();
         contentFields.forEach(contentField -> contentNodes.add(contentField.toJsonNode()));
@@ -338,5 +352,14 @@ public class Schema implements Serializable, Cloneable {
 
     public Multimap<String, Field> getInnerMap() {
         return innerMap;
+    }
+
+
+    public String getIdFormatter() {
+        return idFormatter;
+    }
+
+    public boolean withHbase() {
+        return  withHbase;
     }
 }

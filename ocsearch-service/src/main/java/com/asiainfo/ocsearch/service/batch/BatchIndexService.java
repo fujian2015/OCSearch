@@ -40,7 +40,7 @@ public class BatchIndexService extends OCSearchService {
 
             IndexType indexType = schema.getIndexType();
 
-            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_PHOENIX) {
+            if (indexType == IndexType.HBASE_SOLR || indexType == IndexType.HBASE_SOLR_PHOENIX) {
                 if (!IndexerServiceManager.getIndexerService().exists(table))
                     throw new ServiceException(String.format("indexer %s does not exist!", table), ErrorCode.INDEXER_NOT_EXIST);
             } else {

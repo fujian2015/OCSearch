@@ -46,7 +46,7 @@ public abstract class OCSearchService extends HttpServlet {
         try {
             byte[] re;
 
-            if (request.getContentLength() > Integer.parseInt(OCSearchEnv.getEnvValue("MAX_REQUEST_LENGTH", "10240")))
+            if (request.getContentLength() > Integer.parseInt(OCSearchEnv.getEnvValue("request.length.max", "10240")))
                 re = new ServiceException("request is too long", ErrorCode.PARSE_ERROR).getErrorResponse();
             else {
 

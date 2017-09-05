@@ -7,6 +7,7 @@ import com.ngdata.hbaseindexer.conf.DefaultIndexerComponentFactory;
 import com.ngdata.hbaseindexer.conf.IndexerComponentFactoryUtil;
 import com.ngdata.hbaseindexer.model.api.*;
 import com.ngdata.hbaseindexer.model.impl.IndexerModelImpl;
+import com.ngdata.hbaseindexer.model.impl.IndexerProcessRegistryImpl;
 import com.ngdata.hbaseindexer.mr.HBaseMapReduceIndexerTool;
 import com.ngdata.hbaseindexer.util.zookeeper.StateWatchingZooKeeper;
 import com.ngdata.hbaseindexer.util.zookeeper.ZkLockException;
@@ -82,6 +83,7 @@ public class IndexerService {
         }
         model.addIndexer(indexer);
     }
+
     /**
      * @param table
      * @param indexerConf
@@ -97,7 +99,7 @@ public class IndexerService {
         try {
             IndexerDefinition indexer = model.getFreshIndexer(table);
 
-            IndexerDefinitionBuilder builder =buildIndexerDefinition(table, indexerConf, indexer);
+            IndexerDefinitionBuilder builder = buildIndexerDefinition(table, indexerConf, indexer);
             newIndexer = builder.build();
 
             if (newIndexer.equals(indexer)) {
@@ -120,6 +122,7 @@ public class IndexerService {
             model.unlockIndexer(lock, ignoreMissing);
         }
     }
+
     /**
      * @param indexerName
      */
@@ -327,5 +330,25 @@ public class IndexerService {
             batchConf.set("tmpjars", tmpJars);
         }
         return batchConf;
+    }
+
+    public int runningProcessor(String table) {
+        int numRunning = 0;
+        IndexerProcessRegistry processRegistry = null;
+        try {
+            processRegistry = new IndexerProcessRegistryImpl(zk, conf);
+
+            List<IndexerProcess> indexerProcesses = processRegistry.getIndexerProcesses(table);
+            for (IndexerProcess indexerProcess : indexerProcesses) {
+                if (indexerProcess.isRunning()) {
+                    numRunning++;
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (KeeperException e) {
+            e.printStackTrace();
+        }
+        return numRunning;
     }
 }

@@ -55,19 +55,22 @@ public class CreateTableService extends OCSearchService {
 
             Transaction transaction = new TransactionImpl();
 
-            if (!request.get("hbase").has("exist") || !request.get("hbase").get("exist").asBoolean()) //hbase table does not exist
+//            if (!request.get("hbase").has("exist") || !request.get("hbase").get("exist").asBoolean()) //hbase table does not exist
+//                transaction.add(new CreateHbaseTable(name, table.getHbaseRegions(), table.getRegionSplits(), getHbaseFamilies(schema)));
+
+            if (!schema.withHbase())
                 transaction.add(new CreateHbaseTable(name, table.getHbaseRegions(), table.getRegionSplits(), getHbaseFamilies(schema)));
 
             IndexType indexType = schema.getIndexType();
 
-            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_PHOENIX) {
+            if (indexType == IndexType.HBASE_SOLR || indexType == IndexType.HBASE_SOLR_PHOENIX) {
 
                 transaction.add(new CreateSolrCollection(name, schema.getName(), table.getSolrShards(), table.getSolrReplicas()));
 
                 transaction.add(new CreateIndexerTable(name, schema));
 
             }
-            if (indexType == IndexType.PHOENIX || indexType == IndexType.HBASE_SOLR_PHOENIX) {
+            if (indexType == IndexType.HBASE_PHOENIX || indexType == IndexType.HBASE_SOLR_PHOENIX) {
                 transaction.add(new CreatePhoenixView(name, schema));
             }
 

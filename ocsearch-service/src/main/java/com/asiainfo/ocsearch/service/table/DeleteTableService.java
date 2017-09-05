@@ -41,16 +41,20 @@ public class DeleteTableService extends OCSearchService {
 
             IndexType indexType = schema.getIndexType();
 
-            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_PHOENIX) {
+            if (indexType == IndexType.HBASE_SOLR || indexType == IndexType.HBASE_SOLR_PHOENIX) {
                 transaction.add(new DeleteIndexerTable(name));
                 transaction.add(new DeleteSolrCollection(name));
             }
-            if (indexType == IndexType.PHOENIX||indexType==IndexType.HBASE_SOLR_PHOENIX) {
+            if (indexType == IndexType.HBASE_PHOENIX || indexType == IndexType.HBASE_SOLR_PHOENIX) {
                 transaction.add(new DeletePhoenixView(name));
             }
-            if (false == request.has("hbase_exist") || false == request.get("hbase_exist").asBoolean())
+
+            if (!schema.withHbase())
                 transaction.add(new DeleteHbaseTable(name));
 
+            if (!transaction.canExecute()) {
+                throw new ServiceException(String.format("delete table :%s  failure because of transaction can't be executed. please check hbase indexer servers", name), ErrorCode.RUNTIME_ERROR);
+            }
             try {
                 transaction.execute();
             } catch (Exception e) {
@@ -59,7 +63,7 @@ public class DeleteTableService extends OCSearchService {
                 throw e;
             }
             return success;
-        }catch (ServiceException se){
+        } catch (ServiceException se) {
             log.warn(se);
             throw se;
         } catch (Exception e) {

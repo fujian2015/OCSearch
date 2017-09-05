@@ -35,10 +35,8 @@ public class GetService extends QueryService {
             ArrayNode idsNode = (ArrayNode) request.get("ids");
 
             List<String> ids = new ArrayList<>();
-            if(RowkeyUtils.ENCRYPT_KEY)
-                idsNode.forEach(jsonNode -> ids.add(RowkeyUtils.decodeKey(jsonNode.asText())));
-            else
-                idsNode.forEach(jsonNode -> ids.add(jsonNode.asText()));
+
+            idsNode.forEach(jsonNode -> ids.add(jsonNode.asText()));
 
             if (schema == null)
                 throw new ServiceException("the table does not exist!", ErrorCode.TABLE_NOT_EXIST);
@@ -69,14 +67,8 @@ public class GetService extends QueryService {
                 ArrayNode docs = JsonNodeFactory.instance.arrayNode();
                 ids.forEach(id -> {
                     ObjectNode node = result.getData().remove(0);
-                    if (node.get("id") == null)
-                        node.put("id", id);
-                    
-                    if (withTable == true)
-                        data.put("_table_", table);
-                    if (withId == false)
-                        data.remove("id");
-                    docs.add(node);
+
+                    docs.add(updateNode(node,id,table,withTable,withId));
                 });
                 data.put("docs", docs);
 
@@ -90,5 +82,7 @@ public class GetService extends QueryService {
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
         }
     }
+
+
 
 }

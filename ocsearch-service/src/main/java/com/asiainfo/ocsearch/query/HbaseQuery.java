@@ -9,6 +9,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
+import com.ngdata.hbaseindexer.uniquekey.UniqueKeyFormatter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -32,6 +33,7 @@ public class HbaseQuery {
     String condition;
     int skip = 0;
     boolean needTotal = false;
+    UniqueKeyFormatter uniqueKeyFormatter;
 
     public int getSkip() {
         return skip;
@@ -79,6 +81,9 @@ public class HbaseQuery {
     }
 
     private void initial() {
+
+        uniqueKeyFormatter=RowkeyUtils.getIdFormatter(schema.getIdFormatter());
+
         Map<String, Field> fields = schema.getFields();
 
         Set<String> innerNames = new HashSet<>();
@@ -139,14 +144,10 @@ public class HbaseQuery {
 
         ObjectNode data = JsonNodeFactory.instance.objectNode();
 
-        String id ;
+        if(result.isEmpty())
+            return data;
 
-        if(RowkeyUtils.ENCRYPT_KEY){
-            id=RowkeyUtils.encodeKey(result.getRow());
-        }
-        else {
-            id= Bytes.toString(result.getRow());
-        }
+        String id= uniqueKeyFormatter.formatRow(result.getRow());
 
         data.put("id", id);
 
@@ -256,7 +257,7 @@ public class HbaseQuery {
     public Map extractResult2Map(Result result) {
         Map<String, Object> map = new HashMap<>();
         Map<String, Field> fields = schema.getFields();
-        String id = Bytes.toString(result.getRow());
+
         columns.forEach(pair -> {
             byte[] valueArray = result.getValue(pair.getFirst(), pair.getSecond());
 
@@ -396,5 +397,9 @@ public class HbaseQuery {
 
     public void setColumns(List<Pair<byte[], byte[]>> columns) {
         this.columns = columns;
+    }
+
+    public UniqueKeyFormatter getUniqueKeyFormatter() {
+        return uniqueKeyFormatter;
     }
 }

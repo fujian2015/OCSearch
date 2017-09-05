@@ -1,12 +1,9 @@
 package com.asiainfo.ocsearch.query;
 
-import com.asiainfo.ocsearch.constants.Constants;
-import com.asiainfo.ocsearch.constants.OCSearchEnv;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+import com.ngdata.hbaseindexer.uniquekey.UniqueKeyFormatter;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by mac on 2017/8/10.
@@ -14,36 +11,20 @@ import java.io.UnsupportedEncodingException;
 public class RowkeyUtils {
 
 
-    public static  boolean ENCRYPT_KEY=Boolean.valueOf(OCSearchEnv.getEnvValue("ENCRYPT_KEY","false"));
+    private static final String DEFAULT_FORMATTER ="com.ngdata.hbaseindexer.uniquekey.StringUniqueKeyFormatter" ;
+    static Map<String, UniqueKeyFormatter> idFormatterHashMap = new HashMap<>();
 
-    static BASE64Encoder base64Encoder = new BASE64Encoder();
-    static BASE64Decoder base64Decoder = new BASE64Decoder();
-
-    public static String encodeKey(String oriId) {
-        byte[] key = null;
-        try {
-            key = oriId.getBytes(Constants.DEFUAT_CHARSET);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+    public static UniqueKeyFormatter getIdFormatter(String className) {
+        if(className ==null)
+            className= DEFAULT_FORMATTER;
+        if (!idFormatterHashMap.containsKey(className)) {
+            try {
+                idFormatterHashMap.put(className, (UniqueKeyFormatter) Class.forName(className).newInstance());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
-        return base64Encoder.encode(key);
-    }
-
-    public static String encodeKey(byte[] key) {
-
-        return base64Encoder.encode(key);
-    }
-
-    public static String decodeKey(String enId) {
-
-        try {
-            byte[] key = base64Decoder.decodeBuffer(enId);
-            return new String(key, Constants.DEFUAT_CHARSET);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-
+        return idFormatterHashMap.get(className);
     }
 
 }

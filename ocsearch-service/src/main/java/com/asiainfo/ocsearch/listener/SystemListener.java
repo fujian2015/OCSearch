@@ -11,6 +11,7 @@ import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.scheduler.ProcessTransaction;
 import com.asiainfo.ocsearch.scheduler.RollBackTranscation;
 import com.asiainfo.ocsearch.utils.PropertiesLoadUtil;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
@@ -171,31 +172,36 @@ public class SystemListener implements ServletContextListener {
 
         OCSearchEnv.setUp(properties);
 
-        System.setProperty("hdp.version",OCSearchEnv.getEnvValue("hdp.version","2.5.0.0-1245"));
-
-        ThreadPoolManager.setUp();
-
-        HbaseServiceManager.setup("hbase-site.xml");
         MetaDataHelperManager.setUp(properties);
 
-        boolean hbaseOnly = Boolean.valueOf(OCSearchEnv.getEnvValue("HBASE_ONLY"));
+        System.setProperty("hdp.version",OCSearchEnv.getEnvValue("hdp.version","2.5.0.0-1245"));
 
-        if (!hbaseOnly) {
+        Set<String> dataSources=Sets.newHashSet(OCSearchEnv.getEnvValue("datasource.types").split(","));
+
+        if(dataSources.contains("hbase")){
+            HbaseServiceManager.setup("hbase-site.xml");
+        }
+        if(dataSources.contains("solr")){
             SolrServerManager.setUp(properties);
+        }
+        if(dataSources.contains("indexer")){
             IndexerServiceManager.setUp(properties);
         }
+
         //initial phoenix connection pool
-        boolean usePhoenix = Boolean.valueOf(OCSearchEnv.getEnvValue("USE_PHOENIX"));
-        if (usePhoenix) {
+
+        if (dataSources.contains("phoenix")) {
             Properties hbase = PropertiesLoadUtil.loadXmlFile("hbase-site.xml");
             Properties druid = PropertiesLoadUtil.loadProFile("druid.properties");
             DbPool.setUp(druid, hbase);
         }
 
-        int processPeriod = Integer.parseInt(OCSearchEnv.getEnvValue("TRANSACTION_PROCESS_PERIOD", "10"));
+        ThreadPoolManager.setUp();
+
+        int processPeriod = Integer.parseInt(OCSearchEnv.getEnvValue("transaction.process.period", "10"));
         scheduledThreadPool.scheduleAtFixedRate(new ProcessTransaction(), 0, processPeriod, TimeUnit.MINUTES);
 
-        int rollbackPeriod = Integer.parseInt(OCSearchEnv.getEnvValue("TRANSACTION_ROLLBACK_PERIOD", "10"));
+        int rollbackPeriod = Integer.parseInt(OCSearchEnv.getEnvValue("transaction.rollback.period", "10"));
         scheduledThreadPool.scheduleAtFixedRate(new RollBackTranscation(), 0, rollbackPeriod, TimeUnit.MINUTES);
 
         logger.info("end init ocsearch...");

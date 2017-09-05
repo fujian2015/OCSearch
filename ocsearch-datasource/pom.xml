@@ -29,16 +29,19 @@
             <groupId>com.ngdata</groupId>
             <artifactId>hbase-indexer-model</artifactId>
             <version>${version.indexer}</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.ngdata</groupId>
             <artifactId>hbase-indexer-engine</artifactId>
             <version>${version.indexer}</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.ngdata</groupId>
             <artifactId>hbase-indexer-morphlines</artifactId>
             <version>${version.indexer}</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.phoenix</groupId>
@@ -54,6 +57,7 @@
             <groupId>com.ngdata</groupId>
             <artifactId>hbase-indexer-mr</artifactId>
             <version>${version.indexer}</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>commons-beanutils</groupId>

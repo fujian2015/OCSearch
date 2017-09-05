@@ -20,6 +20,18 @@ import java.util.Set;
  * Created by mac on 2017/5/18.
  */
 public abstract class QueryService extends OCSearchService {
+
+    protected JsonNode updateNode(ObjectNode node, String id, String table, boolean withTable, boolean withId) {
+        if (node.get("id") == null)
+            node.put("id", id);
+
+        if (withTable == true)
+            node.put("_table_", table);
+        if (withId == false)
+            node.remove("id");
+        return node;
+    }
+
     public boolean hasTable(ArrayNode returnNodes) {
         for (JsonNode node : returnNodes) {
             String name = node.asText();
@@ -30,6 +42,8 @@ public abstract class QueryService extends OCSearchService {
     }
 
     public boolean hasId(ArrayNode returnNodes) {
+        if(returnNodes.size()<1)
+            return true;
         for (JsonNode node : returnNodes) {
             String name = node.asText();
             if (name.equals("id"))

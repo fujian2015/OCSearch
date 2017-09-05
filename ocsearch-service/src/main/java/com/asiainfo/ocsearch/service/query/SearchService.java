@@ -125,14 +125,8 @@ public class SearchService extends QueryService {
             boolean withId = hasId(returnNode);
             for (OCRowKey rowKey : rowKeys) {
                 ObjectNode data = actors.get(rowKey.table).getQueryResult().getData().remove(0);
-                if (data.get("id") == null) {
-                    data.put("id", rowKey.rowKey);
-                }
-                if (false == withId)
-                    data.remove("id");
-                if (true == withTable)
-                    data.put("_table_", rowKey.table);
-                arrayNode.add(data);
+
+                arrayNode.add(updateNode(data,rowKey.rowKey,rowKey.table,withTable,withId));
             }
         }
         //return data
@@ -188,11 +182,8 @@ public class SearchService extends QueryService {
             log.warn("result is:" + queryActor.getQueryResult().getData().size());
             rowKeys.forEach(row -> {
                         ObjectNode data = queryActor.getQueryResult().getData().remove(0);
-                        if (data.get("id") == null)
-                            data.put("id", row);
-                        if (false == withId)
-                            data.remove("id");
-                        arrayNode.add(data);
+
+                        arrayNode.add(updateNode(data,row,table,false,withId));
                     }
             );
             log.warn("arrayNode  is:" + arrayNode.size());

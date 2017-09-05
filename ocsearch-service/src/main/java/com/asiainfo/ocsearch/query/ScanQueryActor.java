@@ -5,6 +5,7 @@ import com.asiainfo.ocsearch.datasource.hbase.HbaseServiceManager;
 import com.asiainfo.ocsearch.datasource.hbase.ScanService;
 import com.asiainfo.ocsearch.expression.Engine;
 import com.asiainfo.ocsearch.expression.Executor;
+import com.ngdata.hbaseindexer.uniquekey.UniqueKeyFormatter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -39,7 +40,8 @@ public class ScanQueryActor extends QueryActor {
 
             List<Pair<byte[], byte[]>> columns = this.hbaseQuery.getColumns();
 
-            Scan scan = new Scan(Bytes.toBytes(hbaseQuery.getStartKey()), Bytes.toBytes(hbaseQuery.getStopKey()));
+            UniqueKeyFormatter uniqueKeyFormatter = hbaseQuery.getUniqueKeyFormatter();
+            Scan scan = new Scan(uniqueKeyFormatter.unformatRow(hbaseQuery.getStartKey()), uniqueKeyFormatter.unformatRow(hbaseQuery.getStopKey()));
 
             columns.forEach(column -> scan.addColumn(column.getFirst(), column.getSecond()));
 

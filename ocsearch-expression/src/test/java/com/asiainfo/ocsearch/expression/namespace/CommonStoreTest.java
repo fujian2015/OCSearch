@@ -29,4 +29,13 @@ public class CommonStoreTest {
         System.out.println(ee.evaluate(jc));
     }
 
+    @Test
+    public void testMd5Prefix() throws Exception {
+        Map<String, Object> jc = new HashMap<>();
+
+        Executor ee = Engine.getInstance().createExecutor("$common:md5Prefix('460023029320008')");
+
+        System.out.println(ee.evaluate(jc)+"460023029320008");
+    }
+
 }

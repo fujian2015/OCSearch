@@ -17,6 +17,7 @@ public class DeleteIndexerTable implements AtomicOperation {
     public DeleteIndexerTable(String table) {
         this.table = table;
     }
+
     @Override
     public boolean execute() {
 
@@ -39,6 +40,13 @@ public class DeleteIndexerTable implements AtomicOperation {
 
     @Override
     public boolean canExecute() {
-        return true;
+
+        IndexerService indexerService = IndexerServiceManager.getIndexerService();
+
+        int runningProcessor = indexerService.runningProcessor(table);
+        if(runningProcessor>=1)
+            return true;
+        else
+            return false;
     }
 }

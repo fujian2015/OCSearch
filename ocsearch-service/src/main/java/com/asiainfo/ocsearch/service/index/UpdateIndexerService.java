@@ -27,7 +27,7 @@ public class UpdateIndexerService extends OCSearchService {
 
             IndexType indexType = schema.getIndexType();
 
-            if (indexType == IndexType.HBASE_SOLR_INDEXER || indexType == IndexType.HBASE_SOLR_PHOENIX) {
+            if (indexType == IndexType.HBASE_SOLR || indexType == IndexType.HBASE_SOLR_PHOENIX) {
                 if (!IndexerServiceManager.getIndexerService().exists(name))
                     throw new ServiceException(String.format("indexer %s does not exist!", name), ErrorCode.INDEXER_NOT_EXIST);
                 new UpdateIndexer(name, schema).execute();

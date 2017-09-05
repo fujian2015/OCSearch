@@ -36,6 +36,10 @@ public abstract class UpdateOrAddIndexer implements AtomicOperation {
         Element indexer = indexerDoc.addElement("indexer");
         indexer.addAttribute("table", name);
         indexer.addAttribute("mapper", "com.ngdata.hbaseindexer.parse.DefaultResultToSolrMapper");
+
+        if(tableSchema.getIdFormatter()!=null)
+            indexer.addAttribute("unique-key-formatter", tableSchema.getIdFormatter());
+
         indexer.addAttribute("table-name-field", "_table_");
         indexer.addAttribute("read-row", "never");
 

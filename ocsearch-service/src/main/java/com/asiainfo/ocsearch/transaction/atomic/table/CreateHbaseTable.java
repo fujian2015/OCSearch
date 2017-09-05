@@ -13,14 +13,14 @@ import java.util.Set;
  */
 public class CreateHbaseTable implements AtomicOperation {
 
-    static  Logger log = Logger.getLogger("state");
+    static Logger log = Logger.getLogger("state");
 
     int regions;
     String table;
-    Map<String,Integer> columnFamilies;
+    Map<String, Integer> columnFamilies;
     Set<String> regionSplits;
 
-    public CreateHbaseTable(String table, int regions, Set<String> regionSplits, Map<String,Integer> columnFamilies) {
+    public CreateHbaseTable(String table, int regions, Set<String> regionSplits, Map<String, Integer> columnFamilies) {
 
         this.regions = regions;
         this.table = table;
@@ -31,18 +31,22 @@ public class CreateHbaseTable implements AtomicOperation {
     @Override
     public boolean execute() {
 
-        log.info("create hbase table " + table + " start!");
+        try {
+            log.info("create hbase table " + table + " start!");
 
-        AdminService adminService = HbaseServiceManager.getInstance().getAdminService();
+            AdminService adminService = HbaseServiceManager.getInstance().getAdminService();
 
-        if (regionSplits == null || regionSplits.isEmpty()) {
-            adminService.createTable(table, columnFamilies, regions);
-        } else {
-            adminService.createTable(table, columnFamilies, regionSplits);
+            if (regionSplits == null || regionSplits.isEmpty()) {
+                adminService.createTable(table, columnFamilies, regions);
+            } else {
+                adminService.createTable(table, columnFamilies, regionSplits);
+            }
+
+            log.info("create hbase table " + table + " success!");
+        } catch (Exception e) {
+            log.warn("create hbase table " + table + " failure!", e);
+            throw new RuntimeException(e);
         }
-
-        log.info("create hbase table " + table + " success!");
-
         return true;
     }
 
