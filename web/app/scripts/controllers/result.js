@@ -3,7 +3,7 @@
 /**
  * Search Result Controller
  */
-angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$stateParams', 'hotkeys', '$http', 'GLOBAL', function ($scope, searchService, $stateParams, hotkeys, $http, GLOBAL) {
+angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$stateParams', 'hotkeys', '$http', 'GLOBAL', '$window', function ($scope, searchService, $stateParams, hotkeys, $http, GLOBAL, $window) {
   /**
    * Initialize params
    */
@@ -121,6 +121,10 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
    */
   if($scope.schemas && $scope.schemas.length > 0) {
     $scope.chooseSchema($scope.schemas[0], 0);
+  }
+  let focusElem = $window.document.getElementById('mainSearchInput');
+  if (focusElem) {
+    focusElem.focus();
   }
 
   hotkeys.bindTo($scope)

@@ -59,7 +59,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
           $scope._ok = function(){
             if ($scope.newtable.hbase.region_split === "" || $scope.newtable.hbase.region_split === null) { $scope.newtable.hbase.region_split = []; }
             $http.post(GLOBAL.host+"/table/create", $scope.newtable).then(function(data) {
-              if (data.data.result !== 0) {
+              if (data.data.result.error_code !== 0) {
                 $ngConfirm({
                   title: $translate.instant('CONFIRM_TITLE_CREATE_TABLE_ERROR'),
                   content: data.data.result.error_desc,

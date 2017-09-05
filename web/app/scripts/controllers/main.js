@@ -3,7 +3,7 @@
 /**
  * Main Controller
  */
-angular.module('basic').controller('MainCtrl', ['$scope', 'searchService', 'hotkeys', '$state', '$rootScope', function ($scope, searchService, hotkeys, $state, $rootScope) {
+angular.module('basic').controller('MainCtrl', ['$scope', 'searchService', 'hotkeys', '$state', '$rootScope', '$window', function ($scope, searchService, hotkeys, $state, $rootScope, $window) {
   $rootScope.global = {
     tab: 'search'
   };
@@ -19,4 +19,9 @@ angular.module('basic').controller('MainCtrl', ['$scope', 'searchService', 'hotk
       allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
       callback: $scope.search
     });
+  
+  let focusElem = $window.document.getElementById('mainSearchInput');
+  if (focusElem) {
+    focusElem.focus();
+  }
 }]);
