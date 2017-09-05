@@ -32,7 +32,7 @@ app.get('/schema/config', function(req, res) {
   fs.readFile('./schema.config.json', function(err, data) {
     if (err) {
       if (err.code === "ENOENT") {
-        res.send([]);
+        res.send({});
       } else {
         console.log(err);
       }

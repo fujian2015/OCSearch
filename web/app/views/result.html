@@ -76,18 +76,11 @@
           </button>
         </div>
         <div class="row" ng-repeat="item in data.docs" style="margin-top: 10px;">
-          <span class="badge">{{$index+1+(page.pagination.current-1)*page.rows}}</span>
-          <div ng-repeat="field in page.schema.fields">
-            <h3 ng-if="field.name === 'name'">
-              {{item.name}}
-            </h3>
-            <span ng-if="field.name !=='name'">
-              <strong>{{field.name}}</strong>
-              <!--<a ng-href="{{host}}/query/fileget?id={{item[field.name]}}" ng-if="field.store_type !== 'STRING'" download="{{item.name}}">link</a>-->
-              <a ng-href="http://10.1.236.66:58080/ocsearch-service/query/fileget?id={{item[field.name]}}" ng-if="field.store_type !== 'STRING'">link</a>
-              <span ng-if="field.store_type === 'STRING'">{{item[field.name]}}</span>
-            </span>
-          </div>
+          <h4><span class="badge badge-secondary">{{$index+1+(page.pagination.current-1)*page.rows}}</span>&nbsp;&nbsp;{{item.id}}</h4>
+          <span ng-repeat="field in page.schema.fields">
+            <span ng-show="schema_display[page.schema.name][field.name]"><b>{{field.name}}:</b>&nbsp;&nbsp;{{item[field.name] || ('UNDEFINED' | translate)}}</span>
+            &nbsp; &nbsp; &nbsp;
+          </span>
         </div>
       </div>
     </div>

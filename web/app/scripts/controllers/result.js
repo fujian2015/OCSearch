@@ -16,8 +16,8 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
     tables: [],
     fields: [],
     actives: [],
-    rows: 5,
-    rowOptions:[5,10,20,50],
+    rows: 10,
+    rowOptions:[10,20,30,50],
     pagination:{
       current : 1,
       maxsize : 10
@@ -31,7 +31,6 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
     searchService.search($scope.content, function(schemas){
       $scope.schemas = schemas;
       if(schemas && schemas.length > 0) {
-        console.log($scope.page.schema);
         if (Object.keys($scope.page.schema).length !== 0) {
           for (let i=0; i<schemas.length; ++i) {
             if (schemas[i].name === $scope.page.schema.name) {
@@ -93,7 +92,7 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
         $scope.page.actives[i] = true;
       }
     }
-    $scope.page.fields = [];
+    $scope.page.fields = ["id"];
     for(let i = 0; i < item.fields.length; i++){
       $scope.page.fields.push(item.fields[i].name);
     }
@@ -108,24 +107,38 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
     $scope.$broadcast('openSidebar');
   };
 
-  /*
-  $scope.link = function(fid) {
-    $http.post(GLOBAL.host+"/query/fileget", {id:fid}).then(function(res) {
-      console.log(res);
-    });
+  $scope.formatContent = function(item, schema) {
+    let content = [];
+    for (let field of schema.fields) {
+      if ($scope.schema_display[schema.name][field.name]) {
+        let fname = field.name;
+        if (item[fname]) {
+          let temp = {};
+          temp[fname] = item[fname];
+          content.push(temp);
+        } else {
+          let temp = {};
+          temp[fname] = null;
+          content.push(temp);
+        }
+      }
+    }
+    return content;
   };
-  */
 
   /**
    * Global init functions
    */
-  if($scope.schemas && $scope.schemas.length > 0) {
-    $scope.chooseSchema($scope.schemas[0], 0);
-  }
-  let focusElem = $window.document.getElementById('mainSearchInput');
-  if (focusElem) {
-    focusElem.focus();
-  }
+  $http.get("/schema/config").then(function(data) {
+    $scope.schema_display = data.data;
+    if($scope.schemas && $scope.schemas.length > 0) {
+      $scope.chooseSchema($scope.schemas[0], 0);
+    }
+    let focusElem = $window.document.getElementById('mainSearchInput');
+    if (focusElem) {
+      focusElem.focus();
+    }
+  });
 
   hotkeys.bindTo($scope)
     .add({

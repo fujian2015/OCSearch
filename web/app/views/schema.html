@@ -288,7 +288,7 @@
               <td>{{field.inner_field || ('UNDEFINED' | translate)}}</td>
               <td>{{field.index_type || ('UNDEFINED' | translate)}}</td>
               <td>{{queryWeight(field.name, page.schema.query_fields) || ('UNDEFINED' | translate)}}</td>
-              <td><span class="checkbox" style="margin-top: 0;"><input type="checkbox" ng-model="setDisplay(field).val">{{'DISPLAY' | translate}}</span></td>
+              <td><span class="checkbox" style="margin-top: 0;"><input type="checkbox" ng-model="schema_display[page.schema.name][field.name]">{{'DISPLAY' | translate}}</span></td>
             </tr>
           </table>
         </div>

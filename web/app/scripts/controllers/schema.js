@@ -273,6 +273,9 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
     $http.post(GLOBAL.host + "/table/list", schema_tables).then(function(data) {
       $scope.page.tables = data.data.tables;
     });
+    if (!angular.isDefined($scope.schema_display[$scope.page.schema.name])) {
+      $scope.schema_display[$scope.page.schema.name] = {};
+    }
   };
   // Delete schema
   $scope.deleteSchema = function() {
@@ -317,32 +320,6 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
       $scope.initial();
     });
   };
-  // Set display
-  $scope.setDisplay = function(item) {
-    let idx = -1;
-    for (let i = 0; i < $scope.schema_display.length; i++) {
-      if ($scope.schema_display[i].name === $scope.page.schema.name) {
-        idx = i;
-        break;
-      }
-    }
-    if (idx < 0) {
-      $scope.schema_display.push({name:$scope.page.schema.name, fields:[]});
-      idx = $scope.schema_display.length-1;
-    }
-    let fidx = -1;
-    for (let i = 0; i < $scope.schema_display[idx].fields.length; i++) {
-      if ($scope.schema_display[idx].fields[i].name === item.name) {
-        fidx = i;
-        break;
-      }
-    }
-    if (fidx < 0) {
-      $scope.schema_display[idx].fields.push({name:item.name, val:false});
-      fidx = $scope.schema_display[idx].fields.length - 1;
-    }
-    return $scope.schema_display[idx].fields[fidx];
-  };
   // Initial load function
   $scope.initial = function() {
     $scope.page = {
@@ -371,6 +348,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
   $scope.initial();
 
   $scope.$on("$destroy", function() {
+    //console.log($scope.schema_display);
     $http.post("/schema/config/set", $scope.schema_display, function() {});
   });
 }]);
