@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$rootScope', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate, $rootScope) {
+angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$rootScope', function ($scope, $http, $q, GLOBAL, $uibModal, $ngConfirm, $translate, $rootScope) {
 
   let yes_text = $translate.instant('YES');
   let no_text = $translate.instant('NO');
@@ -169,7 +169,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
           };
           // Check input parameters
           $scope.checkStep1 = function() {
-            if ($scope.newschema.name==="" || ($scope.newschema.index_type !== 1 && $scope.newschema.index_type !== 0 && $scope.newschema.index_type !== -1)) {
+            if ($scope.newschema.name==="" || ($scope.newschema.index_type !== 1 && $scope.newschema.index_type !== 0 && $scope.newschema.index_type !== -1 && $scope.newschema.index_type !== 2)) {
               $scope.modalmsg = $translate.instant("MODALMSG_FILL_IN_ALL");
               return false;
             } else {
@@ -317,21 +317,51 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', 'GLOBAL', '
       $scope.initial();
     });
   };
-  //Initial load function
+  // Set display
+  $scope.setDisplay = function(item) {
+    let idx = -1;
+    for (let i = 0; i < $scope.schema_display.length; i++) {
+      if ($scope.schema_display[i].name === $scope.page.schema.name) {
+        idx = i;
+        break;
+      }
+    }
+    if (idx < 0) {
+      $scope.schema_display.push({name:$scope.page.schema.name, fields:[]});
+      idx = $scope.schema_display.length-1;
+    }
+    let fidx = -1;
+    for (let i = 0; i < $scope.schema_display[idx].fields.length; i++) {
+      if ($scope.schema_display[idx].fields[i].name === item.name) {
+        fidx = i;
+        break;
+      }
+    }
+    if (fidx < 0) {
+      $scope.schema_display[idx].fields.push({name:item.name, val:false});
+      fidx = $scope.schema_display[idx].fields.length - 1;
+    }
+    return $scope.schema_display[idx].fields[fidx];
+  };
+  // Initial load function
   $scope.initial = function() {
     $scope.page = {
       schema: {},
       schemasActive: []
     };
+    $scope.schema_display = [];
     $rootScope.global.tab = "schema";
-    $http.get(GLOBAL.host + "/schema/list").then(function(data) {
-      //console.log(data.data.result);
-      $scope.schemas = data.data.schemas;
+    $q.all([$http.get(GLOBAL.host + "/schema/list"), $http.get("/schema/config")]).then(function(data) {
+      $scope.schemas = data[0].data.schemas;
       $scope.selectSchema($scope.schemas[0],0);
+      $scope.schema_display = data[1].data;
     });
   };
 
   // Initial work
   $scope.initial();
 
+  $scope.$on("$destroy", function() {
+    $http.post("/schema/config/set", $scope.schema_display, function() {});
+  });
 }]);

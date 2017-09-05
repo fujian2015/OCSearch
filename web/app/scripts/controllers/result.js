@@ -31,7 +31,17 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
     searchService.search($scope.content, function(schemas){
       $scope.schemas = schemas;
       if(schemas && schemas.length > 0) {
-        $scope.chooseSchema(schemas[0], 0);
+        console.log($scope.page.schema);
+        if (Object.keys($scope.page.schema).length !== 0) {
+          for (let i=0; i<schemas.length; ++i) {
+            if (schemas[i].name === $scope.page.schema.name) {
+              $scope.chooseSchema(schemas[i], i);
+              break;
+            }
+          }
+        } else {
+          $scope.chooseSchema(schemas[0], 0);
+        }
       }
     });
   };
@@ -97,6 +107,14 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
   $scope.toggleSideBar = function(){
     $scope.$broadcast('openSidebar');
   };
+
+  /*
+  $scope.link = function(fid) {
+    $http.post(GLOBAL.host+"/query/fileget", {id:fid}).then(function(res) {
+      console.log(res);
+    });
+  };
+  */
 
   /**
    * Global init functions

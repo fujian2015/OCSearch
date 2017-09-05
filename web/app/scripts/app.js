@@ -110,6 +110,8 @@ angular
       INTABLE_QUERY_WEIGHT: "query weight",
       INTABLE_OPERATION: "operation",
       INTABLE_WEIGHT: "weight",
+      INTABLE_DISPLAY: "display in search",
+      DISPLAY: "display",
       SELECT_TYPE: "Select Type",
       SELECT_SCHEMA: "Select schema",
       SELECT_INDEX_TYPE: "Select index type",
@@ -142,6 +144,8 @@ angular
       HELP_EXPRESSION_TITLE: "Help to build an expression",
       HELP_EXPRESSION_CONTENT: "Want to learn",
       HELP_EXPRESSION_LINK: "more",
+      ROWS: "Rows",
+      CONDITIONS: "Conditions",
     }).translations("zh", {
       ADD_NEW_TABLE: "增加新表",
       ADD_NEW_SCHEMA: "新建表结构",
@@ -181,6 +185,8 @@ angular
       INTABLE_QUERY_WEIGHT: "查询权重",
       INTABLE_OPERATION: "操作",
       INTABLE_WEIGHT: "权重",
+      INTABLE_DISPLAY: "搜索结果显示",
+      DISPLAY: "显示",
       SELECT_TYPE: "选择类型",
       SELECT_SCHEMA: "选择表结构",
       SELECT_INDEX_TYPE: "选择索引类型",
@@ -213,6 +219,8 @@ angular
       HELP_EXPRESSION_TITLE: "如何建立一个表达式",
       HELP_EXPRESSION_CONTENT: "想要了解",
       HELP_EXPRESSION_LINK: "更多",
+      ROWS: "每页行数",
+      CONDITIONS: "搜索条件",
     });
     $translateProvider.preferredLanguage('zh');
   }).constant('GLOBAL', {

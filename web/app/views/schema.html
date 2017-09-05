@@ -265,7 +265,7 @@
             <div class="col-md-2"><b>{{'INNER_FIELD' | translate}}:</b></div>
             <div class="col-md-10">{{joinFields(page.schema.inner_fields) || ('UNDEFINED' | translate)}}</div>
           </div>
-          <h4 style="margin-top: 50px;">{{'TABLE' | translate}}</h4>
+          <h4 style="margin-top: 50px;">{{'TABLE' | translate}}</h4><hr>
           <i ng-repeat="table in page.tables" ng-if="page.tables.length > 0"><a ui-sref="table({linktable:table})" style="text-decoration: none;">{{table}}</a>&nbsp;&nbsp;</i>
           <i ng-if="!page.tables.length || page.tables.length===0">{{'UNDEFINED' | translate}}</i>
           <h4 style="margin-top: 50px;">{{'FIELDS' | translate}}</h4><hr>
@@ -278,6 +278,7 @@
               <th>{{'INTABLE_INNER_FIELD' | translate}}</th>
               <th>{{'INTABLE_INDEX_TYPE' | translate}}</th>
               <th>{{'INTABLE_QUERY_WEIGHT' | translate}}</th>
+              <th>{{'INTABLE_DISPLAY' | translate}}</th>
             </tr>
             <tr ng-repeat="field in page.schema.fields">
               <td>{{$index+1}}</td>
@@ -287,6 +288,7 @@
               <td>{{field.inner_field || ('UNDEFINED' | translate)}}</td>
               <td>{{field.index_type || ('UNDEFINED' | translate)}}</td>
               <td>{{queryWeight(field.name, page.schema.query_fields) || ('UNDEFINED' | translate)}}</td>
+              <td><span class="checkbox" style="margin-top: 0;"><input type="checkbox" ng-model="setDisplay(field).val">{{'DISPLAY' | translate}}</span></td>
             </tr>
           </table>
         </div>

@@ -32,7 +32,7 @@ app.get('/schema/config', function(req, res) {
   fs.readFile('./schema.config.json', function(err, data) {
     if (err) {
       if (err.code === "ENOENT") {
-        res.send({});
+        res.send([]);
       } else {
         console.log(err);
       }
@@ -46,10 +46,10 @@ app.post('/schema/config/set', function(req, res) {
   res.setHeader('Content-type', 'application/json');
   fs.writeFile('./schema.config.json', JSON.stringify(req.body), function(err) {
     if (err) {
-      res.send('{result:"error"}');
+      res.send(JSON.stringify({"result":"error"}));
       throw err;
     }
-    res.send('{result:"success"}');
+    res.send(JSON.stringify({"result":"success"}));
   });
 });
 
