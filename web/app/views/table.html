@@ -167,7 +167,7 @@
             <div class="col-md-2"><b>{{'NAME' | translate}}:</b></div>
             <div class="col-md-4">{{page.table.name}}</div>
             <div class="col-md-2"><b>{{'SCHEMA' | translate}}:</b></div>
-            <div class="col-md-4">{{page.table.schema.name}}</div>
+            <div class="col-md-4"><i><a ui-sref="schema({linkschema:page.table.schema.name})" style="text-decoration: none;">{{page.table.schema.name}}</a></i></div>
           </div>
           <h4 style="margin-top: 50px;">{{'FIELDS' | translate}}</h4><hr>
           <table class="table">

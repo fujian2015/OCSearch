@@ -45,7 +45,10 @@ angular
       .state('schema', {
         url:"/schema",
         templateUrl: 'views/schema.html',
-        controller: 'SchemaCtrl'
+        controller: 'SchemaCtrl',
+        params: {
+          'linkschema' : ''
+        }
       })
       .state('table', {
         url:"/table",

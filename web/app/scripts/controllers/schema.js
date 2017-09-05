@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$rootScope', function ($scope, $http, $q, GLOBAL, $uibModal, $ngConfirm, $translate, $rootScope) {
+angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$rootScope', '$stateParams', function ($scope, $http, $q, GLOBAL, $uibModal, $ngConfirm, $translate, $rootScope, $stateParams) {
 
   let yes_text = $translate.instant('YES');
   let no_text = $translate.instant('NO');
@@ -353,8 +353,17 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
     $rootScope.global.tab = "schema";
     $q.all([$http.get(GLOBAL.host + "/schema/list"), $http.get("/schema/config")]).then(function(data) {
       $scope.schemas = data[0].data.schemas;
-      $scope.selectSchema($scope.schemas[0],0);
       $scope.schema_display = data[1].data;
+      if (!$stateParams.linkschema || $stateParams.linkschema === "") {
+        $scope.selectSchema($scope.schemas[0],0);
+      } else {
+        for (let i = 0; i < $scope.schemas.length; i++) {
+          if ($scope.schemas[i].name === $stateParams.linkschema) {
+            $scope.selectSchema($scope.schemas[i], i);
+            break;
+          }
+        }
+      }
     });
   };
 
