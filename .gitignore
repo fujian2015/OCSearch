@@ -47,3 +47,5 @@ web/*/log/
 web/*/*.log
 web/*/users.dat
 web/*/.tmp/
+web/schema.config.json
+

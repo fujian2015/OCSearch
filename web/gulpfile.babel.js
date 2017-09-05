@@ -94,7 +94,7 @@ gulp.task('start:server', ['styles', 'es6:frontend', 'es6:server', 'bower'], fun
   let started = false;
   return $.nodemon({
     script: 'build-server/app.js',
-    ignore: ["app","dist","upload","node","node-v6.9.1","build-server"]
+    ignore: ["app","dist","upload","node","node-v6.9.1","build-server","schema.config.json"]
   }).on('start', function () {
     if (!started) {
       cb();

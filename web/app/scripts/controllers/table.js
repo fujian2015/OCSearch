@@ -3,6 +3,7 @@
 angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$stateParams', '$rootScope', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate, $stateParams, $rootScope) {
   let yes_text = $translate.instant('YES');
   let no_text = $translate.instant('NO');
+  let ok_text = $translate.instant('OK');
   let confirmation_text = $translate.instant('CONFIRMATION');
   let create_table_text = $translate.instant('CONFIRM_ADD_TABLE');
   let edit_table_text = $translate.instant('CONFIRM_EDIT_TABLE');
@@ -57,9 +58,20 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
           };
           $scope._ok = function(){
             if ($scope.newtable.hbase.region_split === "" || $scope.newtable.hbase.region_split === null) { $scope.newtable.hbase.region_split = []; }
-            //console.log(JSON.stringify($scope.newtable));
-            $http.post(GLOBAL.host+"/table/create", $scope.newtable).then(function() {
-              //console.log(data);
+            $http.post(GLOBAL.host+"/table/create", $scope.newtable).then(function(data) {
+              if (data.data.result !== 0) {
+                $ngConfirm({
+                  title: $translate.instant('CONFIRM_TITLE_CREATE_TABLE_ERROR'),
+                  content: data.data.result.error_desc,
+                  scope: $scope,
+                  closeIcon: true,
+                  buttons: {
+                    OK: {
+                      text: ok_text
+                    }
+                  }
+                });
+              }
               $scope.initial();
               modalInstance.close();
             });
