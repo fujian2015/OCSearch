@@ -266,7 +266,7 @@
             <div class="col-md-10">{{joinFields(page.schema.inner_fields) || ('UNDEFINED' | translate)}}</div>
           </div>
           <h4 style="margin-top: 50px;">{{'TABLE' | translate}}</h4><hr>
-          <i ng-repeat="table in page.tables" ng-if="page.tables.length > 0"><a ui-sref="table({linktable:table})" style="text-decoration: none;">{{table}}</a>&nbsp;&nbsp;</i>
+          <i ng-repeat="table in page.tables" ng-if="page.tables.length > 0"><a ui-sref="table({linktable:table})" target="_blank" style="text-decoration: none;">{{table}}</a>&nbsp;&nbsp;</i>
           <i ng-if="!page.tables.length || page.tables.length===0">{{'UNDEFINED' | translate}}</i>
           <h4 style="margin-top: 50px;">{{'FIELDS' | translate}}</h4><hr>
           <table class="table">

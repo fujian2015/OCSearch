@@ -83,6 +83,7 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
   };
 
   $scope.chooseSchema = function(item, index){
+    $scope.page.pagination.current = 1;
     $scope.page.schema = item;
     $scope.page.chooseIndex = index;
     $scope.page.tables = item.tables;
@@ -107,28 +108,28 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
     $scope.$broadcast('openSidebar');
   };
 
-  $scope.formatContent = function(item, schema) {
-    let content = [];
-    for (let field of schema.fields) {
-      if ($scope.schema_display[schema.name][field.name]) {
-        let fname = field.name;
-        if (item[fname]) {
-          let temp = {};
-          temp[fname] = item[fname];
-          content.push(temp);
+  $scope.initShow = function(item, idx) {
+    $scope.showCtrl[idx] = [];
+    for (let f of $scope.page.schema.fields) {
+      if (angular.isDefined($scope.schema_display[$scope.page.schema.name]) && $scope.schema_display[$scope.page.schema.name][f.name]) {
+        let temp = {};
+        if (angular.isDefined(item[f.name])) {
+          temp[f.name] = item[f.name];
         } else {
-          let temp = {};
-          temp[fname] = null;
-          content.push(temp);
+          temp[f.name] = null;
         }
+        $scope.showCtrl[idx].push(temp);
       }
     }
-    return content;
   };
-
+  $scope.getColor = function(idx) {
+    let colors = ["result-odd", "result-even"];
+    return colors[parseInt(idx/4) % 2];
+  };
   /**
    * Global init functions
    */
+  $scope.showCtrl = [];
   $http.get("/schema/config").then(function(data) {
     $scope.schema_display = data.data;
     if($scope.schemas && $scope.schemas.length > 0) {

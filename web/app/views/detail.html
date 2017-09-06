@@ -1,0 +1,8 @@
+<div class="container-fluid" style="margin-top: 5%; margin-left: 5%">
+  <div class="row">
+    <h3>ID : {{item.id}}</h3>
+  </div>
+  <div class="row" ng-repeat="field in schema.fields" style="font-size: 20px">
+    <span class="badge badge-secondary" style="margin-right: 12px">{{$index+1}}</span><b>{{field.name}} : </b>{{item[field.name] || ('EMPTY' | translate)}}
+  </div>
+</div>

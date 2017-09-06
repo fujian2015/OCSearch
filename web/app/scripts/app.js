@@ -63,6 +63,16 @@ angular
         params: {"schemas": null, content: null},
         templateUrl: 'views/result.html',
         controller: 'ResultCtrl'
+      })
+      .state('detail', {
+        url:"/detail/:id?table&schema",
+        params: {
+          "id":null, 
+          "table":null, 
+          "schema":null
+        },
+        templateUrl: 'views/detail.html',
+        controller: 'DetailCtrl'
       });
     $httpProvider.interceptors.push('spinnerInterceptor');
     NotificationProvider.setOptions({

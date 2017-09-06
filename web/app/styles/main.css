@@ -69,3 +69,11 @@ body {
 .box:hover {
   box-shadow: 5px 5px 8px #d5d5d5;
 }
+
+.result-odd {
+  color: green;
+}
+
+.result-even {
+  color: orange;
+}

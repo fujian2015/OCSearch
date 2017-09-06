@@ -75,11 +75,10 @@
             {{table}}
           </button>
         </div>
-        <div class="row" ng-repeat="item in data.docs" style="margin-top: 10px;">
-          <h4><span class="badge badge-secondary">{{$index+1+(page.pagination.current-1)*page.rows}}</span>&nbsp;&nbsp;{{item.id}}</h4>
-          <span ng-repeat="field in page.schema.fields">
-            <span ng-show="schema_display[page.schema.name][field.name]"><b>{{field.name}}:</b>&nbsp;&nbsp;{{item[field.name] || ('UNDEFINED' | translate)}}</span>
-            &nbsp; &nbsp; &nbsp;
+        <div class="row" ng-repeat="item in data.docs" style="margin-top: 10px;" ng-init="initShow(item, $index)">
+          <h4><span class="badge badge-secondary">{{$index+1+(page.pagination.current-1)*page.rows}}</span>&nbsp;&nbsp;<a ui-sref="detail({id:item.id, schema:page.schema.name, table:page.schema.tables})" target="_blank" style="text-decoration: none;">{{item.id}}</a></h4>
+          <span ng-repeat="field in showCtrl[$index]" ng-init="findex = $index">
+            <span ng-repeat="(key, val) in field" class="col-md-3"><b>{{key}} :&nbsp;&nbsp; </b><span ng-class="getColor(findex)">{{val || ('EMPTY' | translate)}}</span></span>
           </span>
         </div>
       </div>
