@@ -23,6 +23,7 @@ mkdir -p build/ocsearch/conf
 mkdir -p build/ocsearch/logs
 mkdir -p build/ocsearch/flume
 mkdir -p build/ocsearch/expression
+mkdir -p build/ocsearch/web
 
 cp -r server build/ocsearch
 cp -r bin build/ocsearch
@@ -36,6 +37,7 @@ cp ocsearch-flume/target/ocsearch-flume-${version}.jar build/ocsearch/flume/
 
 cp ocsearch-expression/target/ocsearch-expression-${version}.jar build/ocsearch/expression/
 
+tar -xzf web/target/web-${version}-bundle.tar.gz -C build/ocsearch/web
 
 cd build
 

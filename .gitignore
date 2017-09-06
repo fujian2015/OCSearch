@@ -48,4 +48,5 @@ web/*/*.log
 web/*/users.dat
 web/*/.tmp/
 web/schema.config.json
+web/node-v6.9.1/
 

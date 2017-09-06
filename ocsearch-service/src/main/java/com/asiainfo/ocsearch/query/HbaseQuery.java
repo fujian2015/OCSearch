@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
@@ -24,6 +25,8 @@ import java.util.*;
  * Created by mac on 2017/5/16.
  */
 public class HbaseQuery {
+
+    static Logger log = Logger.getLogger(HbaseQuery.class);
 
     Schema schema;
     String table;
@@ -159,78 +162,82 @@ public class HbaseQuery {
             String name = kvMap.get(Bytes.toString(pair.getFirst()), Bytes.toString(pair.getSecond()));
             if (valueArray == null)
                 return;
-            if (returnFields.contains(name)) {
-                if (fields.containsKey(name)) {
-                    switch (fields.get(name).getStoreType()) {
-                        case STRING:
-                            data.put(name, Bytes.toString(valueArray));
-                            break;
-                        case INT:
-                            data.put(name, Bytes.toInt(valueArray));
-                            break;
-                        case LONG:
-                            data.put(name,Bytes.toLong(valueArray));
-                            break;
-                        case FLOAT:
-                            data.put(name, Bytes.toFloat(valueArray));
-                            break;
-                        case DOUBLE:
-                            data.put(name, Bytes.toDouble(valueArray));
-                            break;
-                        case BOOLEAN:
-                            data.put(name, Bytes.toBoolean(valueArray));
-                            break;
-                        case ATTACHMENT:
-                            ArrayNode attachNode = JsonNodeFactory.instance.arrayNode();
-                            for (String file : Bytes.toString(valueArray).split(",")) {
-                                attachNode.add(generateFilelUrl(table, id, name, file));
-                            }
-                            data.put(name, attachNode);
-                            break;
-                        default:
-                            data.put(name, valueArray);
+            try {
+                if (returnFields.contains(name)) {
+                    if (fields.containsKey(name)) {
+                        switch (fields.get(name).getStoreType()) {
+                            case STRING:
+                                data.put(name, Bytes.toString(valueArray));
+                                break;
+                            case INT:
+                                data.put(name, Bytes.toInt(valueArray));
+                                break;
+                            case LONG:
+                                data.put(name, Bytes.toLong(valueArray));
+                                break;
+                            case FLOAT:
+                                data.put(name, Bytes.toFloat(valueArray));
+                                break;
+                            case DOUBLE:
+                                data.put(name, Bytes.toDouble(valueArray));
+                                break;
+                            case BOOLEAN:
+                                data.put(name, Bytes.toBoolean(valueArray));
+                                break;
+                            case ATTACHMENT:
+                                ArrayNode attachNode = JsonNodeFactory.instance.arrayNode();
+                                for (String file : Bytes.toString(valueArray).split(",")) {
+                                    attachNode.add(generateFilelUrl(table, id, name, file));
+                                }
+                                data.put(name, attachNode);
+                                break;
+                            default:
+                                data.put(name, valueArray);
+                        }
+                    } else {  //get attachment file
+                        data.put(name, valueArray);
                     }
-                } else {  //get attachment file
-                    data.put(name, valueArray);
-                }
-            } else if (StringUtils.equals(Constants.FILE_NAMES_COLUMN, name)) {
-                String names = Bytes.toString(valueArray);
-                for (String n : names.split(",")) {
-                    if (returnFields.contains(n)) {
-                        data.put(n, generateFilelUrl(table, id, n, fields.get(n).getHbaseColumn()));
+                } else if (StringUtils.equals(Constants.FILE_NAMES_COLUMN, name)) {
+                    String names = Bytes.toString(valueArray);
+                    for (String n : names.split(",")) {
+                        if (returnFields.contains(n)) {
+                            data.put(n, generateFilelUrl(table, id, n, fields.get(n).getHbaseColumn()));
+                        }
                     }
-                }
-            } else { //inner field
-                String innerValue = Bytes.toString(valueArray);
+                } else { //inner field
+                    String innerValue = Bytes.toString(valueArray);
 
-                InnerField inf = schema.getInnerFields().get(name);
-                String[] values = innerValue.split(inf.getSeparator());
-                innerMap.get(name).forEach(field -> {
-                            String value = values[field.getInnerIndex()];
-                            if (StringUtils.isNotEmpty(value)) {
-                                switch (field.getStoreType()) {
-                                    case INT:
-                                        data.put(field.getName(), Integer.parseInt(value));
-                                        break;
-                                    case LONG:
-                                        data.put(field.getName(),Long.parseLong(value));
-                                        break;
-                                    case FLOAT:
-                                        data.put(field.getName(), Float.parseFloat(value));
-                                        break;
-                                    case DOUBLE:
-                                        data.put(field.getName(), Double.parseDouble(value));
-                                        break;
-                                    case BOOLEAN:
-                                        data.put(field.getName(), Boolean.parseBoolean(value));
-                                        break;
-                                    default:
-                                        data.put(field.getName(), value);
+                    InnerField inf = schema.getInnerFields().get(name);
+                    String[] values = innerValue.split(inf.getSeparator());
+                    innerMap.get(name).forEach(field -> {
+                                String value = values[field.getInnerIndex()];
+                                if (StringUtils.isNotEmpty(value)) {
+                                    switch (field.getStoreType()) {
+                                        case INT:
+                                            data.put(field.getName(), Integer.parseInt(value));
+                                            break;
+                                        case LONG:
+                                            data.put(field.getName(), Long.parseLong(value));
+                                            break;
+                                        case FLOAT:
+                                            data.put(field.getName(), Float.parseFloat(value));
+                                            break;
+                                        case DOUBLE:
+                                            data.put(field.getName(), Double.parseDouble(value));
+                                            break;
+                                        case BOOLEAN:
+                                            data.put(field.getName(), Boolean.parseBoolean(value));
+                                            break;
+                                        default:
+                                            data.put(field.getName(), value);
 
+                                    }
                                 }
                             }
-                        }
-                );
+                    );
+                }
+            }catch (Exception e){
+                log.warn("handle data exception:",e);
             }
         });
 
