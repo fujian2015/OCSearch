@@ -28,6 +28,7 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
    * Page Methods;
    */
   $scope.search = function(){
+    $scope.showAdvance = false;
     searchService.search($scope.content, function(schemas){
       $scope.schemas = schemas;
       if(schemas && schemas.length > 0) {
@@ -93,7 +94,7 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
         $scope.page.actives[i] = true;
       }
     }
-    $scope.page.fields = ["id"];
+    $scope.page.fields = ["id", "_table_"];
     for(let i = 0; i < item.fields.length; i++){
       $scope.page.fields.push(item.fields[i].name);
     }
@@ -126,10 +127,38 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
     let colors = ["result-odd", "result-even"];
     return colors[parseInt(idx/4) % 2];
   };
+  $scope.valFilter = function(item, len) {
+    let key = Object.keys(item)[0];
+    let val = item[key];
+    if (angular.isString(val)) {
+      if (val.length >= len) {
+        val = val.substring(0, len) + "...";
+      }
+      let temp = {};
+      temp[key] = val;
+      return temp;
+    } else if (angular.isArray(val)) {
+      // Todo
+      let lst = [];
+      for (let a of val) {
+        if (angular.isString(a)) {
+          if (a.length > len/val.length) {
+            lst.push(a.substring(0, parseInt(len/val.length)) + "...");
+          }
+        }
+      }
+      let temp = {};
+      temp[key] = lst.join(",");
+      return temp;
+    } else {
+      return item;
+    }
+  };
   /**
    * Global init functions
    */
   $scope.showCtrl = [];
+  $scope.showAdvance = false;
   $http.get("/schema/config").then(function(data) {
     $scope.schema_display = data.data;
     if($scope.schemas && $scope.schemas.length > 0) {
@@ -147,4 +176,15 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
       allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
       callback: $scope.search
     });
-}]);
+}])
+.directive('searchFocus', function($timeout) {
+  return function(scope, element) {
+    scope.$watch('showAdvance', function(newVal) {
+      $timeout(function () {
+        if (newVal) {
+          element[0].focus();
+        }
+      });
+    }, true);
+  };
+});

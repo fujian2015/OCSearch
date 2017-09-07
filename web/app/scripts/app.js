@@ -160,6 +160,7 @@ angular
       HELP_EXPRESSION_LINK: "more",
       ROWS: "Rows",
       CONDITIONS: "Conditions",
+      ADVANCE_SEARCH: "Advance Search",
     }).translations("zh", {
       ADD_NEW_TABLE: "增加新表",
       ADD_NEW_SCHEMA: "新建表结构",
@@ -236,6 +237,7 @@ angular
       HELP_EXPRESSION_LINK: "更多",
       ROWS: "每页行数",
       CONDITIONS: "搜索条件",
+      ADVANCE_SEARCH: "高级搜索",
     });
     $translateProvider.preferredLanguage('zh');
   }).constant('GLOBAL', {

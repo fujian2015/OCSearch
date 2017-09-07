@@ -7,6 +7,17 @@ angular.module('basic').controller('DetailCtrl', ['$scope', '$q', '$http', 'GLOB
   $scope.idparam = $stateParams.id;
   $scope.schemaparam = $stateParams.schema;
   $scope.tableparam = $stateParams.table;
+  $scope.links = null;
+
+  $scope.cutLen = function(item, len) {
+    if (angular.isString(item)) {
+      if (item.length > len) {
+        return item.substring(0, len) + "...";
+      }
+    } else {
+      return item;
+    }
+  };
 
   /*
   * Initial functions

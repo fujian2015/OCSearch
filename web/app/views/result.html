@@ -3,12 +3,6 @@
     <div class="col-lg-5 col-lg-offset-1" style="margin-top: 10px;">
       <form class="form-horizontal">
         <div class="form-group">
-          <label class="col-lg-2 control-label">{{'CONDITIONS' | translate}}</label>
-          <div class="col-lg-10">
-            <input type="text" ng-model="condition" class="form-control">
-          </div>
-        </div>
-        <div class="form-group">
           <label class="col-lg-2 control-label">{{'ROWS' | translate}}</label>
           <div class="col-lg-4">
             <select class="form-control" ng-model="page.rows" ng-options="o for o in page.rowOptions"></select>
@@ -41,6 +35,14 @@
               </button>
             </span>
           </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="col-md-2" style="margin-top: 25px;">
+          <a href="" ng-click="showAdvance=!showAdvance" style="text-decoration: none; color: deepSkyBlue;">{{'ADVANCE_SEARCH' | translate}}</a>
+        </div> 
+        <div ng-show="showAdvance" class="col-md-10" style="margin-top: 20px;">
+          <input id="advanceSearch" ng-model="condition" type="text" class="form-control input-sm" search-focus>
         </div>
       </div>
       <div class="col-lg-1 pull-right">
@@ -76,9 +78,9 @@
           </button>
         </div>
         <div class="row" ng-repeat="item in data.docs" style="margin-top: 10px;" ng-init="initShow(item, $index)">
-          <h4><span class="badge badge-secondary">{{$index+1+(page.pagination.current-1)*page.rows}}</span>&nbsp;&nbsp;<a ui-sref="detail({id:item.id, schema:page.schema.name, table:page.schema.tables})" target="_blank" style="text-decoration: none;">{{item.id}}</a></h4>
+          <h4><span class="badge badge-secondary">{{$index+1+(page.pagination.current-1)*page.rows}}</span>&nbsp;&nbsp;<a ui-sref="detail({id:item.id, schema:page.schema.name, table:item._table_})" target="_blank" style="text-decoration: none;">{{item.id}}</a></h4>
           <span ng-repeat="field in showCtrl[$index]" ng-init="findex = $index">
-            <span ng-repeat="(key, val) in field" class="col-md-3"><b>{{key}} :&nbsp;&nbsp; </b><span ng-class="getColor(findex)">{{val || ('EMPTY' | translate)}}</span></span>
+            <span ng-repeat="(key, val) in valFilter(field, 30)" class="col-md-3"><b>{{key}} :&nbsp;&nbsp; </b><span ng-class="getColor(findex)">{{val || ('EMPTY' | translate)}}</span></span>
           </span>
         </div>
       </div>
