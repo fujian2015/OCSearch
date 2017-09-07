@@ -17,6 +17,7 @@ function print_usage(){
   echo "  stop                           shutdown the server application"
   echo "  restart                        restart the server application"
   echo "  restart -m 【4】g               restart the server application"
+  echo "  version                        print the version"
 }
 
 function startServer(){
@@ -84,7 +85,8 @@ function stopServer(){
 
 
 function print_version(){
-    echo "1.0"
+
+    java -cp ${SERVER_HOME}/server/webapps/ocsearch-service/WEB-INF/lib/ocsearch-common-*jar  com.asiainfo.ocsearch.utils.VersionInfo
 }
 HEAP_SIZE=1g
 
