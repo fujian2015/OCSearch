@@ -47,6 +47,11 @@ public abstract class UpdateOrAddIndexer implements AtomicOperation {
         isProduct.addAttribute("name", "isProductionMode");
         isProduct.addAttribute("value", "true");
 
+
+        Element setTableCF = indexer.addElement("param");
+        setTableCF.addAttribute("name", "set-tablef");
+        setTableCF.addAttribute("value", "true");
+
         Map<String, Element> innerElements = Maps.newHashMap();
 
         tableSchema.getFields().values().stream().filter(Field::withSolr).forEach(field -> {
@@ -84,7 +89,6 @@ public abstract class UpdateOrAddIndexer implements AtomicOperation {
         try {
             xmlWriter = new XMLWriter(out);
             xmlWriter.write(indexerDoc);
-            System.out.println(indexerDoc.asXML());
         } catch (IOException e) {
             throw e;
         } finally {
