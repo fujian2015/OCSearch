@@ -139,7 +139,23 @@ public class BatchJobClient extends Configured implements Tool {
         job.setMapOutputValueClass(Put.class);//指定输出值类
         job.setMapperClass(BulkloadMapper.class);//指定Map函数
 //        job.setCombinerClass(PutCombiner.class);
-        FileInputFormat.addInputPaths(job, args[0]);//输入路径
+        String inputPath = args[0];
+        String commaSeparatedInputPaths = "";
+        try {
+            FileSystem fileSystem = FileSystem.get(configuration);
+            for (FileStatus fs : fileSystem.listStatus(new Path(inputPath))) {
+                logger.info("BulkLoad Input File : "+fs.getPath().toString());
+                commaSeparatedInputPaths = commaSeparatedInputPaths.concat(fs.getPath().toString()).concat(",");
+            }
+            commaSeparatedInputPaths = commaSeparatedInputPaths.substring(0,commaSeparatedInputPaths.length()-1);
+            logger.info("BulkLoad Input Files is : "+commaSeparatedInputPaths);
+            fileSystem.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error(String.valueOf(e));
+            throw new RuntimeException(e);
+        }
+        FileInputFormat.addInputPaths(job, commaSeparatedInputPaths);//输入路径
         FileSystem fs = FileSystem.get(configuration);
         Path output = new Path(outputPath);
         if (fs.exists(output)) {
