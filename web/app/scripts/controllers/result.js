@@ -28,7 +28,6 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
    * Page Methods;
    */
   $scope.search = function(){
-    $scope.showAdvance = false;
     searchService.search($scope.content, function(schemas){
       $scope.schemas = schemas;
       if(schemas && schemas.length > 0) {
@@ -74,9 +73,16 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
   $scope.choose = function(table){
     if($scope.page.tables) {
       for (let i = 0; i < $scope.page.tables.length; i++) {
+        /*
         if ($scope.page.tables[i] === table) {
           $scope.page.actives[i] = !$scope.page.actives[i];
           break;
+        }
+        */
+        if ($scope.page.tables[i] === table) {
+          $scope.page.actives[i] = true;
+        } else {
+          $scope.page.actives[i] = false;
         }
       }
     }
@@ -153,6 +159,14 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
     } else {
       return item;
     }
+  };
+  $scope.getFieldType = function(key) {
+    for (let field of $scope.page.schema.fields) {
+      if (field.name === key) {
+        return field.store_type;
+      }
+    }
+    return null;
   };
   /**
    * Global init functions

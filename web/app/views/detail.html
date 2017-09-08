@@ -7,9 +7,14 @@
     <b>{{field.name}} : </b>
     <span ng-if="field.store_type !== 'FILE' && field.store_type !== 'ATTACHMENT'">{{item[field.name] || ('EMPTY' | translate)}}</span>
     <span ng-if="field.store_type === 'FILE'">
-      <a href="">{{cutLen(item[field.name], 50)}}</a>
+      <a href="http://10.1.236.66:58080/ocsearch-service/query/fileget?id={{item[field.name]}}">{{cutLen(item[field.name], 90)}}</a>
     </span>
     <span ng-if="field.store_type === 'ATTACHMENT'">
+      <ul ng-repeat="link in item[field.name]">
+        <li ng-repeat="link in item[field.name]">
+          <a href="http://10.1.236.66:58080/ocsearch-service/query/fileget?id={{link}}">{{cutLen(link, 90)}}</a>
+        </li>
+      </ul>
     </span>
   </div>
 </div>
