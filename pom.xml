@@ -4,7 +4,7 @@
     <groupId>com.asiainfo</groupId>
     <artifactId>ocsearch</artifactId>
     <packaging>pom</packaging>
-    <version>${ocsearch.version}}</version>
+    <version>1.0-SNAPSHOT</version>
 
     <modules>
         <module>ocsearch-common</module>

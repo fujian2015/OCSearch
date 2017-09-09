@@ -19,15 +19,12 @@ import org.codehaus.jackson.node.ArrayNode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by mac on 2017/5/2.
  */
 public class CreateTableService extends OCSearchService {
 
-    private static Lock lock = new ReentrantLock();
 
     Logger stateLog = Logger.getLogger("state");
 
@@ -38,7 +35,6 @@ public class CreateTableService extends OCSearchService {
         stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());
 
         try {
-            lock.lock();
 
             Table table = parseRequest(request);
 
@@ -52,6 +48,7 @@ public class CreateTableService extends OCSearchService {
             String name = table.getName();
             if (metaDataHelper.hasTable(name))
                 throw new ServiceException("table : " + name + " exists!", ErrorCode.TABLE_EXIST);
+
 
             Transaction transaction = new TransactionImpl();
 
@@ -74,10 +71,12 @@ public class CreateTableService extends OCSearchService {
                 transaction.add(new CreatePhoenixView(name, schema));
             }
 
-//            transaction.add(new SaveTableToDb(table));
-
-//            transaction.add(new SaveTableToMemory(name, schema.getName()));
             transaction.add(new SaveTableToZk(table)); //instead db with zookeeper
+
+            String lock = metaDataHelper.lock("TABLE_" + table.getName());
+
+            if (lock == null)
+                throw new ServiceException("get lock failure,please check lock file on zookeeper", ErrorCode.TABLE_EXIST);
 
             if (!transaction.canExecute()) {
                 throw new ServiceException(String.format("create table :%s  failure because of transaction can't be executed.", name), ErrorCode.RUNTIME_ERROR);
@@ -93,6 +92,8 @@ public class CreateTableService extends OCSearchService {
                     log.error("roll back create table " + name + " failure", rollBackException);
                 }
                 throw e;
+            } finally {
+                metaDataHelper.unlock(lock);
             }
             return success;
         } catch (ServiceException e) {
@@ -102,7 +103,6 @@ public class CreateTableService extends OCSearchService {
             log.error(e);
             throw new ServiceException(e, ErrorCode.RUNTIME_ERROR);
         } finally {
-            lock.unlock();
             stateLog.info("end request " + uuid + " at " + System.currentTimeMillis());
         }
 

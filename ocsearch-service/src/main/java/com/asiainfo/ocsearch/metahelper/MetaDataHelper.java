@@ -19,19 +19,20 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Created by mac on 2017/5/11.
  */
 public class MetaDataHelper implements OnReconnect {
+    private Lock reloadLock = new ReentrantLock();
 
     static Logger log = Logger.getLogger(MetaDataHelper.class);
 
     private final String schemaPath;
     private final String tablePath;
+
+    private final String lockPath;
 
     private SolrZkClient zkclient;
 
@@ -41,12 +42,13 @@ public class MetaDataHelper implements OnReconnect {
 
     private Map<String, Schema> schemaMap;
     private Map<String, String> tableMap;
-    private ReadWriteLock lock = new ReentrantReadWriteLock(false);
+    private Lock lock = new ReentrantLock();
 
     public MetaDataHelper(Properties properties) throws Exception {
 
         this.schemaPath = properties.getProperty("zookeeper.schema.dir");
         this.tablePath = properties.getProperty("zookeeper.table.dir");
+        this.lockPath = properties.getProperty("zookeeper.lock.dir", "/ocsearch/lock");
 
         assert this.schemaPath != null;
         assert this.tablePath != null;
@@ -62,7 +64,7 @@ public class MetaDataHelper implements OnReconnect {
 //    private final Set<EventListener> listeners =
 //            Collections.newSetFromMap(new IdentityHashMap<EventListener, Boolean>());
 
-    private JsonNode readData(String path,Watcher watcher) throws KeeperException, InterruptedException, IOException {
+    private JsonNode readData(String path, Watcher watcher) throws KeeperException, InterruptedException, IOException {
 
         byte data[] = zkclient.getData(path, watcher, null, true);
         return new ObjectMapper().readTree(data);
@@ -74,8 +76,10 @@ public class MetaDataHelper implements OnReconnect {
     }
 
     private void reload() {
+        reloadLock.lock();
         reloadSchemas();
         reloadTables();
+        reloadLock.unlock();
     }
 
     private void reloadTables() {
@@ -83,9 +87,11 @@ public class MetaDataHelper implements OnReconnect {
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 Map<String, String> tables = loadTables();
-                lock.writeLock().lock();
+                log.debug(" get lock...");
+                lock.lock();
+                log.debug("release lock...");
                 this.tableMap = tables;
-                lock.writeLock().unlock();
+                lock.unlock();
             } catch (KeeperException e) {
                 log.error(e);
                 continue;
@@ -102,9 +108,11 @@ public class MetaDataHelper implements OnReconnect {
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 Map<String, Schema> schemas = loadSchemas();
-                lock.writeLock().lock();
+                log.debug(" get lock...");
+                lock.lock();
                 this.schemaMap = schemas;
-                lock.writeLock().unlock();
+                lock.unlock();
+                log.debug("release lock...");
             } catch (KeeperException e) {
                 log.error(e);
                 continue;
@@ -119,7 +127,7 @@ public class MetaDataHelper implements OnReconnect {
 
     private void load() throws Exception {
         log.info("load schemas and tables start!");
-        lock.writeLock().lock();
+        lock.lock();
         try {
             this.schemaMap = loadSchemas();
             this.tableMap = loadTables();
@@ -128,7 +136,7 @@ public class MetaDataHelper implements OnReconnect {
             log.error(e);
             throw e;
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
         log.info("load schemas and tables over!");
     }
@@ -144,7 +152,7 @@ public class MetaDataHelper implements OnReconnect {
         for (String name : schemas) {
             String path = this.schemaPath + "/" + name;
             try {
-                schemaMap.put(name, new Schema(readData(path,schemaWatcher)));
+                schemaMap.put(name, new Schema(readData(path, schemaWatcher)));
             } catch (IOException | ServiceException e) {
                 log.error("illegal json data:" + path, e);
             }
@@ -164,7 +172,7 @@ public class MetaDataHelper implements OnReconnect {
         for (String name : schemas) {
             String path = this.tablePath + "/" + name;
             try {
-                tableMap.put(name, new Table(readData(path,null)).getSchema());
+                tableMap.put(name, new Table(readData(path, null)).getSchema());
             } catch (IOException | ServiceException e) {
                 log.error("illegal json data:" + path, e);
             }
@@ -172,43 +180,15 @@ public class MetaDataHelper implements OnReconnect {
         return tableMap;
     }
 
-    private void addSchema(String name, Schema schema) {
-        log.info("add schema " + name);
-        lock.writeLock().lock();
-
-        schemaMap.put(name, schema);
-
-        lock.writeLock().unlock();
-    }
-
-    private void removeSchema(String schema) {
-        log.info("remove schema " + schema);
-        lock.writeLock().lock();
-
-        schemaMap.remove(schema);
-
-        lock.writeLock().unlock();
-    }
-
-    private void addTable(String table, String schema) {
-        log.info("add table " + table);
-        lock.writeLock().lock();
-        tableMap.put(table, schema);
-        lock.writeLock().unlock();
-    }
-
-    private void removeTable(String table) {
-        log.info("remove table " + table);
-        lock.writeLock().lock();
-        tableMap.remove(table);
-        lock.writeLock().unlock();
-    }
 
     public Schema getSchemaBySchema(String name) {
         Schema schema;
-        lock.readLock().lock();
-        schema = schemaMap.get(name);
-        lock.readLock().unlock();
+        lock.lock();
+        try {
+            schema = schemaMap.get(name);
+        } finally {
+            lock.unlock();
+        }
         return schema;
     }
 
@@ -284,56 +264,99 @@ public class MetaDataHelper implements OnReconnect {
     }
 
     public boolean hasTable(String name) {
-        boolean hasTbable;
-        lock.readLock().lock();
-        hasTbable = tableMap.containsKey(name);
-        lock.readLock().unlock();
-        return hasTbable;
+        lock.lock();
+        try {
+            return tableMap.containsKey(name);
+        } finally {
+            lock.unlock();
+        }
     }
 
     public boolean hasSchema(String name) {
-        boolean hasSchema;
-        lock.readLock().lock();
-        hasSchema = schemaMap.containsKey(name);
-        lock.readLock().unlock();
-        return hasSchema;
+        lock.lock();
+        try {
+            return schemaMap.containsKey(name);
+        } finally {
+            lock.unlock();
+        }
     }
 
     public Schema getSchemaByTable(String name) {
-        Schema schema;
-        lock.readLock().lock();
-        String schemaName = tableMap.get(name);
-        schema = schemaMap.get(schemaName);
-        lock.readLock().unlock();
-        return schema;
+        lock.lock();
+        try {
+            String schemaName = tableMap.get(name);
+            return schemaMap.get(schemaName);
+        } finally {
+            lock.unlock();
+        }
     }
 
     public boolean schemaInUse(String name) {
-        boolean isInUse;
-        lock.readLock().lock();
-        isInUse = tableMap.values().contains(name);
-        lock.readLock().unlock();
-        return isInUse;
+        lock.lock();
+        try {
+            return tableMap.values().contains(name);
+        } finally {
+            lock.unlock();
+        }
     }
 
     public Set<String> getTables() {
-        return tableMap.keySet();
+        lock.lock();
+        try {
+            return tableMap.keySet();
+        } finally {
+            lock.unlock();
+        }
     }
 
     public Set<String> getTablesBySchema(String schema) {
-        Set<String> tables=new TreeSet<>();
-        lock.readLock().lock();
-        for (Map.Entry<String, String> entry : tableMap.entrySet()) {
-            if(StringUtils.equals(schema,entry.getValue())){
-                tables.add(entry.getKey());
+        lock.lock();
+        try {
+            Set<String> tables = new TreeSet<>();
+            for (Map.Entry<String, String> entry : tableMap.entrySet()) {
+                if (StringUtils.equals(schema, entry.getValue())) {
+                    tables.add(entry.getKey());
+                }
             }
+            return tables;
+        } finally {
+            lock.unlock();
         }
-        lock.readLock().unlock();
-        return tables;
     }
 
     public Collection<Schema> getSchemas() {
         return schemaMap.values();
+    }
+
+    public String lock(String s) {
+        String lock = this.lockPath + "/" + s;
+        try {
+            if (!this.zkclient.exists(this.lockPath, true))
+                this.zkclient.makePath(lockPath, CreateMode.PERSISTENT, true);
+
+            if (zkclient.exists(lock, true) == false) {
+
+                zkclient.create(lock, null, CreateMode.PERSISTENT, true);
+                return lock;
+            }
+            else {
+                log.warn("lock file exists:" + lock);
+            }
+
+        } catch (Exception e) {
+            log.error("create lock failed:" + lock, e);
+        }
+        return null;
+    }
+
+    public void unlock(String lock) throws Exception {
+        try {
+            if (zkclient.exists(lock, true) == true) {
+                zkclient.delete(lock,-1,true);
+            }
+        } catch (Exception e) {
+            throw new Exception("unlock failed:"+lock,e);
+        }
     }
 
 
@@ -341,12 +364,11 @@ public class MetaDataHelper implements OnReconnect {
      * watcher for schema path
      */
     class SchemaWatcher implements Watcher {
-        private Lock reloadLock = new ReentrantLock();
 
         @Override
         public void process(WatchedEvent event) {
 
-            if (event.getType() == Event.EventType.NodeChildrenChanged||event.getType()== Event.EventType.NodeDataChanged) {
+            if (event.getType() == Event.EventType.NodeChildrenChanged || event.getType() == Event.EventType.NodeDataChanged) {
                 reloadLock.lock();
                 reloadSchemas();
                 reloadLock.unlock();
@@ -358,7 +380,6 @@ public class MetaDataHelper implements OnReconnect {
      * watcher for table path
      */
     class TableWatcher implements Watcher {
-        private Lock reloadLock = new ReentrantLock();
 
         @Override
         public void process(WatchedEvent event) {

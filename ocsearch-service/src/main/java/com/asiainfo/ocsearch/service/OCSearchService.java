@@ -52,6 +52,8 @@ public abstract class OCSearchService extends HttpServlet {
 
                 try {
                     JsonNode jsonNode = new ObjectMapper().readTree(request.getInputStream());
+                    if (log.isDebugEnabled())
+                        log.debug(id + ":" + jsonNode.toString());
                     re = doService(jsonNode);
 
                 } catch (IOException e) {
@@ -90,6 +92,8 @@ public abstract class OCSearchService extends HttpServlet {
             byte[] re;
 
             try {
+                if (log.isDebugEnabled())
+                    log.debug(id + ":" + jsonNode.toString());
                 re = doService(jsonNode);
             } catch (ServiceException serviceException) {
                 re = serviceException.getErrorResponse();

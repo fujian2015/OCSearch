@@ -4,6 +4,7 @@ import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.meta.IndexType;
 import com.asiainfo.ocsearch.meta.Schema;
+import com.asiainfo.ocsearch.metahelper.MetaDataHelper;
 import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
@@ -30,14 +31,16 @@ public class AddSchemaService extends OCSearchService {
 
             stateLog.info("start request " + uuid + " at " + System.currentTimeMillis());
 
-            if (request.has("with_hbase")&&request.get("with_hbase").asBoolean())
+            if (request.has("with_hbase") && request.get("with_hbase").asBoolean())
                 ((ObjectNode) request).put("request", false);
             else
                 ((ObjectNode) request).put("request", true);
 
             Schema tableSchema = new Schema(request);
 
-            if (MetaDataHelperManager.getInstance().hasSchema(tableSchema.getName())) {
+            MetaDataHelper metaDataHelper = MetaDataHelperManager.getInstance();
+
+            if (metaDataHelper.hasSchema(tableSchema.getName())) {
                 throw new ServiceException(String.format("schema :%s  exists.", tableSchema.name), ErrorCode.SCHEMA_EXIST);
             }
 
@@ -46,12 +49,15 @@ public class AddSchemaService extends OCSearchService {
             if (tableSchema.getIndexType() == IndexType.HBASE_SOLR ||
                     tableSchema.getIndexType() == IndexType.HBASE_SOLR_PHOENIX) {
                 transaction.add(new CreateSolrConfig(tableSchema));
-//                transaction.add(new CreateIndexerConfig(tableSchema));
             }
 
-//            transaction.add(new SaveSchemaToDb(tableSchema));
-//            transaction.add(new AddSchemaToMemory(tableSchema));
+
             transaction.add(new SaveSchemaToZk(tableSchema)); //instead db with zookeeper
+
+            String lock = metaDataHelper.lock("SCHEMA_" + tableSchema.name);
+
+            if (lock == null)
+                throw new ServiceException("get lock failure,please check lock file on zookeeper", ErrorCode.TABLE_EXIST);
 
             String transactionName = uuid + "_schema_add_" + tableSchema.name;
 
@@ -68,6 +74,8 @@ public class AddSchemaService extends OCSearchService {
                     TransactionUtil.serialize(transactionName, transaction, true);
                 }
                 throw e;
+            } finally {
+                metaDataHelper.unlock(lock);
             }
             return success;
         } catch (ServiceException e) {

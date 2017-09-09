@@ -4,6 +4,7 @@ import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.meta.IndexType;
 import com.asiainfo.ocsearch.meta.Schema;
+import com.asiainfo.ocsearch.metahelper.MetaDataHelper;
 import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
 import com.asiainfo.ocsearch.service.OCSearchService;
 import com.asiainfo.ocsearch.transaction.Transaction;
@@ -32,7 +33,8 @@ public class DeleteTableService extends OCSearchService {
             if (!MetaDataHelperManager.getInstance().hasTable(name)) {
                 throw new ServiceException("table " + name + " does not exist!", ErrorCode.TABLE_NOT_EXIST);
             }
-            Schema schema = MetaDataHelperManager.getInstance().getSchemaByTable(name);
+            MetaDataHelper metaDataHelper = MetaDataHelperManager.getInstance();
+            Schema schema = metaDataHelper.getSchemaByTable(name);
 
             Transaction transaction = new TransactionImpl();
 
@@ -52,6 +54,11 @@ public class DeleteTableService extends OCSearchService {
             if (!schema.withHbase())
                 transaction.add(new DeleteHbaseTable(name));
 
+            String lock = metaDataHelper.lock("TABLE_" + name);
+
+            if (lock == null)
+                throw new ServiceException("get lock failure,please check lock file on zookeeper", ErrorCode.TABLE_EXIST);
+
             if (!transaction.canExecute()) {
                 throw new ServiceException(String.format("delete table :%s  failure because of transaction can't be executed. please check hbase indexer servers", name), ErrorCode.RUNTIME_ERROR);
             }
@@ -61,6 +68,8 @@ public class DeleteTableService extends OCSearchService {
                 TransactionUtil.serialize(uuid + "_table_delete_" + name, transaction, false);
                 log.error("delete table " + name + " failure", e);
                 throw e;
+            } finally {
+                metaDataHelper.unlock(lock);
             }
             return success;
         } catch (ServiceException se) {

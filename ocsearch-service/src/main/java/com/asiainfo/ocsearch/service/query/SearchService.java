@@ -179,11 +179,12 @@ public class SearchService extends QueryService {
             ThreadPoolManager.getExecutor("getQuery").submit(queryActor);
             runningThreadNum.await();
             boolean withId = hasId(returnNode);
+            boolean withTable = hasTable(returnNode);
             log.warn("result is:" + queryActor.getQueryResult().getData().size());
             rowKeys.forEach(row -> {
                         ObjectNode data = queryActor.getQueryResult().getData().remove(0);
 
-                        arrayNode.add(updateNode(data,row,table,false,withId));
+                        arrayNode.add(updateNode(data,row,table,withTable,withId));
                     }
             );
             log.warn("arrayNode  is:" + arrayNode.size());

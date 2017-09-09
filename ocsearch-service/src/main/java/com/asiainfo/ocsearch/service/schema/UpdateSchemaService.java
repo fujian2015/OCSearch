@@ -40,16 +40,25 @@ public class UpdateSchemaService extends OCSearchService {
             if (schema == null)
                 throw new ServiceException("the  'table' " + table + " does not exist", ErrorCode.TABLE_NOT_EXIST);
 
-            JsonNode body = request.get("field");
+            String lock = metaDataHelper.lock("SCHEMA_" + schema.name);
 
-            if (StringUtils.equals(command, "update_field")) {
-                updateField(body, schema, table);
-            } else if (StringUtils.equals(command, "add_field")) {
-                addField(body, schema, table);
-            } else if (StringUtils.equals(command, "delete_field")) {
-                deleteField(body, schema, table);
-            } else {
-                throw new ServiceException("unknown update command " + command, ErrorCode.PARSE_ERROR);
+            if (lock == null)
+                throw new ServiceException("get lock failure,please check lock file on zookeeper", ErrorCode.TABLE_EXIST);
+
+            try {
+                JsonNode body = request.get("field");
+
+                if (StringUtils.equals(command, "update_field")) {
+                    updateField(body, schema, table);
+                } else if (StringUtils.equals(command, "add_field")) {
+                    addField(body, schema, table);
+                } else if (StringUtils.equals(command, "delete_field")) {
+                    deleteField(body, schema, table);
+                } else {
+                    throw new ServiceException("unknown update command " + command, ErrorCode.PARSE_ERROR);
+                }
+            }finally {
+                metaDataHelper.unlock(lock);
             }
             return success;
         } catch (ServiceException se) {

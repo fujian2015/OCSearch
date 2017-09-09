@@ -51,15 +51,23 @@ public class DeleteSchemaService extends OCSearchService {
 
             if (schema.getIndexType() == IndexType.HBASE_SOLR||
                     schema.getIndexType() == IndexType.HBASE_SOLR_PHOENIX) {
-//                transaction.add(new DeleteIndexerConfig(name));
                 transaction.add(new DeleteSolrConfig(name));
             }
+            
+            String lock = metaDataHelper.lock("SCHEMA_" + name);
+
+            if (lock == null)
+                throw new ServiceException("get lock failure,please check lock file on zookeeper", ErrorCode.TABLE_EXIST);
+
             try {
                 transaction.execute();
             } catch (Exception e) {
                 log.error("delete schema " + name + " failure", e);
                 TransactionUtil.serialize(uuid + "_schema_delete_" + name, transaction, false);
                 throw e;
+            }
+            finally {
+                metaDataHelper.unlock(lock);
             }
             return success;
         } catch (ServiceException e) {
