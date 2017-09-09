@@ -30,7 +30,8 @@ ocsearch-batchjob/target
 ocsearch-cache/target
 ocsearch-flume/target
 
-web/node_modules
+web/node_modules/*
+!web/node_modules/bower*
 web/dist
 web/build-server
 web/.sass-cache
