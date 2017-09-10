@@ -133,31 +133,17 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
     let colors = ["result-odd", "result-even"];
     return colors[parseInt(idx/4) % 2];
   };
-  $scope.valFilter = function(item, len) {
-    let key = Object.keys(item)[0];
-    let val = item[key];
+  $scope.valFilter = function(val, len) {
     if (angular.isString(val)) {
-      if (val.length >= len) {
-        val = val.substring(0, len) + "...";
-      }
-      let temp = {};
-      temp[key] = val;
-      return temp;
+      return val.substring(0, len) + "...";
     } else if (angular.isArray(val)) {
-      // Todo
-      let lst = [];
-      for (let a of val) {
-        if (angular.isString(a)) {
-          if (a.length > len/val.length) {
-            lst.push(a.substring(0, parseInt(len/val.length)) + "...");
-          }
-        }
+      if (angular.isString(val[0])) {
+        return val[0].substring(0, len) + "...";
+      } else {
+        return val[0];
       }
-      let temp = {};
-      temp[key] = lst.join(",");
-      return temp;
     } else {
-      return item;
+      return val;
     }
   };
   $scope.getFieldType = function(key) {

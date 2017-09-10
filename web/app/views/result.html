@@ -80,15 +80,15 @@
         <div class="row" ng-repeat="item in data.docs" style="margin-top: 10px;" ng-init="initShow(item, $index)">
           <h4><span class="badge badge-secondary">{{$index+1+(page.pagination.current-1)*page.rows}}</span>&nbsp;&nbsp;<a ui-sref="detail({id:item.id, schema:page.schema.name, table:item._table_})" target="_blank" style="text-decoration: none;">{{item.id}}</a></h4>
           <span ng-repeat="field in showCtrl[$index]" ng-init="findex = $index">
-            <span ng-repeat="(key, val) in valFilter(field, 30)" class="col-md-3">
+            <span ng-repeat="(key, val) in field" class="col-md-3">
               <b>{{key}} :&nbsp;&nbsp; </b>
-              <span ng-class="getColor(findex)" ng-if="getFieldType(key) !== 'FILE'">{{val || ('EMPTY' | translate)}}</span>
-              <span ng-if="getFieldType(key) === 'FILE'"><a href="" ng-class="getColor(findex)" style="text-decoration: none;">{{val}}</a></span>
-              <!--
-              <span ng-if="getFieldType(key) === 'ATTACHMENT'">
-                <a ng-repeat="link in val.split(',')" href="" ng-class="getColor(findex)" style="text-decoration: none;">{{link}}</a>&nbsp;&nbsp;
+              <span ng-class="getColor(findex)" ng-if="getFieldType(key) !== 'FILE' && getFieldType(key) !== 'ATTACHMENT'">{{valFilter(val, 30) || ('EMPTY' | translate)}}</span>
+              <span ng-if="getFieldType(key) === 'FILE'">
+                <a href="http://10.1.236.66:58080/ocsearch-service/query/fileget?id={{val}}" ng-class="getColor(findex)" style="text-decoration: none;">{{valFilter(val, 30)}}</a>
               </span>
-              -->
+              <span ng-if="getFieldType(key) === 'ATTACHMENT'">
+                <a href="http://10.1.236.66:58080/ocsearch-service/query/fileget?id={{val[0]}}" ng-class="getColor(findex)" style="text-decoration: none;">{{valFilter(val, 30)}}</a><font ng-class="getColor(findex)">, More...</font>
+              </span>
             </span>
           </span>
         </div>

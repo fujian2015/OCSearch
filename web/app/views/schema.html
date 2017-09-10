@@ -10,8 +10,11 @@
         <div class="container-fluid">
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'NAME' | translate}} *</label>
-            <div class="col-md-10">
+            <div class="col-md-8">
               <input class="form-control" ng-model="newschema.name">
+            </div>
+            <div class="col-md-2">
+              <div class="checkbox"><label><input type="checkbox" ng-model="newschema.with_hbase">With Hbase</label></div>
             </div>
           </div>
           <div class="form-group">
@@ -34,6 +37,13 @@
               <input class="form-control" ng-model="newschema.table_expression" uib-popover-html="helpExpressionHtml" popover-trigger="'focus'" popover-animation="true">
             </div>
           </div>
+          <div class="form-group">
+            <label class="control-label col-md-2" style="text-align: left;">ID Formatter</label>
+            <div class="col-md-10">
+              <select class="form-control" ng-model="newschema.id_formatter" ng-options="f for f in id_formatter_type">
+              </select>
+            </div>
+          </div> 
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'CONTENT_FIELD' | translate}}</label>
             <div class="col-md-4"><input type="text" class="form-control" placeholder="{{'NAME' | translate}}" ng-model="new_content_field.name"></div>
@@ -131,9 +141,14 @@
             </div>
           </div>
           <div class="form-group">
+            <label class="control-label col-md-2" style="text-align: left;">Hbase</label>
+            <div class="col-md-5"><input type="text" class="form-control" ng-disabled="!newschema.with_hbase" placeholder="family"></div>
+            <div class="col-md-5"><input type="text" class="form-control" ng-disabled="!newschema.with_hbase" placeholder="column"></div>
+          </div>
+          <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'INNER_FIELD' | translate}}</label>
             <div class="col-md-10">
-              <select class="form-control" ng-model="new_field.inner_field" ng-options="ifield.name as ifield.name for ifield in newschema.inner_fields">
+              <select class="form-control" ng-disabled="newschema.with_hbase" ng-model="new_field.inner_field" ng-options="ifield.name as ifield.name for ifield in newschema.inner_fields">
                 <option value=""><{{'SELECT_FIELD_INNER_FIELD' | translate}}></option>
               </select>
             </div>
@@ -151,7 +166,8 @@
                 <th>{{'INTABLE_STORE_TYPE' | translate}}</th>
                 <th>{{'INTABLE_INDEX_TYPE' | translate}}</th>
                 <th>{{'INTABLE_CONTENT_FIELD' | translate}}</th>
-                <th>{{'INTABLE_INNER_FIELD' | translate}}</th>
+                <th ng-if="newschema.with_hbase">Hbase</th>
+                <th ng-if="!newschema.with_hbase">{{'INTABLE_INNER_FIELD' | translate}}</th>
                 <th>{{'INTABLE_OPERATION' | translate}}</th>
               </tr>
               <tr ng-repeat="field in newschema.fields">
@@ -160,7 +176,8 @@
                 <td>{{field.store_type}}</td>
                 <td>{{field.index_type || ('UNDEFINED' | translate)}}</td>
                 <td>{{field.content_field || ('UNDEFINED' | translate)}}</td>
-                <td>{{field.inner_field || ('UNDEFINED' | translate)}}</td>
+                <td>family:{{}}&nbsp;&nbsp;column:{{}}</td>
+                <td ng-if="!newschema.with_hbase">{{field.inner_field || ('UNDEFINED' | translate)}}</td>
                 <td><a href="" ng-click="removeField()" style="text-decoration: none;">{{'DELETE' | translate}}</a></td>
               </tr>
             </table>
@@ -266,7 +283,7 @@
             <div class="col-md-10">{{joinFields(page.schema.inner_fields) || ('UNDEFINED' | translate)}}</div>
           </div>
           <h4 style="margin-top: 50px;">{{'TABLE' | translate}}</h4><hr>
-          <i ng-repeat="table in page.tables" ng-if="page.tables.length > 0"><a ui-sref="table({linktable:table})" target="_blank" style="text-decoration: none;">{{table}}</a>&nbsp;&nbsp;</i>
+          <i ng-repeat="table in page.tables" ng-if="page.tables.length > 0"><a ui-sref="table({linktable:table})" style="text-decoration: none;">{{table}}</a>&nbsp;&nbsp;</i>
           <i ng-if="!page.tables.length || page.tables.length===0">{{'UNDEFINED' | translate}}</i>
           <h4 style="margin-top: 50px;">{{'FIELDS' | translate}}</h4><hr>
           <table class="table">

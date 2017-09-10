@@ -29,6 +29,8 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
     { val: 1, display: "hbase+phoenix" },
     { val: 2, display: "hbase+phoenix+solr" }
   ];
+  // ID formatter
+  $scope.id_formatter_type = ["com.ngdata.hbaseindexer.uniquekey.HexUniqueKeyFormatter", "com.ngdata.hbaseindexer.uniquekey.StringUniqueKeyFormatter"];
   // get index display info by index val
   $scope.schemaIndexType = function(index) {
     for (let item of $scope.index_type) {
@@ -218,7 +220,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
     $scope.modalAction(
       $translate.instant('ADD_NEW_SCHEMA'), 
       $translate.instant('CONFIRM_ADD_SCHEMA'),
-      {name:"", rowkey_expression:"", table_expression:"", index_type:"", content_fields:[], inner_fields:[], fields:[], query_fields:[]},
+      {name:"", with_hbase: false, rowkey_expression:"", table_expression:"", index_type:"", id_formatter: $scope.id_formatter_type[1], content_fields:[], inner_fields:[], fields:[], query_fields:[]},
       function() {
         $http.post(GLOBAL.host+'/schema/add', this.newschema).then(function(){
           $scope.initial();
@@ -326,7 +328,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
       schema: {},
       schemasActive: []
     };
-    $scope.schema_display = [];
+    $scope.schema_display = {};
     $rootScope.global.tab = "schema";
     $q.all([$http.get(GLOBAL.host + "/schema/list"), $http.get("/schema/config")]).then(function(data) {
       $scope.schemas = data[0].data.schemas;
@@ -349,6 +351,8 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
 
   $scope.$on("$destroy", function() {
     //console.log($scope.schema_display);
-    $http.post("/schema/config/set", $scope.schema_display, function() {});
+    if ($scope.schema_display && Object.keys($scope.schema_display).length !== 0) {
+      $http.post("/schema/config/set", $scope.schema_display, function() {});
+    }
   });
 }]);
