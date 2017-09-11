@@ -40,6 +40,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
     }
     return null;
   };
+  /*
   // output content_fields and inner_fields in format string
   $scope.joinFields = function(fields) {
     if (angular.isDefined(fields)) {
@@ -61,6 +62,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
       return null;
     }
   };
+  */
   // Template modal factory
   $scope.modalAction = function(title, confirm_content, initval, okfunc) {
     let returnfunc = function(title, confirm_content, initval, okfunc) {
@@ -363,7 +365,6 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
   $scope.initial();
 
   $scope.$on("$destroy", function() {
-    //console.log($scope.schema_display);
     if ($scope.schema_display && Object.keys($scope.schema_display).length !== 0) {
       $http.post("/schema/config/set", $scope.schema_display, function() {});
     }

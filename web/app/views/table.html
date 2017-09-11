@@ -90,17 +90,23 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="control-label col-md-2" style="text-align: left;">{{'INNER_FIELD' | translate}}</label>
-          <div class="col-md-10">
-            <select class="form-control" ng-model="curfield.inner_field" ng-options="if.name as if.name for if in page.table.schema.inner_fields">
-              <option value=""><{{'SELECT_FIELD_INNER_FIELD' | translate}}></option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
           <label class="control-label col-md-2" style="text-align: left;">{{'HBASE' | translate}}</label>
           <div class="col-md-5"><input class="form-control" ng-model="curfield.hbase_family" placeholder="{{'HBASE_FAMILY' | translate}}"></div>
           <div class="col-md-5"><input class="form-control" ng-model="curfield.hbase_column" placeholder="{{'HBASE_COLUMN' | translate}}"></div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-md-2" style="text-align: left;">{{'INNER_FIELD' | translate}}</label>
+          <div class="col-md-10">
+            <table class="table">
+              <tr><th>#</th><th>{{'INTABLE_NAME' | translate}}</th><th>{{'INTABLE_SEPARATOR' | translate}}</th><th>{{'HBASE' | translate}}</th></tr>
+              <tr ng-repeat="ifield in page.table.schema.inner_fields">
+                <td>{{$index+1}}</td>
+                <td>{{ifield.name}}</td>
+                <td>{{ifield.separator}}</td>
+                <td>{{'HBASE_FAMILY' | translate}}:{{ifield.hbase_family}};&nbsp;{{'HBASE_COLUMN' | translate}}:{{ifield.hbase_column}}</td>
+              </tr>
+            </table>
+          </div>
         </div>
         <div class="form-group">
           <div class="col-md-2 col-md-offset-10" ng-if="!editModeFlag">

@@ -226,9 +226,9 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
             let err_flag = false;
             let result_lst = [];
             for (let item of $scope.request_list) {
-              if (item.error_code !== 0) {
+              if (item.return_code !== 0) {
                 err_flag = true;
-                result_lst.push("Action:" + item.command + " of " + item.field.name + "   Error:" + item.error_desc);
+                result_lst.push("Action:" + item.command + " of " + item.field.name + "   Error:" + item.return_desc);
               }
             }
             if (err_flag) {
