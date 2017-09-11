@@ -38,7 +38,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="control-label col-md-2" style="text-align: left;">ID Formatter</label>
+            <label class="control-label col-md-2" style="text-align: left;">{{'ID_FORMATTER' | translate}}</label>
             <div class="col-md-10">
               <select class="form-control" ng-model="newschema.id_formatter" ng-options="f for f in id_formatter_type">
               </select>
@@ -174,10 +174,10 @@
                 <td>{{$index + 1}}</td>
                 <td>{{field.name}}</td>
                 <td>{{field.store_type}}</td>
-                <td>{{field.index_type || ('UNDEFINED' | translate)}}</td>
-                <td>{{field.content_field || ('UNDEFINED' | translate)}}</td>
-                <td ng-if="newschema.with_hbase">{{'HBASE_FAMILY' | translate}}:{{field.hbase_family}};&nbsp;{{'HBASE_COLUMN' | translate}}:{{field.hbase_column}}</td>
-                <td ng-if="!newschema.with_hbase">{{field.inner_field || ('UNDEFINED' | translate)}}</td>
+                <td>{{field.index_type || ('NULL' | translate)}}</td>
+                <td>{{field.content_field || ('NULL' | translate)}}</td>
+                <td ng-if="newschema.with_hbase">{{field.hbase_family || ('NULL' | translate)}}:{{field.hbase_column || ('NULL' | translate)}}</td>
+                <td ng-if="!newschema.with_hbase">{{field.inner_field || ('NULL' | translate)}}</td>
                 <td><a href="" ng-click="removeField()" style="text-decoration: none;">{{'DELETE' | translate}}</a></td>
               </tr>
             </table>
@@ -270,9 +270,17 @@
           </div>
           <div class="row" style="margin-bottom: 10px;">
             <div class="col-md-2"><b>{{'ROWKEY_EXPRESSION' | translate}}:</b></div>
-            <div class="col-md-4">{{page.schema.rowkey_expression || ('UNDEFINED' | translate)}}</div>
+            <div class="col-md-4">{{page.schema.rowkey_expression || ('NULL' | translate)}}</div>
             <div class="col-md-2"><b>{{'TABLE_EXPRESSION' | translate}}:</b></div>
-            <div class="col-md-4">{{page.schema.table_expression || ('UNDEFINED' | translate)}}</div>
+            <div class="col-md-4">{{page.schema.table_expression || ('NULL' | translate)}}</div>
+          </div>
+          <div class="row" style="margin-bottom: 10px;">
+            <div class="col-md-2"><b>{{'WITH_HBASE' | translate}}</b></div>
+            <div class="col-md-10">{{page.schema.with_hbase || ('NULL' | translate)}}</div>
+          </div>
+          <div class="row" style="margin-bottom: 10px;">
+            <div class="col-md-2"><b>{{'ID_FORMATTER' | translate}}:</b></div>
+            <div class="col-md-10">{{page.schema.id_formatter || ('NULL' | translate)}}</div>
           </div>
           <div class="row" style="margin-bottom: 10px;">
             <div class="col-md-5">
@@ -294,23 +302,23 @@
               <b>{{'INNER_FIELD' | translate}}</b>
               <table class="table" style="margin-top: 10px;">
                 <tr>
-                  <td>#</td>
-                  <td>{{'INTABLE_NAME' | translate}}</td>
-                  <td>{{'INTABLE_SEPARATOR' | translate}}</td>
-                  <td>{{'HBASE' | translate}}</td>
+                  <th>#</th>
+                  <th>{{'INTABLE_NAME' | translate}}</th>
+                  <th>{{'INTABLE_SEPARATOR' | translate}}</th>
+                  <th>{{'HBASE' | translate}}</th>
                 </tr>
                 <tr ng-repeat="ifield in page.schema.inner_fields">
                   <td>{{$index+1}}</td>
                   <td>{{ifield.name}}</td>
                   <td>{{ifield.separator}}</td>
-                  <td>{{'HBASE_FAMILY' | translate}}:{{ifield.hbase_family}};&nbsp;{{'HBASE_COLUMN' | translate}}:{{ifield.hbase_column}}</td>
+                  <td>{{ifield.hbase_family || ('NULL' | translate)}}:{{ifield.hbase_column || ('NULL' | translate)}}</td>
                 </tr>
               </table>
             </div>
           </div>
           <h4 style="margin-top: 50px;">{{'TABLE' | translate}}</h4><hr>
           <i ng-repeat="table in page.tables" ng-if="page.tables.length > 0"><a ui-sref="table({linktable:table})" style="text-decoration: none;">{{table}}</a>&nbsp;&nbsp;</i>
-          <i ng-if="!page.tables.length || page.tables.length===0">{{'UNDEFINED' | translate}}</i>
+          <i ng-if="!page.tables.length || page.tables.length===0">{{'NULL' | translate}}</i>
           <h4 style="margin-top: 50px;">{{'FIELDS' | translate}}</h4><hr>
           <table class="table">
             <tr>
@@ -322,18 +330,18 @@
               <th>{{'INTABLE_INDEX_TYPE' | translate}}</th>
               <th>{{'HBASE' | translate}}</th>
               <th>{{'INTABLE_QUERY_WEIGHT' | translate}}</th>
-              <th>{{'INTABLE_DISPLAY' | translate}}</th>
+              <th><span class="checkbox" style="margin-top: 0;">{{'INTABLE_DISPLAY' | translate}}<input type="checkbox" ng-click="checkDisplay()" ng-model="page.schema_display" indeterminate="page.schema_display_indeter"></span></th>
             </tr>
             <tr ng-repeat="field in page.schema.fields">
               <td>{{$index+1}}</td>
               <td>{{field.name}}</td>
               <td>{{field.store_type}}</td>
-              <td>{{field.content_field || ('UNDEFINED' | translate)}}</td>
-              <td>{{field.inner_field || ('UNDEFINED' | translate)}}</td>
-              <td>{{field.index_type || ('UNDEFINED' | translate)}}</td>
-              <td>{{'HBASE_FAMILY' | translate}}:{{field.hbase_family || ('UNDEFINED' | translate)}};&nbsp;{{'HBASE_COLUMN' | translate}}:{{field.hbase_column || ('UNDEFINED' | translate)}}</td>
-              <td>{{queryWeight(field.name, page.schema.query_fields) || ('UNDEFINED' | translate)}}</td>
-              <td><span class="checkbox" style="margin-top: 0;"><input type="checkbox" ng-model="schema_display[page.schema.name][field.name]">{{'DISPLAY' | translate}}</span></td>
+              <td>{{field.content_field || ('NULL' | translate)}}</td>
+              <td>{{field.inner_field || ('NULL' | translate)}}</td>
+              <td>{{field.index_type || ('NULL' | translate)}}</td>
+              <td>{{field.hbase_family || ('NULL' | translate)}}:{{field.hbase_column || ('NULL' | translate)}}</td>
+              <td>{{queryWeight(field.name, page.schema.query_fields) || ('NULL' | translate)}}</td>
+              <td><span class="checkbox" style="margin-top: 0;"><input type="checkbox" ng-model="schema_display[page.schema.name][field.name]" ng-click="changeDisplay()">{{'DISPLAY' | translate}}</span></td>
             </tr>
           </table>
         </div>

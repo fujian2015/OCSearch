@@ -103,7 +103,7 @@
                 <td>{{$index+1}}</td>
                 <td>{{ifield.name}}</td>
                 <td>{{ifield.separator}}</td>
-                <td>{{'HBASE_FAMILY' | translate}}:{{ifield.hbase_family}};&nbsp;{{'HBASE_COLUMN' | translate}}:{{ifield.hbase_column}}</td>
+                <td>{{ifield.hbase_family || ('NULL' | translate)}}:{{ifield.hbase_column || ('NULL' | translate)}}</td>
               </tr>
             </table>
           </div>
@@ -136,11 +136,11 @@
           <td>{{$index+1}}</td>
           <td>{{field.name}}</td>
           <td>{{field.store_type}}</td>
-          <td>{{field.index_type || ('UNDEFINED' | translate)}}</td>
-          <td>{{field.content_field || ('UNDEFINED' | translate)}}</td>
-          <td>{{field.inner_field || ('UNDEFINED' | translate)}}</td>
-          <td>{{'HBASE_FAMILY' | translate}}:{{field.hbase_family || ('UNDEFINED' | translate)}};&nbsp;{{'HBASE_COLUMN' | translate}}:{{field.hbase_column || ('UNDEFINED' | translate)}}</td>
-          <td>{{queryWeight(curschema, $index) || ('UNDEFINED' | translate)}}</td>
+          <td>{{field.index_type || ('NULL' | translate)}}</td>
+          <td>{{field.content_field || ('NULL' | translate)}}</td>
+          <td>{{field.inner_field || ('NULL' | translate)}}</td>
+          <td>{{field.hbase_family || ('NULL' | translate)}}:{{field.hbase_column || ('NULL' | translate)}}</td>
+          <td>{{queryWeight(curschema, $index) || ('NULL' | translate)}}</td>
           <td ng-if="!queryWeight(curschema, $index)"><a href="" ng-click="deleteField($index)">{{'DELETE' | translate}}</a>&nbsp;/&nbsp;<a href="" ng-click="editField($index)">{{'EDIT' | translate}}</a></td>
           <td ng-if="queryWeight(curschema, $index)">{{'UNAVAILABLE' | translate}}</td>
         </tr>
@@ -191,16 +191,18 @@
               <th>{{'INTABLE_CONTENT_FIELD' | translate}}</th>
               <th>{{'INTABLE_INNER_FIELD' | translate}}</th>
               <th>{{'INTABLE_INDEX_TYPE' | translate}}</th>
+              <th>{{'HBASE' | translate}}</th>
               <th>{{'INTABLE_QUERY_WEIGHT' | translate}}</th>
             </tr>
             <tr ng-repeat="field in page.table.schema.fields">
               <td>{{$index+1}}</td>
               <td>{{field.name}}</td>
               <td>{{field.store_type}}</td>
-              <td>{{field.content_field || ('UNDEFINED' | translate)}}</td>
-              <td>{{field.inner_field || ('UNDEFINED' | translate)}}</td>
-              <td>{{field.index_type || ('UNDEFINED' | translate)}}</td>
-              <td>{{queryWeight(page.table.schema, $index) || ('UNDEFINED' | translate)}}</td>
+              <td>{{field.content_field || ('NULL' | translate)}}</td>
+              <td>{{field.inner_field || ('NULL' | translate)}}</td>
+              <td>{{field.index_type || ('NULL' | translate)}}</td>
+              <td>{{field.hbase_family || ('NULL' | translate)}}:{{field.hbase_column || ('NULL' | translate)}}</td>
+              <td>{{queryWeight(page.table.schema, $index) || ('NULL' | translate)}}</td>
             </tr>
           </table>
         </div>

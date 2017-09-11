@@ -292,6 +292,63 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
     });
     if (!angular.isDefined($scope.schema_display[$scope.page.schema.name])) {
       $scope.schema_display[$scope.page.schema.name] = {};
+      $scope.page.schema_display = false;
+      $scope.page.schema_display_indeter = false;
+    } else {
+      let show_count = 0;
+      for (let f of $scope.page.schema.fields) {
+        if ($scope.schema_display[$scope.page.schema.name][f.name]) {
+          show_count += 1;
+        }
+      }
+      if (show_count === $scope.page.schema.fields.length) {
+        $scope.page.schema_display = true;
+        $scope.page.schema_display_indeter = false;
+      } else if (show_count === 0) {
+        $scope.page.schema_display = false;
+        $scope.page.schema_display_indeter = false;
+      } else {
+        $scope.page.schema_display = false;
+        $scope.page.schema_display_indeter = true;
+      }
+    }
+  };
+  $scope.checkDisplay = function() {
+    if ($scope.page.schema_display_indeter && $scope.page.schema_display) {
+      // Indeterminate -> All
+      for(let f of $scope.page.schema.fields) {
+        $scope.schema_display[$scope.page.schema.name][f.name] = true;
+      }
+      $scope.page.schema_display = true;
+      $scope.page.schema_display_indeter = false;
+    } else if (!$scope.page.schema_display && !$scope.page.schema_display_indeter) {
+      // All -> None
+      for(let f of $scope.page.schema.fields) {
+        $scope.schema_display[$scope.page.schema.name][f.name] = false;
+      }
+    } else if ($scope.page.schema_display && !$scope.page.schema_display_indeter) {
+      // None -> All
+      for(let f of $scope.page.schema.fields) {
+        $scope.schema_display[$scope.page.schema.name][f.name] = true;
+      }
+    }
+  };
+  $scope.changeDisplay = function() {
+    let check_count = 0;
+    for (let f of $scope.page.schema.fields) {
+      if ($scope.schema_display[$scope.page.schema.name][f.name]) {
+        check_count += 1;
+      }
+    }
+    if (check_count === $scope.page.schema.fields.length) {
+      $scope.page.schema_display = true;
+      $scope.page.schema_display_indeter = false;
+    } else if (check_count === 0) {
+      $scope.page.schema_display = false;
+      $scope.page.schema_display_indeter = false;
+    } else {
+      $scope.page.schema_display = false;
+      $scope.page.schema_display_indeter = true;
     }
   };
   // Delete schema
@@ -341,7 +398,9 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
   $scope.initial = function() {
     $scope.page = {
       schema: {},
-      schemasActive: []
+      schemasActive: [],
+      schema_display: false,
+      schema_display_indeter: false,
     };
     $scope.schema_display = {};
     $rootScope.global.tab = "schema";
@@ -369,4 +428,19 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
       $http.post("/schema/config/set", $scope.schema_display, function() {});
     }
   });
-}]);
+}])
+.directive('indeterminate', function() {
+  return {
+    restrict: 'A',
+
+    link(scope, elem, attr) {
+      var watcher = scope.$watch(attr.indeterminate, function(value) {
+        elem[0].indeterminate = value;
+      });
+
+      scope.$on('$destory', function() {
+        watcher();
+      });
+    }
+  };
+});

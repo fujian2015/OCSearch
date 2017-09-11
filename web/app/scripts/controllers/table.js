@@ -233,7 +233,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
             }
             if (err_flag) {
               $ngConfirm({
-                title: "Error",
+                title: $translate.instant('CONFIRM_TITLE_EDIT_TABLE_ERROR'),
                 content: result_lst.join('\n'),
                 closeIcon: true,
                 scope: $scope,

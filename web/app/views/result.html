@@ -82,12 +82,12 @@
           <span ng-repeat="field in showCtrl[$index]" ng-init="findex = $index">
             <span ng-repeat="(key, val) in field" class="col-md-3">
               <b>{{key}} :&nbsp;&nbsp; </b>
-              <span ng-class="getColor(findex)" ng-if="getFieldType(key) !== 'FILE' && getFieldType(key) !== 'ATTACHMENT'">{{valFilter(val, 30) || ('EMPTY' | translate)}}</span>
+              <span ng-class="getColor(findex)" ng-if="getFieldType(key) !== 'FILE' && getFieldType(key) !== 'ATTACHMENT'">{{valFilter(val, 30) || ('NULL' | translate)}}</span>
               <span ng-if="getFieldType(key) === 'FILE'">
-                <a href="http://10.1.236.66:58080/ocsearch-service/query/fileget?id={{val}}" ng-class="getColor(findex)" style="text-decoration: none;">{{valFilter(val, 30)}}</a>
+                <a href="http://10.1.236.66:58080/ocsearch-service/query/fileget?id={{val}}" style="text-decoration: none; color: deepSkyBlue;">{{valFilter(val, 30)}}</a>
               </span>
               <span ng-if="getFieldType(key) === 'ATTACHMENT'">
-                <a href="http://10.1.236.66:58080/ocsearch-service/query/fileget?id={{val[0]}}" ng-class="getColor(findex)" style="text-decoration: none;">{{valFilter(val, 30)}}</a><font ng-class="getColor(findex)">, More...</font>
+                <a href="http://10.1.236.66:58080/ocsearch-service/query/fileget?id={{val[0]}}" style="text-decoration: none; color: deepSkyBlue;">{{valFilter(val, 30)}}</a><font ng-class="getColor(findex)">, More...</font>
               </span>
             </span>
           </span>
