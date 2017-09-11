@@ -155,7 +155,7 @@ public class DeepSearchService extends QueryService {
     private void searchSingleTable(String qs, String condition, String start, int rows, String sort, Set<String> tableSet, ArrayNode returnNode, ObjectNode returnData) throws Exception {
         int total = 0;
 
-        long cacheTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
         List<String> rowKeys = new ArrayList<>(rows);
 
@@ -179,8 +179,8 @@ public class DeepSearchService extends QueryService {
 
         long getIdsTime = System.currentTimeMillis();
 
-//        if (log.isDebugEnabled())
-        log.info("[ocsearch]get ids use :" + (getIdsTime - cacheTime) + "ms");
+        if (log.isDebugEnabled())
+            log.debug(String.format("[ocsearch]get ids %d record,time used :%d ms", solrResults.size(), getIdsTime - startTime));
 
         Set<String> returnFields = generateReturnFields(schema, returnNode);
 
@@ -210,13 +210,12 @@ public class DeepSearchService extends QueryService {
                         arrayNode.add(data);
                     }
             );
-            log.warn("arrayNode  is:" + arrayNode.size());
         }
 
         long getDataTime = System.currentTimeMillis();
 
-//        if (log.isDebugEnabled())
-        log.info("[ocsearch]get hbase data use :" + (getDataTime - getIdsTime) + "ms");
+        if (log.isDebugEnabled())
+            log.debug(String.format("[ocsearch]get hbase data,time used :%d ms", getDataTime - getIdsTime));
         //cache put
         //return data
         returnData.put("total", total);
@@ -237,7 +236,10 @@ public class DeepSearchService extends QueryService {
         if (StringUtils.isNotBlank(qs)) {
 
             solrQuery.setQuery(qs);
-            updateDisMax(solrQuery, queryFields);
+            if (queryFields.size() == 1)
+                solrQuery.set("df", queryFields.get(0).getName());
+            else
+                updateDisMax(solrQuery, queryFields);
 
             if (StringUtils.isNotBlank(condition))
                 solrQuery.setFilterQueries(condition);

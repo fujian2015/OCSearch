@@ -29,6 +29,8 @@ public class ScanService extends QueryService {
     @Override
     public JsonNode query(JsonNode request) throws ServiceException {
 
+        long startTime=System.currentTimeMillis();
+
         ObjectNode returnData = JsonNodeFactory.instance.objectNode();
         ArrayNode results = JsonNodeFactory.instance.arrayNode();
         int total = 0;
@@ -63,6 +65,11 @@ public class ScanService extends QueryService {
                 log.error("get cache error,called by:", e);
                 cacheValue = new HashMap<>();
             }
+            long getCacheTime=System.currentTimeMillis();
+
+            if(log.isDebugEnabled())
+                log.debug(String.format("get cache data from redis,time used:%d ms",getCacheTime-startTime));
+
             MetaDataHelper metaDataHelper = MetaDataHelperManager.getInstance();
 
             Schema schema = null;
@@ -178,7 +185,7 @@ public class ScanService extends QueryService {
                         int size = totalNode.get(table).asInt();
 
                         if (offset + size <= start) {
-                            offset = offset + size;
+
                         } else if (isFirst) {
                             isFirst = false;
                             String startKey = null;
@@ -237,6 +244,11 @@ public class ScanService extends QueryService {
 
             }
 
+            long scanData=System.currentTimeMillis();
+
+            if(log.isDebugEnabled())
+                log.debug(String.format("scan data from hbase,time used:%d ms",scanData-getCacheTime));
+
             //cache put
             Map<String, String> caches = new HashMap<>();
             if (!cacheValue.containsKey("total")) {
@@ -248,6 +260,12 @@ public class ScanService extends QueryService {
                 caches.put("" + (start + rows), nextRowKey);
             if (!caches.isEmpty())
                 CacheManager.getCache().put(cacheKey, caches);
+
+            long putCache=System.currentTimeMillis();
+
+            if(log.isDebugEnabled())
+                log.debug(String.format("put data to hbase,time used:%d ms",putCache-scanData));
+
             //return data
             returnData.put("total", total);
             returnData.put("docs", results);

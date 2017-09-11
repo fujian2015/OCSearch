@@ -24,8 +24,12 @@ mkdir -p build/ocsearch/logs
 mkdir -p build/ocsearch/flume
 mkdir -p build/ocsearch/expression
 mkdir -p build/ocsearch/web
+mkdir -p build/ocsearch/server
 
-cp -r server build/ocsearch
+tar -xvf  apache-tomcat-8.5.14.tar -C build/ocsearch/server --strip-components 1
+
+cp server.xml build/ocsearch/server/conf/
+
 cp -r bin build/ocsearch
 
 

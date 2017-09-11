@@ -68,6 +68,7 @@ public class SearchService extends QueryService {
 
     private void searchMultiTable(String qs, String condition, int start, int rows, String sort, Set<String> tableSet, ArrayNode returnNode, ObjectNode returnData) throws Exception {
         int total = 0;
+        long startTime = System.currentTimeMillis();
 
         List<OCRowKey> rowKeys = new ArrayList<>(rows);
 
@@ -77,7 +78,9 @@ public class SearchService extends QueryService {
 
         //get ids from solr
         SolrQuery solrQuery = constructQuery(start, rows, qs, condition, sort, tableSet, schema.getQueryFields());
-        log.info("solr query is:" + solrQuery.toString());
+        if (log.isDebugEnabled())
+            log.debug("solr query is:" + solrQuery.toString());
+
         SolrDocumentList solrResults = SolrServerManager.getInstance().query(tableFirst, solrQuery);
 
         total = (int) solrResults.getNumFound();
@@ -91,6 +94,10 @@ public class SearchService extends QueryService {
             rowKeys.add(new OCRowKey(table, id));
         });
 
+        long getIdsTime = System.currentTimeMillis();
+
+        if (log.isDebugEnabled())
+            log.debug(String.format("[ocsearch]get ids %d record,time used :%d ms", solrResults.size(), getIdsTime - startTime));
 
         Set<String> returnFields = generateReturnFields(schema, returnNode);
 
@@ -126,9 +133,14 @@ public class SearchService extends QueryService {
             for (OCRowKey rowKey : rowKeys) {
                 ObjectNode data = actors.get(rowKey.table).getQueryResult().getData().remove(0);
 
-                arrayNode.add(updateNode(data,rowKey.rowKey,rowKey.table,withTable,withId));
+                arrayNode.add(updateNode(data, rowKey.rowKey, rowKey.table, withTable, withId));
             }
         }
+        long getDataTime = System.currentTimeMillis();
+
+        if (log.isDebugEnabled())
+            log.debug(String.format("[ocsearch]get hbase data,time used :%d ms", getDataTime - getIdsTime));
+
         //return data
         returnData.put("total", total);
         returnData.put("docs", arrayNode);
@@ -147,7 +159,8 @@ public class SearchService extends QueryService {
         //get ids from solr
         SolrQuery solrQuery = constructQuery(start, rows, qs, condition, sort, tableSet, schema.getQueryFields());
 
-        log.info("solr query is:" + solrQuery.toString());
+        if (log.isDebugEnabled())
+            log.debug("solr query is:" + solrQuery.toString());
 
         SolrDocumentList solrResults = SolrServerManager.getInstance().query(table, solrQuery);
 
@@ -159,7 +172,9 @@ public class SearchService extends QueryService {
 
         long getIdsTime = System.currentTimeMillis();
 
-        log.info("[ocsearch]get ids use :" + (getIdsTime - startTime) + "ms");
+        if (log.isDebugEnabled())
+            log.debug(String.format("[ocsearch]get ids %d record,time used :%d ms", solrResults.size(), getIdsTime - startTime));
+
 
         Set<String> returnFields = generateReturnFields(schema, returnNode);
 
@@ -180,18 +195,17 @@ public class SearchService extends QueryService {
             runningThreadNum.await();
             boolean withId = hasId(returnNode);
             boolean withTable = hasTable(returnNode);
-            log.warn("result is:" + queryActor.getQueryResult().getData().size());
             rowKeys.forEach(row -> {
                         ObjectNode data = queryActor.getQueryResult().getData().remove(0);
 
-                        arrayNode.add(updateNode(data,row,table,withTable,withId));
+                        arrayNode.add(updateNode(data, row, table, withTable, withId));
                     }
             );
-            log.warn("arrayNode  is:" + arrayNode.size());
         }
         long getDataTime = System.currentTimeMillis();
 
-        log.info("[ocsearch]get hbase data use :" + (getDataTime - getIdsTime) + "ms");
+        if (log.isDebugEnabled())
+            log.debug(String.format("[ocsearch]get hbase data,time used :%d ms", getDataTime - getIdsTime));
 
         //return data
         returnData.put("total", total);
@@ -225,7 +239,10 @@ public class SearchService extends QueryService {
         if (StringUtils.isNotBlank(qs)) {
 
             solrQuery.setQuery(qs);
-            updateDisMax(solrQuery, queryFields);
+            if (queryFields.size() == 1)
+                solrQuery.set("df", queryFields.get(0).getName());
+            else
+                updateDisMax(solrQuery, queryFields);
 
             if (StringUtils.isNotBlank(condition))
                 solrQuery.setFilterQueries(condition);

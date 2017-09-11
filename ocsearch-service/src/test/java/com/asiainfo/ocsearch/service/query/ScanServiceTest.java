@@ -12,15 +12,16 @@ public class ScanServiceTest {
     public void testQuery() throws Exception {
         new SystemListener().initAll();
         String request = "{\n" +
-                "    \"start\": 1,\n" +
-                "    \"rows\": 5,\n" +
-                "    \"rowkey_prefix\": \"e\",\n" +
-                "    \"condition\":\"time>='20170716' and time<='20170718'\",\n" +
+                "\"cursor_mark\":\"*\",\n" +
+                "    \"start\":0,\n" +
+                "    \"rows\": 3,\n" +
+                "    \"rowkey_prefix\": \"1\",\n" +
+                "    \"condition\":\"\",\n" +
                 "    \"tables\": [\n" +
-                "        \"FILE__201707\"\n" +
+                "        \"testTable\",\"testHello\"\n" +
                 "    ],\n" +
                 "    \"return_fields\": [\n" +
-
+                "\"id\",\"other\",\"_table_\",\"name\"\n" +
                 "    ]\n" +
                 "}";
         System.out.println(request);
