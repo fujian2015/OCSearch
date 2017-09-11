@@ -135,10 +135,18 @@ angular.module('basic').controller('ResultCtrl', ['$scope', 'searchService', '$s
   };
   $scope.valFilter = function(val, len) {
     if (angular.isString(val)) {
-      return val.substring(0, len) + "...";
+      if (val.length < len) {
+        return val;
+      } else {
+        return val.substring(0, len) + "...";
+      }
     } else if (angular.isArray(val)) {
       if (angular.isString(val[0])) {
-        return val[0].substring(0, len) + "...";
+        if (val[0].length < len) {
+          return val[0];
+        } else {
+          return val[0].substring(0, len) + "...";
+        }
       } else {
         return val[0];
       }

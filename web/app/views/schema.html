@@ -14,7 +14,7 @@
               <input class="form-control" ng-model="newschema.name">
             </div>
             <div class="col-md-2">
-              <div class="checkbox"><label><input type="checkbox" ng-model="newschema.with_hbase">With Hbase</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-model="newschema.with_hbase">{{'WITH_HBASE' | translate}}</label></div>
             </div>
           </div>
           <div class="form-group">
@@ -141,9 +141,9 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="control-label col-md-2" style="text-align: left;">Hbase</label>
-            <div class="col-md-5"><input type="text" class="form-control" ng-disabled="!newschema.with_hbase" placeholder="family"></div>
-            <div class="col-md-5"><input type="text" class="form-control" ng-disabled="!newschema.with_hbase" placeholder="column"></div>
+            <label class="control-label col-md-2" style="text-align: left;">{{'HBASE' | translate}}</label>
+            <div class="col-md-5"><input type="text" class="form-control" ng-model="new_field.hbase_family" ng-disabled="!newschema.with_hbase" placeholder="{{'HBASE_FAMILY' | translate}}"></div>
+            <div class="col-md-5"><input type="text" class="form-control" ng-model="new_field.hbase_column" ng-disabled="!newschema.with_hbase" placeholder="{{'HBASE_COLUMN' | translate}}"></div>
           </div>
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'INNER_FIELD' | translate}}</label>
@@ -155,7 +155,7 @@
           </div>
           <div class="form-group">
             <div class="col-md-2 col-md-offset-10">
-              <a class="btn btn-success center-block" ng-click="addField()" ng-disabled="!(new_field.name && new_field.store_type && (((new_field.indexed || new_field.content_field) && new_field.index_type) || !(new_field.indexed || new_field.content_field)))"><i class="glyphicon glyphicon-plus"></i></a>
+              <a class="btn btn-success center-block" ng-click="addField()" ng-disabled="!enableAddField()"><i class="glyphicon glyphicon-plus"></i></a>
             </div>
           </div>
           <div class="col-md-12" style="margin-top: 10px;">
@@ -166,7 +166,7 @@
                 <th>{{'INTABLE_STORE_TYPE' | translate}}</th>
                 <th>{{'INTABLE_INDEX_TYPE' | translate}}</th>
                 <th>{{'INTABLE_CONTENT_FIELD' | translate}}</th>
-                <th ng-if="newschema.with_hbase">Hbase</th>
+                <th ng-if="newschema.with_hbase">{{'HBASE' | translate}}</th>
                 <th ng-if="!newschema.with_hbase">{{'INTABLE_INNER_FIELD' | translate}}</th>
                 <th>{{'INTABLE_OPERATION' | translate}}</th>
               </tr>
@@ -176,7 +176,7 @@
                 <td>{{field.store_type}}</td>
                 <td>{{field.index_type || ('UNDEFINED' | translate)}}</td>
                 <td>{{field.content_field || ('UNDEFINED' | translate)}}</td>
-                <td>family:{{}}&nbsp;&nbsp;column:{{}}</td>
+                <td ng-if="newschema.with_hbase">{{'HBASE_FAMILY' | translate}}:{{field.hbase_family}};&nbsp;{{'HBASE_COLUMN' | translate}}:{{field.hbase_column}}</td>
                 <td ng-if="!newschema.with_hbase">{{field.inner_field || ('UNDEFINED' | translate)}}</td>
                 <td><a href="" ng-click="removeField()" style="text-decoration: none;">{{'DELETE' | translate}}</a></td>
               </tr>

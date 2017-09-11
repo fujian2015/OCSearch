@@ -161,6 +161,10 @@ angular
       ROWS: "Rows",
       CONDITIONS: "Conditions",
       ADVANCE_SEARCH: "Advance Search",
+      WITH_HBASE: "With Hbase",
+      HBASE: "Hbase",
+      HBASE_FAMILY: "family",
+      HBASE_COLUMN: "column",
     }).translations("zh", {
       ADD_NEW_TABLE: "增加新表",
       ADD_NEW_SCHEMA: "新建表结构",
@@ -238,6 +242,10 @@ angular
       ROWS: "每页行数",
       CONDITIONS: "搜索条件",
       ADVANCE_SEARCH: "高级搜索",
+      WITH_HBASE: "Hbase已存在",
+      HBASE: "Hbase",
+      HBASE_FAMILY: "family",
+      HBASE_COLUMN: "column",
     });
     $translateProvider.preferredLanguage('zh');
   }).constant('GLOBAL', {

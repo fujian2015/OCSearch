@@ -117,6 +117,8 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
             if(!$scope.new_field.index_type) { delete $scope.new_field.index_type; }
             if(!$scope.new_field.content_field) { delete $scope.new_field.content_field; }
             if(!$scope.new_field.inner_field) { delete $scope.new_field.inner_field; }
+            if(!$scope.new_field.hbase_family) { delete $scope.new_field.hbase_family; }
+            if(!$scope.new_field.hbase_column) { delete $scope.new_field.hbase_column; }
             $scope.newschema.fields.push($scope.new_field);
             $scope.new_field = { name: null, store_type: null, indexed: true, index_stored: false };
           };
@@ -186,6 +188,17 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
             } else {
               $scope.modalmsg = "";
               return true;
+            }
+          };
+          $scope.enableAddField = function() {
+            if ($scope.new_field.name && $scope.new_field.store_type && ((($scope.new_field.indexed || $scope.new_field.content_field) && $scope.new_field.index_type) || !($scope.new_field.indexed || $scope.new_field.content_field))) {
+              if ($scope.newschema.with_hbase) {
+                return ($scope.new_field.hbase_family && $scope.new_field.hbase_column);
+              } else {
+                return true;
+              }
+            } else {
+              return false;
             }
           };
           // Functions of filter

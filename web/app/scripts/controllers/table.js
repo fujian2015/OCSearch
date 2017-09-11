@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$stateParams', '$rootScope', function ($scope, $http, GLOBAL, $uibModal, $ngConfirm, $translate, $stateParams, $rootScope) {
+angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBAL', '$uibModal', '$ngConfirm', '$translate', '$stateParams', '$rootScope', function ($scope, $http, $q, GLOBAL, $uibModal, $ngConfirm, $translate, $stateParams, $rootScope) {
   let yes_text = $translate.instant('YES');
   let no_text = $translate.instant('NO');
   let ok_text = $translate.instant('OK');
@@ -112,7 +112,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
       size: 'lg',
       controller: ['$scope', '$http', '$ngConfirm', function($scope, $http, $ngConfirm) {
         // Change request
-        $scope.request_list = {add_field:[],delete_field:[],update_field:[]};
+        $scope.request_list = [];
         // Copy page.table.schema
         $scope.curschema = angular.copy($scope.page.table.schema);
         // Temporary field
@@ -190,13 +190,13 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
               if(cfield.name === rfield.name) {
                 existed_flag = true;
                 if(!angular.equals(cfield, rfield)) {
-                  $scope.request_list.update_field.push({command:"update_field", table: $scope.page.table.name, field: cfield});
+                  $scope.request_list.push({command:"update_field", table: $scope.page.table.name, field: cfield});
                 }
                 break;
               }
             }
             if(!existed_flag) {
-              $scope.request_list.add_field.push({command:"add_field", table: $scope.page.table.name, field: cfield});
+              $scope.request_list.push({command:"add_field", table: $scope.page.table.name, field: cfield});
             }
           }
           // Search deleted fields
@@ -209,9 +209,44 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
               }
             }
             if(!existed_flag) {
-              $scope.request_list.delete_field.push({command:"delete_field", table: $scope.page.table.name, field: {name: rfield.name}});
+              $scope.request_list.push({command:"delete_field", table: $scope.page.table.name, field: {name: rfield.name}});
             }
           }
+        };
+        $scope._ok = function() {
+          let updateTable = i => $http.post(GLOBAL.host+"/schema/update", $scope.request_list[i]).then(function(data) {
+            $scope.request_list[i].return_code = data.data.result.error_code;
+            $scope.request_list[i].return_desc = data.data.result.error_desc;
+          });
+          let promises = [];
+          for (let i = 0; i < $scope.request_list.length; i++) {
+            promises.push(updateTable(i));
+          }
+          $q.all(promises).then(function() {
+            let err_flag = false;
+            let result_lst = [];
+            for (let item of $scope.request_list) {
+              if (item.error_code !== 0) {
+                err_flag = true;
+                result_lst.push("Action:" + item.command + " of " + item.field.name + "   Error:" + item.error_desc);
+              }
+            }
+            if (err_flag) {
+              $ngConfirm({
+                title: "Error",
+                content: result_lst.join('\n'),
+                closeIcon: true,
+                scope: $scope,
+                buttons: {
+                  OK: {
+                    text: ok_text
+                  }
+                }
+              });
+            }
+            $scope.initial();
+            modalInstance.close();
+          });
         };
         // Check inputs for edit-save button
         $scope.checkEditTable = function() {
@@ -235,7 +270,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', 'GLOBAL', '$
                 text: yes_text,
                 action: function(scope) {
                   scope._diffSchema();
-                  console.log($scope.request_list);
+                  scope._ok();
                 }
               },
               No: {
