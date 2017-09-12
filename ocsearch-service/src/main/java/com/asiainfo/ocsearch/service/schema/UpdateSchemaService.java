@@ -6,6 +6,7 @@ import com.asiainfo.ocsearch.exception.ErrorCode;
 import com.asiainfo.ocsearch.exception.ServiceException;
 import com.asiainfo.ocsearch.meta.Field;
 import com.asiainfo.ocsearch.meta.FieldType;
+import com.asiainfo.ocsearch.meta.IndexType;
 import com.asiainfo.ocsearch.meta.Schema;
 import com.asiainfo.ocsearch.metahelper.MetaDataHelper;
 import com.asiainfo.ocsearch.metahelper.MetaDataHelperManager;
@@ -57,7 +58,7 @@ public class UpdateSchemaService extends OCSearchService {
                 } else {
                     throw new ServiceException("unknown update command " + command, ErrorCode.PARSE_ERROR);
                 }
-            }finally {
+            } finally {
                 metaDataHelper.unlock(lock);
             }
             return success;
@@ -83,7 +84,12 @@ public class UpdateSchemaService extends OCSearchService {
             if (StringUtils.isNotEmpty(field.getInnerField())) {
                 throw new ServiceException("doesn't support delete a inner field", ErrorCode.PARSE_ERROR);
             }
-            if (field.withSolr()) {
+
+            IndexType indexType = schema.getIndexType();
+
+            boolean withSolr = (indexType == IndexType.HBASE_SOLR_PHOENIX || indexType == IndexType.HBASE_SOLR);
+
+            if (field.withSolr() && withSolr) {
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("name", name);
@@ -100,14 +106,14 @@ public class UpdateSchemaService extends OCSearchService {
                     updates.add(new SchemaRequest.DeleteCopyField(name, Arrays.asList(field.getContentField())));
                 }
 
-                log.info("update field '" + name + "' in solr config start!");
+                log.info("delete field '" + name + "' in solr config start!");
                 solrServer.updateFields(updates, table);
-                log.info("update field '" + name + "' in solr config success!");
+                log.info("delete field '" + name + "' in solr config success!");
             }
-            log.info("update field '" + name + "' in zookeeper  start!");
+            log.info("delete field '" + name + "' in zookeeper  start!");
             schemaNew.getFields().remove(name);
             MetaDataHelperManager.getInstance().updateSchema(schemaNew);
-            log.info("update field '" + name + "' in zookeeper  success!");
+            log.info("delete field '" + name + "' in zookeeper  success!");
         } catch (ServiceException se) {
             throw se;
         } catch (Exception e) {
@@ -130,10 +136,15 @@ public class UpdateSchemaService extends OCSearchService {
             if (StringUtils.isNotEmpty(field.getInnerField())) {
                 throw new ServiceException("doesn't support add a inner field", ErrorCode.PARSE_ERROR);
             }
-            if(StringUtils.isEmpty(field.getHbaseFamily())||StringUtils.isEmpty(field.getHbaseColumn())){
+            if (StringUtils.isEmpty(field.getHbaseFamily()) || StringUtils.isEmpty(field.getHbaseColumn())) {
                 throw new ServiceException("doesn't support add a field without hbase family or column ", ErrorCode.PARSE_ERROR);
             }
-            if (field.withSolr()) {
+
+            IndexType indexType = schema.getIndexType();
+
+            boolean withSolr = (indexType == IndexType.HBASE_SOLR_PHOENIX || indexType == IndexType.HBASE_SOLR);
+
+            if (field.withSolr() && withSolr) {
                 if (field.isIndexContented() && !schemaContainsCf(schema, field.getContentField())) {
                     throw new ServiceException("the schema does not has the content field " + field.getContentField(), ErrorCode.PARSE_ERROR);
                 }
@@ -152,14 +163,14 @@ public class UpdateSchemaService extends OCSearchService {
                     updates.add(new SchemaRequest.AddCopyField(name, Arrays.asList(field.getContentField())));
                 }
 
-                log.info("update field '" + name + "' in solr config start!");
+                log.info("add field '" + name + "' in solr config start!");
                 solrServer.updateFields(updates, table);
-                log.info("update field '" + name + "' in solr config success!");
+                log.info("add field '" + name + "' in solr config success!");
             }
-            log.info("update field '" + name + "' in zookeeper  start!");
+            log.info("add field '" + name + "' in zookeeper  start!");
             schemaNew.getFields().put(name, field);
             MetaDataHelperManager.getInstance().updateSchema(schemaNew);
-            log.info("update field '" + name + "' in zookeeper  success!");
+            log.info("add field '" + name + "' in zookeeper  success!");
         } catch (ServiceException se) {
             throw se;
         } catch (Exception e) {
@@ -181,10 +192,13 @@ public class UpdateSchemaService extends OCSearchService {
             constructField(field, body);
 
 
+            IndexType indexType = schema.getIndexType();
+
+            boolean withSolr = (indexType == IndexType.HBASE_SOLR_PHOENIX || indexType == IndexType.HBASE_SOLR);
+
             if (oriField.equals(field)) {
                 throw new ServiceException("the field equals the origin field", ErrorCode.PARSE_ERROR);
-            } else if (!oriField.indexEquals(field)) {
-
+            } else if (!oriField.indexEquals(field) && withSolr) {
                 if (field.isIndexContented() && !schemaContainsCf(schema, field.getContentField())) {
                     throw new ServiceException("the schema does not has the content field " + field.getContentField(), ErrorCode.PARSE_ERROR);
                 }
