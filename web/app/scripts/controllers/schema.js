@@ -40,29 +40,6 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
     }
     return null;
   };
-  /*
-  // output content_fields and inner_fields in format string
-  $scope.joinFields = function(fields) {
-    if (angular.isDefined(fields)) {
-      let farr = [];
-      for (let f of fields) {
-        if (!f.hasOwnProperty("name")) { continue; }
-        let fstr = [];
-        fstr.push(f.name);
-        fstr.push("(");
-        for (let k in f) {
-          if (k === "name") { continue; }
-          fstr.push(k+":"+f[k]);
-        }
-        fstr.push(")");
-        farr.push(fstr.join(''));
-      }
-      return farr.join(',');
-    } else {
-      return null;
-    }
-  };
-  */
   // Template modal factory
   $scope.modalAction = function(title, confirm_content, initval, okfunc) {
     let returnfunc = function(title, confirm_content, initval, okfunc) {
@@ -237,7 +214,19 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
       $translate.instant('CONFIRM_ADD_SCHEMA'),
       {name:"", with_hbase: false, rowkey_expression:"", table_expression:"", index_type:0, id_formatter: $scope.id_formatter_type[1], content_fields:[], inner_fields:[], fields:[], query_fields:[]},
       function() {
-        $http.post(GLOBAL.host+'/schema/add', this.newschema).then(function(){
+        $http.post(GLOBAL.host+'/schema/add', this.newschema).then(function(data){
+          if (data.data.result.error_code !== 0) {
+            $ngConfirm({
+              title: $translate.instant('CONFIRM_TITLE_CREATE_SCHEMA_ERROR'),
+              content: data.data.result.error_desc,
+              closeIcon: true,
+              buttons: {
+                OK: {
+                  text: ok_text
+                }
+              }
+            });
+          }
           $scope.initial();
         });
       }
