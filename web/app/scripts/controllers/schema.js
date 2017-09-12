@@ -95,7 +95,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
           // Temp new inner field
           $scope.new_inner_field = { name: null, separator: null };
           // Temp new field
-          $scope.new_field = { name: null, store_type: null, indexed: true, index_stored: false };
+          $scope.new_field = { name: null, store_type: null, indexed: false, index_stored: false };
           // Temp new query field
           $scope.new_query_field = { name: null, weight: null };
           // Functions of Content Field
@@ -122,7 +122,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
             if(!$scope.new_field.hbase_family) { delete $scope.new_field.hbase_family; }
             if(!$scope.new_field.hbase_column) { delete $scope.new_field.hbase_column; }
             $scope.newschema.fields.push($scope.new_field);
-            $scope.new_field = { name: null, store_type: null, indexed: true, index_stored: false };
+            $scope.new_field = { name: null, store_type: null, indexed: false, index_stored: false };
           };
           $scope.removeField = function($index) {
             $scope.newschema.fields.splice($index, 1);
@@ -235,7 +235,7 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
     $scope.modalAction(
       $translate.instant('ADD_NEW_SCHEMA'), 
       $translate.instant('CONFIRM_ADD_SCHEMA'),
-      {name:"", with_hbase: false, rowkey_expression:"", table_expression:"", index_type:"", id_formatter: $scope.id_formatter_type[1], content_fields:[], inner_fields:[], fields:[], query_fields:[]},
+      {name:"", with_hbase: false, rowkey_expression:"", table_expression:"", index_type:0, id_formatter: $scope.id_formatter_type[1], content_fields:[], inner_fields:[], fields:[], query_fields:[]},
       function() {
         $http.post(GLOBAL.host+'/schema/add', this.newschema).then(function(){
           $scope.initial();

@@ -39,12 +39,12 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
             name:"",
             schema:"",
             hbase:{
-              region_num: 0,
+              region_num: 4,
               region_split: []
             },
             solr:{
-              shards: 0,
-              replicas: 0
+              shards: 1,
+              replicas: 1
             }
           };
           $scope.checkAddTable = function() {
@@ -54,6 +54,19 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
             } else {
               $scope.modalmsg = "";
               return true;
+            }
+          };
+          $scope.changeSchema = function() {
+            for(let schema of $scope.schemas) {
+              if(schema.name === $scope.newtable.schema) {
+                if (!schema.with_hbase) {
+                  $scope.newtable.hbase.region_num = 0;
+                  return;
+                } else {
+                  $scope.newtable.hbase.region_num = 4;
+                  return;
+                }
+              }
             }
           };
           $scope._ok = function(){

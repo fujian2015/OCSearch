@@ -15,7 +15,7 @@
       <div class="form-group">
         <label class="control-label col-md-2" style="text-align: left;">{{'SCHEMA' | translate}} *</label>
         <div class="col-md-10">
-          <select class="form-control" ng-model="newtable.schema" ng-options="schema.name as schema.name for schema in schemas">
+          <select class="form-control" ng-model="newtable.schema" ng-options="schema.name as schema.name for schema in schemas" ng-change="changeSchema()">
             <option value=""><{{'SELECT_SCHEMA' | translate}}></option>
           </select>
         </div>
@@ -23,7 +23,7 @@
       <div class="form-group">
         <label class="control-label col-md-2" style="text-align: left;">{{'REGION_NUM' | translate}}</label>
         <div class="col-md-4">
-          <input class="form-control" type="number" ng-model="newtable.hbase.region_num">
+          <input class="form-control" type="number" ng-model="newtable.hbase.region_num" ng-disabled="newtable.hbase.region_num===0">
         </div>
         <label class="control-label col-md-2" style="text-align: left;">{{'REGION_SPLIT' | translate}}</label>
         <div class="col-md-4">

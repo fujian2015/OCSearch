@@ -21,7 +21,6 @@
             <label class="control-label col-md-2" style="text-align: left;">{{'INDEX_TYPE' | translate}} *</label>
             <div class="col-md-10">
               <select class="form-control" ng-model="newschema.index_type" ng-options="index.val as index.display for index in index_type">
-                <option value=""><{{'SELECT_INDEX_TYPE' | translate}}></option>
               </select>
             </div>
           </div>
@@ -46,9 +45,9 @@
           </div> 
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'CONTENT_FIELD' | translate}}</label>
-            <div class="col-md-4"><input type="text" class="form-control" placeholder="{{'NAME' | translate}}" ng-model="new_content_field.name"></div>
+            <div class="col-md-4"><input type="text" class="form-control" placeholder="{{'NAME' | translate}}" ng-model="new_content_field.name" ng-disabled="newschema.index_type!==0 && newschema.index_type!==2"></div>
             <div class="col-md-4">
-              <select class="form-control" ng-model="new_content_field.type" ng-options="tp for tp in field_index_type | filter: typeFilter.CONTENT">
+              <select class="form-control" ng-disabled="newschema.index_type!==0 && newschema.index_type!==2" ng-model="new_content_field.type" ng-options="tp for tp in field_index_type | filter: typeFilter.CONTENT">
                 <option value=""><{{'SELECT_TYPE' | translate}}></option>
               </select>
             </div>
@@ -71,8 +70,8 @@
           </div>
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'INNER_FIELD' | translate}}</label>
-            <div class="col-md-4"><input type="text" class="form-control" placeholder="{{'NAME' | translate}}" ng-model="new_inner_field.name" ng-disabled="newschema.with_hbase"></div>
-            <div class="col-md-4"><input type="text" class="form-control" placeholder="{{'INTABLE_SEPARATOR' | translate}}" ng-model="new_inner_field.separator" ng-disabled="newschema.with_hbase"></div>
+            <div class="col-md-4"><input type="text" class="form-control" placeholder="{{'NAME' | translate}}" ng-model="new_inner_field.name" ng-disabled="newschema.with_hbase || newschema.index_type===1 || newschema.index_type===2"></div>
+            <div class="col-md-4"><input type="text" class="form-control" placeholder="{{'INTABLE_SEPARATOR' | translate}}" ng-model="new_inner_field.separator" ng-disabled="newschema.with_hbase || newschema.index_type===1 || newschema.index_type===2"></div>
             <div class="col-md-2">
               <a class="btn btn-success center-block" ng-click="addInnerField()" ng-disabled="!new_inner_field.name || !new_inner_field.separator"><i class="glyphicon glyphicon-plus"></i></a>
             </div>
@@ -121,7 +120,7 @@
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'CONTENT_FIELD' | translate}}</label>
             <div class="col-md-10">
-              <select class="form-control" ng-model="new_field.content_field" ng-options="cfield.name as cfield.name for cfield in newschema.content_fields" ng-change="checkIndexType()">
+              <select class="form-control" ng-disabled="newschema.index_type!==0 && newschema.index_type!==2" ng-model="new_field.content_field" ng-options="cfield.name as cfield.name for cfield in newschema.content_fields" ng-change="checkIndexType()">
                 <option value=""><{{'SELECT_FIELD_CONTENT_FIELD' | translate}}></option>
               </select>
             </div>
@@ -129,7 +128,7 @@
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'FIELD_INDEX' | translate}}</label>
             <div class="col-md-3">
-              <div class="checkbox"><label><input type="checkbox" value="" ng-model="new_field.indexed" ng-click="checkIndexType()">{{'INDEXED' | translate}}</label></div>
+              <div class="checkbox"><label><input type="checkbox" ng-disabled="newschema.index_type!==0 && newschema.index_type!==2" value="" ng-model="new_field.indexed" ng-click="checkIndexType()">{{'INDEXED' | translate}}</label></div>
             </div>
             <div class="col-md-3">
               <div class="checkbox"><label><input type="checkbox" value="" ng-model="new_field.index_stored" disabled>Stored</label></div>
@@ -148,7 +147,7 @@
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'INNER_FIELD' | translate}}</label>
             <div class="col-md-10">
-              <select class="form-control" ng-disabled="newschema.with_hbase" ng-model="new_field.inner_field" ng-options="ifield.name as ifield.name for ifield in newschema.inner_fields">
+              <select class="form-control" ng-disabled="newschema.with_hbase || newschema.index_type===1 || newschema.index_type===2" ng-model="new_field.inner_field" ng-options="ifield.name as ifield.name for ifield in newschema.inner_fields">
                 <option value=""><{{'SELECT_FIELD_INNER_FIELD' | translate}}></option>
               </select>
             </div>
@@ -178,7 +177,7 @@
                 <td>{{field.content_field || ('NULL' | translate)}}</td>
                 <td ng-if="newschema.with_hbase">{{field.hbase_family || ('NULL' | translate)}}:{{field.hbase_column || ('NULL' | translate)}}</td>
                 <td ng-if="!newschema.with_hbase">{{field.inner_field || ('NULL' | translate)}}</td>
-                <td><a href="" ng-click="removeField()" style="text-decoration: none;">{{'DELETE' | translate}}</a></td>
+                <td><a href="" ng-click="removeField($index)" style="text-decoration: none;">{{'DELETE' | translate}}</a></td>
               </tr>
             </table>
           </div>
@@ -200,7 +199,7 @@
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'NAME' | translate}}</label>
             <div class="col-md-10">
-              <select class="form-control" ng-model="new_query_field.name">
+              <select class="form-control" ng-disabled="newschema.index_type!==0 && newschema.index_type!==2" ng-model="new_query_field.name">
                 <option value=""><{{'SELECT_QUERY_FIELD' | translate}}></option>
                 <option ng-repeat="cf in newschema.content_fields" value="{{cf.name}}">{{cf.name}}</option>
                 <option ng-repeat="fd in newschema.fields | filter: queryFilter" value="{{fd.name}}">{{fd.name}}</option>
@@ -210,7 +209,7 @@
           <div class="form-group">
             <label class="control-label col-md-2" style="text-align: left;">{{'WEIGHT' | translate}}</label>
             <div class="col-md-10">
-              <input type="number" class="form-control" ng-model="new_query_field.weight">
+              <input type="number" ng-disabled="newschema.index_type!==0 && newschema.index_type!==2" class="form-control" ng-model="new_query_field.weight">
             </div>
           </div>
           <div class="form-group">
