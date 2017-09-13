@@ -10,6 +10,5 @@ angular.module("helpapp", [])
       for (let obj in $scope.expressions) {
         $scope.expobjs.push(obj);
       }
-      console.log($scope.expressions);
     });
   });

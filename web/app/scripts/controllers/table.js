@@ -59,7 +59,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
           $scope.changeSchema = function() {
             for(let schema of $scope.schemas) {
               if(schema.name === $scope.newtable.schema) {
-                if (!schema.with_hbase) {
+                if (schema.with_hbase) {
                   $scope.newtable.hbase.region_num = 0;
                   return;
                 } else {

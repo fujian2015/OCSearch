@@ -27,7 +27,7 @@
         </div>
         <label class="control-label col-md-2" style="text-align: left;">{{'REGION_SPLIT' | translate}}</label>
         <div class="col-md-4">
-          <input class="form-control" type="text" ng-model="newtable.hbase.region_split">
+          <input class="form-control" type="text" ng-model="newtable.hbase.region_split" ng-disabled="newtable.hbase.region_num===0">
         </div>
       </div>
       <div class="form-group">

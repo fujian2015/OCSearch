@@ -29,11 +29,32 @@
   .expfuntitle {
     color: indianred;
   }
+  .code {
+    background: gainsboro;
+    padding: 5px 36px 5px 36px;
+  }
+  ul li {
+    margin-top: 10px;
+  }
   </style>
 </head>
 <body ng-controller="expressionCtrl">
   <div class="col-md-9 col-md-offset-1">
     <h1 class="exptitle">{{helpTitle}}</h1>
+    <p>为了方便用户生成rowkey和表名，OCSearch expression提供了一组生成表达式的方法以便用户使用。 支持<a href="http://commons.apache.org/proper/commons-jexl/xref-test/index.html" target="_blank">jexl表达式</a>,可以参照JexlTest类中的表达式。OCSearch提供的自定义方法如下所示的Namespace。</p>
+    <div class="expobj">
+      <h2 class="expobjtitle">指定rowkey或者table生成表达式</h2>
+      <div class="expfun">
+        <p>以下下是根据时间生成GPRS表名的表达式</p>
+        <p class="code">'GPRS__'+ $date:format(now,'yyyyMMdd')</p>
+        <ul>
+          <li>now为时间戳（绝对秒数）</li>
+          <li>$date为处理时间日期的namespace</li>
+          <li>format(long time,String formatter)为格式化方法（提供的方法和namespace的可以查看help文档）</li>
+          <li>对于2017.12.12 12:12:12，最终结果为GPRS__20171212</li>
+        </ul>
+      </div>
+    </div>
     <div ng-repeat="obj in expobjs" class="expobj">
       <h2 class="expobjtitle">Namespace:&nbsp;{{obj}}</h2>
       <div ng-repeat="fun in expressions[obj]" class="expfun">
