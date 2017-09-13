@@ -68,6 +68,9 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
                 }
               }
             }
+            $scope.newtable.hbase.region_split = "";
+            $scope.newtable.solr.shards = 1;
+            $scope.newtable.solr.replicas = 1;
           };
           $scope._ok = function(){
             if ($scope.newtable.hbase.region_split === "" || $scope.newtable.hbase.region_split === null) { $scope.newtable.hbase.region_split = []; }
