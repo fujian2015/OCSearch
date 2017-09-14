@@ -32,9 +32,9 @@ function start(){
         chmod +x ${SERVER_HOME}/web/node/bin/node
 
         # change reverse proxy
-        perl -pi -e "s/10\.1\.236\.66\:58080/${NODE_PROXY_IP}\:${NODE_PROXY_PORT}/g" web/server/app.js
-        perl -pi -e "s/10\.1\.236\.66\:58080/${NODE_PROXY_IP}\:${NODE_PROXY_PORT}/g" web/dist/views/result.html
-        perl -pi -e "s/10\.1\.236\.66\:58080/${NODE_PROXY_IP}\:${NODE_PROXY_PORT}/g" web/dist/views/detail.html
+        perl -pi -e "s/((\d{1,3}.){3}\d{1,3}:\d+)/${NODE_PROXY_IP}\:${NODE_PROXY_PORT}/g" web/server/app.js
+        perl -pi -e "s/((\d{1,3}.){3}\d{1,3}:\d+)/${NODE_PROXY_IP}\:${NODE_PROXY_PORT}/g" web/dist/views/result.html
+        perl -pi -e "s/((\d{1,3}.){3}\d{1,3}:\d+)/${NODE_PROXY_IP}\:${NODE_PROXY_PORT}/g" web/dist/views/detail.html
 
         cd ${SERVER_HOME}/web
         nohup ./node/bin/node ./server/app.js >> ${SERVER_HOME}/logs/web.log 2>&1 &
