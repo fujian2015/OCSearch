@@ -85,7 +85,7 @@ public class HbaseQuery {
 
     private void initial() {
 
-        uniqueKeyFormatter=RowkeyUtils.getIdFormatter(schema.getIdFormatter());
+        uniqueKeyFormatter = RowkeyUtils.getIdFormatter(schema.getIdFormatter());
 
         Map<String, Field> fields = schema.getFields();
 
@@ -147,10 +147,10 @@ public class HbaseQuery {
 
         ObjectNode data = JsonNodeFactory.instance.objectNode();
 
-        if(result.isEmpty())
+        if (result.isEmpty())
             return data;
 
-        String id= uniqueKeyFormatter.formatRow(result.getRow());
+        String id = uniqueKeyFormatter.formatRow(result.getRow());
 
         data.put("id", id);
 
@@ -236,8 +236,8 @@ public class HbaseQuery {
                             }
                     );
                 }
-            }catch (Exception e){
-                log.warn("handle data exception:",e);
+            } catch (Exception e) {
+                log.warn("handle data exception:", e);
             }
         });
 
@@ -282,7 +282,7 @@ public class HbaseQuery {
                             map.put(name, Bytes.toInt(valueArray));
                             break;
                         case LONG:
-                            map.put(name,Bytes.toLong(valueArray));
+                            map.put(name, Bytes.toLong(valueArray));
                             break;
                         case FLOAT:
                             map.put(name, Bytes.toFloat(valueArray));
@@ -298,11 +298,9 @@ public class HbaseQuery {
                             break;
                     }
                 }
-            }
-            else if (StringUtils.equals(Constants.FILE_NAMES_COLUMN, name)) {
-               return;
-            }
-            else { //inner field
+            } else if (StringUtils.equals(Constants.FILE_NAMES_COLUMN, name)) {
+                return;
+            } else { //inner field
                 String innerValue = Bytes.toString(valueArray);
 
                 InnerField inf = schema.getInnerFields().get(name);
@@ -334,6 +332,10 @@ public class HbaseQuery {
                         }
                 );
             }
+        });
+        returnFields.forEach(field -> {
+            if (!map.containsKey(field))
+                map.put(field, null);
         });
         return map;
     }
