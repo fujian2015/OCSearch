@@ -1,5 +1,6 @@
 package com.asiainfo.ocsearch.transaction.atomic.table;
 
+import com.asiainfo.ocsearch.constants.OCSearchEnv;
 import com.asiainfo.ocsearch.meta.Field;
 import com.asiainfo.ocsearch.meta.InnerField;
 import com.asiainfo.ocsearch.meta.Schema;
@@ -37,7 +38,7 @@ public abstract class UpdateOrAddIndexer implements AtomicOperation {
         indexer.addAttribute("table", name);
         indexer.addAttribute("mapper", "com.ngdata.hbaseindexer.parse.DefaultResultToSolrMapper");
 
-        if(tableSchema.getIdFormatter()!=null)
+        if (tableSchema.getIdFormatter() != null)
             indexer.addAttribute("unique-key-formatter", tableSchema.getIdFormatter());
 
         indexer.addAttribute("table-name-field", "_table_");
@@ -48,16 +49,18 @@ public abstract class UpdateOrAddIndexer implements AtomicOperation {
         isProduct.addAttribute("value", "true");
 
 
-        Element setTableCF = indexer.addElement("param");
-        setTableCF.addAttribute("name", "set-tablef");
-        setTableCF.addAttribute("value", "true");
+        if (Boolean.valueOf(OCSearchEnv.getEnvValue("indexer.tablecf.set", "true")) == true) {
+            Element setTableCF = indexer.addElement("param");
+            setTableCF.addAttribute("name", "set-tablef");
+            setTableCF.addAttribute("value", "true");
+        }
 
         Map<String, Element> innerElements = Maps.newHashMap();
 
         tableSchema.getFields().values().stream().filter(Field::withSolr).forEach(field -> {
             if (StringUtils.isNotEmpty(field.getInnerField())) {
                 String innerName = field.getInnerField();
-                if (false==innerElements.containsKey(innerName)) {
+                if (false == innerElements.containsKey(innerName)) {
 
                     InnerField inf = tableSchema.getInnerFields().get(innerName);
                     Element innerElement = indexer.addElement("field");
