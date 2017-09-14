@@ -23,21 +23,21 @@
       <div class="form-group">
         <label class="control-label col-md-2" style="text-align: left;">{{'REGION_NUM' | translate}}</label>
         <div class="col-md-4">
-          <input class="form-control" type="number" ng-model="newtable.hbase.region_num" ng-disabled="newtable.hbase.region_num===0">
+          <input class="form-control" type="number" ng-model="newtable.hbase.region_num" ng-disabled="newtable_hbase" ng-blur="limitRegionNum()" min="4">
         </div>
         <label class="control-label col-md-2" style="text-align: left;">{{'REGION_SPLIT' | translate}}</label>
         <div class="col-md-4">
-          <input class="form-control" type="text" ng-model="newtable.hbase.region_split" ng-disabled="newtable.hbase.region_num===0">
+          <input class="form-control" type="text" ng-model="newtable.hbase.region_split" ng-disabled="newtable_hbase">
         </div>
       </div>
       <div class="form-group">
         <label class="control-label col-md-2" style="text-align: left;">{{'SOLR_SHARDS' | translate}}</label>
         <div class="col-md-4">
-          <input class="form-control" type="number" ng-model="newtable.solr.shards">
+          <input class="form-control" type="number" ng-model="newtable.solr.shards" min="1" ng-blur="limitShards()">
         </div>
         <label class="control-label col-md-2" style="text-align: left;">{{'SOLR_REPLICAS' | translate}}</label>
         <div class="col-md-4">
-          <input class="form-control" type="number" ng-model="newtable.solr.replicas">
+          <input class="form-control" type="number" ng-model="newtable.solr.replicas" min="1" ng-blur="limitReplicas()">
         </div>
       </div>
     </form>

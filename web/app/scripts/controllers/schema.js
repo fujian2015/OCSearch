@@ -117,6 +117,11 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
           $scope.removeQueryField = function($index) {
             $scope.newschema.query_fields.splice($index, 1);
           };
+          $scope.limitWeight = function() {
+            if (!angular.isDefined($scope.new_query_field.weight) || $scope.new_query_field.weight < 0) {
+              $scope.new_query_field.weight = 0;
+            }
+          };
           // Functions of Add Schema steps
           $scope.addsteps = ["step1", "step2", "step3"];
           $scope.curstep = 0;

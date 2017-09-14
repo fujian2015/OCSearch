@@ -56,18 +56,34 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
               return true;
             }
           };
+          $scope.limitRegionNum = function() {
+            if (!angular.isDefined($scope.newtable.hbase.region_num) || $scope.newtable.hbase.region_num < 4) {
+              $scope.newtable.hbase.region_num = 4;
+            }
+          };
+          $scope.limitShards = function() {
+            if (!angular.isDefined($scope.newtable.solr.shards) || $scope.newtable.solr.shards < 1) {
+              $scope.newtable.solr.shards = 1;
+            }
+          };
+          $scope.limitReplicas = function() {
+            if (!angular.isDefined($scope.newtable.solr.replicas) || $scope.newtable.solr.replicas < 1) {
+              $scope.newtable.solr.replicas = 1;
+            }
+          };
           $scope.changeSchema = function() {
             for(let schema of $scope.schemas) {
               if(schema.name === $scope.newtable.schema) {
                 if (schema.with_hbase) {
-                  $scope.newtable.hbase.region_num = 0;
+                  $scope.newtable_hbase = false;
                   return;
                 } else {
-                  $scope.newtable.hbase.region_num = 4;
+                  $scope.newtable_hbase = true;
                   return;
                 }
               }
             }
+            $scope.newtable.hbase.region_num = 4;
             $scope.newtable.hbase.region_split = "";
             $scope.newtable.solr.shards = 1;
             $scope.newtable.solr.replicas = 1;
