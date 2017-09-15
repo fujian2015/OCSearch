@@ -247,7 +247,7 @@
           <button class="btn btn-default btn-block" style="outline: 0" ng-click="addSchema()">{{'ADD' | translate}}</button>
         </div>
         <a href="" class="list-group-item" ng-repeat="schema in schemas" ng-class="{active: page.schemasActive[$index]}" ng-click="selectSchema(schema,$index)">
-          {{schema.name}}
+          {{limitLen(schema.name)}}
         </a>
       </div>
     </div>

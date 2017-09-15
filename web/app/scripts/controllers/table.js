@@ -19,6 +19,17 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
     }
     return null;
   };
+  $scope.limitLen = function(item) {
+    if (angular.isString(item)) {
+      if (item.length > 15) {
+        return item.substring(0, 15) + "...";
+      } else {
+        return item;
+      }
+    } else {
+      return item;
+    }
+  };
 
   // Table operations
   // 1, addTable
@@ -253,7 +264,42 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
             }
           }
         };
+        $scope._httpInQueue = function(idx) {
+          if (idx < $scope.request_list.length) {
+            $http.post(GLOBAL.host + "/schema/update", $scope.request_list[idx]).then(function(data) {
+              $scope.request_list[idx].return_code = data.data.result.error_code;
+              $scope.request_list[idx].return_desc = data.data.result.error_desc;
+              idx += 1;
+              $scope._httpInQueue(idx);
+            });
+          } else {
+            let err_flag = false;
+            let result_lst = [];
+            for (let item of $scope.request_list) {
+              if (item.return_code !== 0) {
+                err_flag = true;
+                result_lst.push("Action:" + item.command + " of '" + item.field.name + "'    Error:" + item.return_desc);
+              }
+            }
+            if (err_flag) {
+              $ngConfirm({
+                title: $translate.instant('CONFIRM_TITLE_EDIT_TABLE_ERROR'),
+                content: result_lst.join('\n'),
+                closeIcon: true,
+                scope: $scope,
+                buttons: {
+                  OK: {
+                    text: ok_text
+                  }
+                }
+              });
+            }
+            $scope.initial();
+            modalInstance.close();
+          }
+        };
         $scope._ok = function() {
+          /*
           let updateTable = i => $http.post(GLOBAL.host+"/schema/update", $scope.request_list[i]).then(function(data) {
             $scope.request_list[i].return_code = data.data.result.error_code;
             $scope.request_list[i].return_desc = data.data.result.error_desc;
@@ -284,9 +330,9 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
                 }
               });
             }
-            $scope.initial();
-            modalInstance.close();
           });
+          */
+          $scope._httpInQueue(0);
         };
         // Check inputs for edit-save button
         $scope.checkEditTable = function() {

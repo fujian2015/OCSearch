@@ -40,6 +40,17 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
     }
     return null;
   };
+  $scope.limitLen = function(item) {
+    if (angular.isString(item)) {
+      if (item.length > 15) {
+        return item.substring(0, 15) + "...";
+      } else {
+        return item;
+      }
+    } else {
+      return item;
+    }
+  };
   // Template modal factory
   $scope.modalAction = function(title, confirm_content, initval, okfunc) {
     let returnfunc = function(title, confirm_content, initval, okfunc) {

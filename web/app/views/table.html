@@ -161,7 +161,7 @@
           <button class="btn btn-default btn-block" style="outline: 0" ng-click="addTable()">{{'ADD' | translate}}</button>
         </div>
         <a href="" class="list-group-item" ng-repeat="table in tables" ng-click="selectTable(table, $index)" ng-class="{active: page.tablesActive[$index]}">
-          {{table}}
+          {{limitLen(table)}}
         </a>
       </div>
     </div>
