@@ -75,10 +75,10 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
             for(let schema of $scope.schemas) {
               if(schema.name === $scope.newtable.schema) {
                 if (schema.with_hbase) {
-                  $scope.newtable_hbase = false;
+                  $scope.newtable_hbase = true;
                   return;
                 } else {
-                  $scope.newtable_hbase = true;
+                  $scope.newtable_hbase = false;
                   return;
                 }
               }
@@ -89,7 +89,15 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
             $scope.newtable.solr.replicas = 1;
           };
           $scope._ok = function(){
-            if ($scope.newtable.hbase.region_split === "" || $scope.newtable.hbase.region_split === null) { $scope.newtable.hbase.region_split = []; }
+            if ($scope.newtable.hbase.region_split === "" || $scope.newtable.hbase.region_split === null || !angular.isDefined($scope.newtable.hbase.region_split)) {
+              $scope.newtable.hbase.region_split = [];
+            } else {
+              let rsp_lst = $scope.newtable.hbase.region_split.split(',');
+              $scope.newtable.hbase.region_split = [];
+              for (let rsp of rsp_lst) {
+                $scope.newtable.hbase.region_split.push(rsp);
+              }
+            }
             $http.post(GLOBAL.host+"/table/create", $scope.newtable).then(function(data) {
               if (data.data.result.error_code !== 0) {
                 $ngConfirm({

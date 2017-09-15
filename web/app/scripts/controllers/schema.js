@@ -118,8 +118,8 @@ angular.module('basic').controller('SchemaCtrl', ['$scope', '$http', '$q', 'GLOB
             $scope.newschema.query_fields.splice($index, 1);
           };
           $scope.limitWeight = function() {
-            if (!angular.isDefined($scope.new_query_field.weight) || $scope.new_query_field.weight < 0) {
-              $scope.new_query_field.weight = 0;
+            if (!angular.isDefined($scope.new_query_field.weight) || $scope.new_query_field.weight < 1) {
+              $scope.new_query_field.weight = 1;
             }
           };
           // Functions of Add Schema steps
