@@ -57,13 +57,13 @@
     <div class="container-fluid">
       <form class="form-horizontal">
         <div class="form-group">
-          <label class="control-label col-md-2" style="text-align: left;">{{'FIELD_NAME' | translate}}</label>
+          <label class="control-label col-md-2" style="text-align: left;">{{'FIELD_NAME' | translate}} *</label>
           <div class="col-md-10">
             <input class="form-control" ng-model="curfield.name" ng-disabled="editModeFlag">
           </div>
         </div>
         <div class="form-group">
-          <label class="control-label col-md-2" style="text-align: left;">{{'STORE_TYPE' | translate}}</label>
+          <label class="control-label col-md-2" style="text-align: left;">{{'STORE_TYPE' | translate}} *</label>
           <div class="col-md-10">
             <select class="form-control" ng-model="curfield.store_type" ng-options="ftp for ftp in field_type">
               <option value=""><{{'SELECT_FIELD_STORE_TYPE' | translate}}></option>

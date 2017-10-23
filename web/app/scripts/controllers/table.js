@@ -51,7 +51,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
             schema:"",
             hbase:{
               region_num: 4,
-              region_split: []
+              region_split: ""
             },
             solr:{
               shards: 1,
@@ -100,6 +100,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
             $scope.newtable.solr.replicas = 1;
           };
           $scope._ok = function(){
+            console.log($scope.newtable.hbase.region_split);
             if ($scope.newtable.hbase.region_split === "" || $scope.newtable.hbase.region_split === null || !angular.isDefined($scope.newtable.hbase.region_split)) {
               $scope.newtable.hbase.region_split = [];
             } else {
