@@ -13,6 +13,8 @@ angular.module('basic').controller('DetailCtrl', ['$scope', '$q', '$http', 'GLOB
     if (angular.isString(item)) {
       if (item.length > len) {
         return item.substring(0, len) + "...";
+      } else {
+        return item;
       }
     } else {
       return item;
@@ -27,6 +29,7 @@ angular.module('basic').controller('DetailCtrl', ['$scope', '$q', '$http', 'GLOB
       $scope.schema = data[1].data.schema;
       if (data[0].data.data.docs.length > 0) {
         $scope.item = data[0].data.data.docs[0];
+        //console.log($scope.item);
       }
     });
   }

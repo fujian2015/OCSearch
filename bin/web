@@ -7,7 +7,7 @@
 # ocsearch
 #***********************************************************************
 
-NODE_PROXY_IP="10.1.236.66"
+NODE_PROXY_IP="10.1.236.80"
 NODE_PROXY_PORT="58080"
 SERVER_HOME=$(cd `dirname $0`/..; pwd)
 . ${SERVER_HOME}/bin/Utilities.sh
