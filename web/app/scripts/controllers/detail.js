@@ -29,7 +29,6 @@ angular.module('basic').controller('DetailCtrl', ['$scope', '$q', '$http', 'GLOB
       $scope.schema = data[1].data.schema;
       if (data[0].data.data.docs.length > 0) {
         $scope.item = data[0].data.data.docs[0];
-        //console.log($scope.item);
       }
     });
   }

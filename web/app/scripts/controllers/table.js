@@ -100,8 +100,7 @@ angular.module('basic').controller('TableCtrl', ['$scope', '$http', '$q', 'GLOBA
             $scope.newtable.solr.replicas = 1;
           };
           $scope._ok = function(){
-            console.log($scope.newtable.hbase.region_split);
-            if ($scope.newtable.hbase.region_split === "" || $scope.newtable.hbase.region_split === null || !angular.isDefined($scope.newtable.hbase.region_split)) {
+            if ($scope.newtable.hbase.region_split === "" || $scope.newtable.hbase.region_split === null || !angular.isDefined($scope.newtable.hbase.region_split || $scope.newtable.hbase.region_split === [])) {
               $scope.newtable.hbase.region_split = [];
             } else {
               let rsp_lst = $scope.newtable.hbase.region_split.split(',');

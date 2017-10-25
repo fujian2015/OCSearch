@@ -64,6 +64,7 @@ angular.module('basic').config(["$translateProvider", function($translateProvide
     WARNING: "警告",
     MODALMSG_FILL_IN_ALL: "请填写所有标记为*的内容",
     MODALMSG_NO_FIELDS: "未定义任何字段！",
+    MODALMSG_QUERY_FIELD_TIP: "提示：内容索引字段或者类型为'text*'的字段可以被设置成查询字段",
     CONFIRM_ADD_TABLE: "新建表？",
     CONFIRM_EDIT_TABLE: "改变表结构？",
     CONFIRM_DELETE_TABLE: "删除选中表？表中所有数据将会丢失！",

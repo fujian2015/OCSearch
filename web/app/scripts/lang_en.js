@@ -64,6 +64,7 @@ angular.module("basic").config(["$translateProvider", function($translateProvide
     WARNING: "Warning",
     MODALMSG_FILL_IN_ALL: "Please fill in all inputs marked as *",
     MODALMSG_NO_FIELDS: "No fields of schema defined!",
+    MODALMSG_QUERY_FIELD_TIP: "Tips: Content fields or Fields typed as 'text*' can be configured as query fields",
     CONFIRM_ADD_TABLE: "Create table now?",
     CONFIRM_EDIT_TABLE: "Change the schema of table now?",
     CONFIRM_DELETE_TABLE: "Want to delete the table selected? All data related will be lost!",
